@@ -18,6 +18,24 @@ function formatDuration(ms: number) {
   return `${pad(mins)}:${pad(secs)}`;
 }
 
+function OdometerDisplay({ text, className }: { text: string; className?: string }) {
+  return (
+    <span className={cn("inline-flex items-center tabular-nums font-mono", className)}>
+      {text.split("").map((c, i) => (
+        <span
+          key={`${i}-${c}`}
+          className={cn(
+            "inline-block transition-all duration-150 motion-reduce:transition-none",
+            c === ":" ? "opacity-60 px-0.5" : "animate-in fade-in slide-in-from-top-1 duration-120"
+          )}
+        >
+          {c}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 function FloatingTimerCard({ timer }: { timer: Reminder }) {
   const completeReminder = useLumen((s) => s.completeReminder);
   const removeReminder = useLumen((s) => s.removeReminder);
@@ -66,6 +84,7 @@ function FloatingTimerCard({ timer }: { timer: Reminder }) {
   const total = timer.durationMs || 1;
   const progress = Math.max(0, Math.min(100, ((total - remaining) / total) * 100));
   const isFinished = remaining <= 0;
+  const isAlerting = !isFinished && remaining > 0 && remaining <= 10000;
 
   // 1. Minimal Transparent Pill Mode
   if (minimal) {
@@ -77,7 +96,8 @@ function FloatingTimerCard({ timer }: { timer: Reminder }) {
             ? "!transition-none cursor-grabbing ring-1 ring-[#F5A623] scale-105 shadow-2xl"
             : "cursor-grab transition-all duration-140 shadow-lg",
           "bg-[#14161D]/80 hover:bg-[#14161D]/95 text-[#F4F5F7] border border-white/10 backdrop-blur-md group",
-          isFinished && "bg-[#EF4444]/90 animate-pulse border-red-400",
+          isAlerting && "timer-alert-pulse text-amber-300 border-amber-500/80 ring-1 ring-amber-500/50",
+          isFinished && "bg-[#EF4444]/90 border-red-400 timer-ringing-shake text-white ring-2 ring-red-400",
         )}
         style={{
           left: `${pos.x}px`,
@@ -89,13 +109,15 @@ function FloatingTimerCard({ timer }: { timer: Reminder }) {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        <Clock className={cn("size-3.5 shrink-0", isFinished ? "text-white" : "text-[#F5A623]")} />
+        <Clock className={cn("size-3.5 shrink-0", isFinished ? "text-white" : isAlerting ? "text-amber-300 animate-pulse" : "text-[#F5A623]")} />
         <span className="text-xs font-medium truncate max-w-[120px]">
           {timer.title}
         </span>
-        <span className="font-mono text-xs font-bold tracking-wider text-[#F5A623] tabular-nums">
-          {isFinished ? "00:00 🔔" : formatDuration(remaining)}
-        </span>
+        {isFinished ? (
+          <span className="font-mono text-xs font-bold tracking-wider text-white">00:00 🔔</span>
+        ) : (
+          <OdometerDisplay text={formatDuration(remaining)} className={cn("text-xs font-bold tracking-wider", isAlerting ? "text-amber-300" : "text-[#F5A623]")} />
+        )}
 
         {/* Hover Action Controls */}
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ml-1">
@@ -128,8 +150,9 @@ function FloatingTimerCard({ timer }: { timer: Reminder }) {
         isDragging
           ? "!transition-none cursor-grabbing ring-2 ring-[#F5A623] scale-[1.02]"
           : "cursor-grab transition-all duration-160",
+        isAlerting && "timer-alert-pulse border-amber-500/80 ring-2 ring-amber-500/50",
         isFinished
-          ? "bg-[#EF4444]/90 text-white border-red-400 animate-pulse ring-2 ring-red-400"
+          ? "bg-[#EF4444]/90 text-white border-red-400 timer-ringing-shake ring-2 ring-red-400"
           : "bg-[#1D2029]/95 text-[#F4F5F7] border-white/10",
       )}
       style={{
@@ -145,7 +168,7 @@ function FloatingTimerCard({ timer }: { timer: Reminder }) {
       {/* Title & Controls */}
       <div className="flex items-center justify-between gap-1">
         <div className="flex items-center gap-1.5 min-w-0">
-          <Clock className={cn("size-3.5 shrink-0", isFinished ? "text-white" : "text-[#F5A623]")} />
+          <Clock className={cn("size-3.5 shrink-0", isFinished ? "text-white" : isAlerting ? "text-amber-300 animate-pulse" : "text-[#F5A623]")} />
           <p className="text-xs font-semibold truncate leading-tight">{timer.title}</p>
         </div>
         <div className="flex items-center gap-0.5 shrink-0">
@@ -178,9 +201,13 @@ function FloatingTimerCard({ timer }: { timer: Reminder }) {
 
       {/* Big Digital Countdown */}
       <div className="flex items-baseline justify-between pt-0.5">
-        <span className="font-mono text-xl font-bold tracking-wider text-[#F5A623] tabular-nums">
-          {isFinished ? (lang === "vi" ? "ĐÃ HẾT GIỜ! 🔔" : "TIME UP! 🔔") : formatDuration(remaining)}
-        </span>
+        {isFinished ? (
+          <span className="font-mono text-xl font-bold tracking-wider text-white">
+            {lang === "vi" ? "ĐÃ HẾT GIỜ! 🔔" : "TIME UP! 🔔"}
+          </span>
+        ) : (
+          <OdometerDisplay text={formatDuration(remaining)} className={cn("text-xl font-bold tracking-wider", isAlerting ? "text-amber-300" : "text-[#F5A623]")} />
+        )}
         {isFinished ? (
           <button
             type="button"

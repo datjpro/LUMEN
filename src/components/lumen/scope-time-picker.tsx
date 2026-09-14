@@ -43,6 +43,8 @@ export function ScopeRotaryTimePicker({
   // Drag state for rotary barrel wheels
   const hourDragRef = useRef<{ startY: number; initVal: number } | null>(null);
   const minDragRef = useRef<{ startY: number; initVal: number } | null>(null);
+  const [hourBounce, setHourBounce] = useState(false);
+  const [minBounce, setMinBounce] = useState(false);
 
   // Sync draft state if prop value changes externally
   useEffect(() => {
@@ -73,6 +75,12 @@ export function ScopeRotaryTimePicker({
       }
     }
 
+    // Elastic bounce when crossing boundaries 23->00 or 00->23
+    if ((draftHour === 23 && nextH === 0) || (draftHour === 0 && nextH === 23)) {
+      setHourBounce(true);
+      setTimeout(() => setHourBounce(false), 220);
+    }
+
     sounds.playMechanicalClick(delta > 0 ? 1.05 : 0.95);
     updateDraft(nextH, draftMin);
   };
@@ -87,6 +95,12 @@ export function ScopeRotaryTimePicker({
         sounds.playMechanicalClick(0.7);
         return;
       }
+    }
+
+    // Elastic bounce when crossing boundaries 59->00 or 00->59
+    if ((draftMin === 59 && nextM === 0) || (draftMin === 0 && nextM === 59)) {
+      setMinBounce(true);
+      setTimeout(() => setMinBounce(false), 220);
     }
 
     sounds.playMechanicalClick(delta > 0 ? 1.15 : 0.9);
@@ -268,7 +282,10 @@ export function ScopeRotaryTimePicker({
             onPointerMove={handleHourPointerMove}
             onPointerUp={handleHourPointerUp}
             onPointerCancel={handleHourPointerUp}
-            className="relative w-14 h-22 flex flex-col items-center justify-center overflow-hidden cursor-ns-resize touch-none select-none rounded-lg bg-[#1D2029]/80 border border-white/6 shadow-inner"
+            className={cn(
+              "relative w-14 h-22 flex flex-col items-center justify-center overflow-hidden cursor-ns-resize touch-none select-none rounded-lg bg-[#1D2029]/80 border border-white/6 shadow-inner transition-transform duration-150",
+              hourBounce && "scale-110 ring-1 ring-[#F5A623]/60",
+            )}
             title="Lăn chuột hoặc kéo thả để xoay nấc giờ"
           >
             {/* Top / Bottom Gradient Fade */}
@@ -282,9 +299,12 @@ export function ScopeRotaryTimePicker({
                 <div
                   key={`${val}-${offset}`}
                   className={cn(
-                    "h-6 flex items-center justify-center font-mono text-xs transition-all duration-75 tabular-nums",
+                    "h-6 flex items-center justify-center font-mono text-xs transition-all duration-120 tabular-nums",
                     scale,
                   )}
+                  style={{
+                    transitionTimingFunction: "var(--ease-mechanical)",
+                  }}
                 >
                   {String(val).padStart(2, "0")}
                 </div>
@@ -325,7 +345,10 @@ export function ScopeRotaryTimePicker({
             onPointerMove={handleMinPointerMove}
             onPointerUp={handleMinPointerUp}
             onPointerCancel={handleMinPointerUp}
-            className="relative w-14 h-22 flex flex-col items-center justify-center overflow-hidden cursor-ns-resize touch-none select-none rounded-lg bg-[#1D2029]/80 border border-white/6 shadow-inner"
+            className={cn(
+              "relative w-14 h-22 flex flex-col items-center justify-center overflow-hidden cursor-ns-resize touch-none select-none rounded-lg bg-[#1D2029]/80 border border-white/6 shadow-inner transition-transform duration-150",
+              minBounce && "scale-110 ring-1 ring-[#F5A623]/60",
+            )}
             title="Lăn chuột hoặc kéo thả để xoay nấc phút"
           >
             {/* Top / Bottom Gradient Fade */}
@@ -339,9 +362,12 @@ export function ScopeRotaryTimePicker({
                 <div
                   key={`${val}-${offset}`}
                   className={cn(
-                    "h-6 flex items-center justify-center font-mono text-xs transition-all duration-75 tabular-nums",
+                    "h-6 flex items-center justify-center font-mono text-xs transition-all duration-120 tabular-nums",
                     scale,
                   )}
+                  style={{
+                    transitionTimingFunction: "var(--ease-mechanical)",
+                  }}
                 >
                   {String(val).padStart(2, "0")}
                 </div>

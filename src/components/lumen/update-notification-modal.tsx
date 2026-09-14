@@ -183,7 +183,8 @@ export function UpdateNotificationModal({
               {highlights.map((h, idx) => (
                 <div
                   key={idx}
-                  className="p-3 rounded-2xl bg-[#14161D]/80 border border-white/6 hover:border-white/15 transition-all duration-120 flex items-start gap-3 shadow-xs"
+                  style={{ animationDelay: `${idx * 60}ms` }}
+                  className="p-3 rounded-2xl bg-[#14161D]/80 border border-white/6 hover:border-white/15 transition-all duration-120 flex items-start gap-3 shadow-xs animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-150"
                 >
                   <span className="text-lg shrink-0 mt-0.5">{h.icon}</span>
                   <div className="min-w-0 flex-1 space-y-0.5">
@@ -195,6 +196,7 @@ export function UpdateNotificationModal({
                         className={cn(
                           "px-1.5 py-0.2 rounded-md border text-[9px] font-bold uppercase tracking-wider font-mono",
                           getBadgeStyle(h.badge),
+                          h.badge === "perf" && "animate-pulse",
                         )}
                       >
                         {getBadgeLabel(h.badge)}

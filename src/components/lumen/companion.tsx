@@ -44,6 +44,24 @@ export function Companion() {
   const [facingDir, setFacingDir] = useState<1 | -1>(-1);
   const [stridePhase, setStridePhase] = useState(0);
   const [pawPrints, setPawPrints] = useState<PawPrint[]>([]);
+  const [isSquash, setIsSquash] = useState(false);
+  const [flyingCookie, setFlyingCookie] = useState(false);
+  const [paperDropping, setPaperDropping] = useState(false);
+
+  const handlePet = () => {
+    setIsSquash(true);
+    petPip();
+    setTimeout(() => setIsSquash(false), 350);
+  };
+
+  const handleFeed = () => {
+    setFlyingCookie(true);
+    sounds.playSnack();
+    setTimeout(() => {
+      setFlyingCookie(false);
+      feedPip();
+    }, 280);
+  };
 
   const elRef = useRef<HTMLDivElement>(null);
   const pos = useRef({ x: 400, y: 300 });
@@ -277,15 +295,19 @@ export function Companion() {
           });
         } else if (p.mood === "deliver" && t.kind === "drop") {
           sounds.playPop(520);
+          setPaperDropping(true);
           const noteXPct = (pos.current.x / scrW) * 100;
           const noteYPct = (pos.current.y / scrH) * 100;
-          state.addNote({
-            x: clamp(noteXPct - 5, 6, 78),
-            y: clamp(noteYPct - 5, 8, 72),
-            tint: "cream",
-            rot: (Math.random() - 0.5) * 4,
-            body: "",
-          });
+          setTimeout(() => {
+            setPaperDropping(false);
+            state.addNote({
+              x: clamp(noteXPct - 5, 6, 78),
+              y: clamp(noteYPct - 5, 8, 72),
+              tint: "cream",
+              rot: (Math.random() - 0.5) * 4,
+              body: "",
+            });
+          }, 200);
           state.pushToast(
             lang === "vi" ? "Ghi chú từ thú cưng" : "Note from Pip",
             lang === "vi" ? "Pip vừa kéo 1 tờ giấy mới ra cho bạn ✨" : "Pip delivered a fresh note ✨",
@@ -347,7 +369,7 @@ export function Companion() {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                petPip();
+                handlePet();
               }}
               title="Xoa đầu (Pet)"
               className="action-btn flex size-7 items-center justify-center rounded-full text-rose-400 hover:bg-white/10 hover:scale-110 active:scale-95 transition-all cursor-pointer"
@@ -358,7 +380,7 @@ export function Companion() {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                feedPip();
+                handleFeed();
               }}
               title="Cho ăn dâu (Feed)"
               className="action-btn flex size-7 items-center justify-center rounded-full text-amber-400 hover:bg-white/10 hover:scale-110 active:scale-95 transition-all cursor-pointer"
@@ -422,10 +444,17 @@ export function Companion() {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                dancePip();
+                if (mood === "dance") {
+                  setPip({ mood: "wander" });
+                } else {
+                  dancePip();
+                }
               }}
               title="Nhảy múa (Dance)"
-              className="action-btn flex size-7 items-center justify-center rounded-full text-indigo-400 hover:bg-white/10 hover:scale-110 active:scale-95 transition-all cursor-pointer"
+              className={cn(
+                "action-btn flex size-7 items-center justify-center rounded-full text-indigo-400 hover:bg-white/10 hover:scale-110 active:scale-95 transition-all cursor-pointer",
+                mood === "dance" && "bg-indigo-500/20 text-indigo-300 ring-1 ring-indigo-400/40",
+              )}
             >
               <Sparkles className="size-3.5" />
             </button>
@@ -455,15 +484,28 @@ export function Companion() {
           </div>
         ) : null}
 
+        {/* Flying Snack Parabolic Feedback */}
+        {flyingCookie && (
+          <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-base animate-in zoom-in slide-in-from-top-3 duration-200 pointer-events-none">
+            🍪
+          </span>
+        )}
+
+        {/* Paper Dropping Bounce Feedback */}
+        {paperDropping && (
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 w-6 h-5 rounded-xs bg-[#fef08a] border border-[#d97706]/40 shadow-md animate-bounce pointer-events-none" />
+        )}
+
         {/* Pet Avatar Component with Mathematical Stride & Accessories */}
         <button
           type="button"
           className={cn(
             "cursor-grab active:cursor-grabbing bg-transparent p-0 transition-transform active:scale-90 hover:scale-105 rounded-full",
+            isSquash && "pip-squash",
             activeAlarm && "pip-timer-alarm ring-4 ring-[#F5A623] shadow-[0_0_25px_rgba(245,166,35,0.7)]",
           )}
           onClick={() => setMenuOpen(!menuOpen)}
-          onDoubleClick={() => petPip()}
+          onDoubleClick={handlePet}
           aria-label="Pet companion"
         >
           <PipFigure

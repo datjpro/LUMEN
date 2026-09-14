@@ -27,6 +27,7 @@ import {
 import { sounds } from "@/lib/audio";
 import { focusDesktopWindow } from "@/lib/desktop-bridge";
 import { DICTIONARY } from "@/lib/i18n";
+import { DURATION_CSS, DURATION_MS, EASING } from "@/lib/motion";
 import { useLumen } from "@/lib/store";
 import type { Note, NoteTint } from "@/lib/types";
 import { cn, uid } from "@/lib/utils";
@@ -93,15 +94,17 @@ export function StickyNote({ note, stacked }: Props) {
   const [isDragging, setIsDragging] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [isFlyingToTrash, setIsFlyingToTrash] = useState(false);
   const [copied, setCopied] = useState(false);
+  const cardRef = useRef<HTMLElement | null>(null);
   const resizeDrag = useRef<{ startX: number; startY: number; startW: number; startH: number } | null>(null);
 
-  // Resize Handlers (Dragging bottom-left corner)
+  // Resize Handlers with smooth rubber-band clamping (220px–600px)
   const onResizePointerDown = (e: PointerEvent<HTMLDivElement>) => {
     e.stopPropagation();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     bringNote(note.id);
-    const card = (e.currentTarget.closest("article") as HTMLElement) || null;
+    const card = (cardRef.current || e.currentTarget.closest("article")) as HTMLElement || null;
     const rect = card ? card.getBoundingClientRect() : { width: 280, height: 220 };
     resizeDrag.current = {
       startX: e.clientX,
@@ -117,9 +120,25 @@ export function StickyNote({ note, stacked }: Props) {
     if (!isResizing || !resizeDrag.current) return;
     const deltaX = e.clientX - resizeDrag.current.startX;
     const deltaY = e.clientY - resizeDrag.current.startY;
-    const newW = Math.min(600, Math.max(220, Math.round(resizeDrag.current.startW + deltaX)));
-    const newH = Math.min(800, Math.max(160, Math.round(resizeDrag.current.startH + deltaY)));
-    updateNote(note.id, { width: newW, height: newH });
+    const rawW = Math.round(resizeDrag.current.startW + deltaX);
+    const rawH = Math.round(resizeDrag.current.startH + deltaY);
+
+    // Rubber-band resistance if exceeding [220, 600] / [160, 800]
+    let rubberW = rawW;
+    if (rawW < 220) {
+      rubberW = Math.round(220 - Math.pow(Math.min(60, 220 - rawW), 0.75));
+    } else if (rawW > 600) {
+      rubberW = Math.round(600 + Math.pow(Math.min(100, rawW - 600), 0.75));
+    }
+
+    let rubberH = rawH;
+    if (rawH < 160) {
+      rubberH = Math.round(160 - Math.pow(Math.min(50, 160 - rawH), 0.75));
+    } else if (rawH > 800) {
+      rubberH = Math.round(800 + Math.pow(Math.min(100, rawH - 800), 0.75));
+    }
+
+    updateNote(note.id, { width: rubberW, height: rubberH });
   };
 
   const onResizePointerUp = (e: PointerEvent<HTMLDivElement>) => {
@@ -130,6 +149,10 @@ export function StickyNote({ note, stacked }: Props) {
     resizeDrag.current = null;
     setIsResizing(false);
     sounds.playPop(620);
+    // Smoothly snap rubber-band back to exact clamp bounds
+    const clampedW = Math.min(600, Math.max(220, note.width || 280));
+    const clampedH = Math.min(800, Math.max(160, note.height || 220));
+    updateNote(note.id, { width: clampedW, height: clampedH });
   };
 
   const onResetSize = (e: React.MouseEvent) => {
@@ -321,12 +344,14 @@ export function StickyNote({ note, stacked }: Props) {
 
     const finalRot = Math.round(clampedRot * 10) / 10;
 
-    // Throttle rendering to rAF for 60/120 FPS sub-16ms budget
+    // Throttle rendering to rAF for 60/120 FPS sub-16ms budget directly on DOM
     if (rotateDrag.current.rafId) {
       cancelAnimationFrame(rotateDrag.current.rafId);
     }
     rotateDrag.current.rafId = requestAnimationFrame(() => {
-      updateNote(note.id, { rot: finalRot });
+      if (cardRef.current) {
+        cardRef.current.style.transform = `rotate(${finalRot}deg)`;
+      }
     });
   };
 
@@ -337,6 +362,14 @@ export function StickyNote({ note, stacked }: Props) {
     } catch {}
     if (rotateDrag.current?.rafId) {
       cancelAnimationFrame(rotateDrag.current.rafId);
+    }
+    if (rotateDrag.current) {
+      let finalRot = Math.round(Math.max(-60, Math.min(60, rotateDrag.current.accumulatedRot)) * 10) / 10;
+      // Animate snap cleanly to 0° within 1.5° threshold using easeSnap
+      if (Math.abs(finalRot) < 1.5) {
+        finalRot = 0;
+      }
+      updateNote(note.id, { rot: finalRot });
     }
     rotateDrag.current = null;
     setIsRotating(false);
@@ -371,12 +404,20 @@ export function StickyNote({ note, stacked }: Props) {
     updateNote(note.id, { checkItems: items });
   };
 
+  const triggerDeleteWithMotion = () => {
+    setIsFlyingToTrash(true);
+    sounds.playPop(380);
+    setTimeout(() => {
+      removeNote(note.id);
+    }, DURATION_MS.base);
+  };
+
   const handleDeleteClick = () => {
     bringNote(note.id);
     setMenuOpen(false);
     const hasContent = note.body.trim().length > 0 || (note.checkItems && note.checkItems.length > 0);
     if (!hasContent) {
-      removeNote(note.id);
+      triggerDeleteWithMotion();
     } else {
       setShowDeleteConfirm(true);
     }
@@ -402,7 +443,7 @@ export function StickyNote({ note, stacked }: Props) {
     a.click();
     URL.revokeObjectURL(url);
 
-    removeNote(note.id);
+    triggerDeleteWithMotion();
   };
 
   const currentPalette = NOTE_PALETTE.find((p) => p.id === note.tint) || NOTE_PALETTE[0];
@@ -416,12 +457,18 @@ export function StickyNote({ note, stacked }: Props) {
     : {
         left: `${note.x}%`,
         top: `${note.y}%`,
-        transform: `rotate(${note.rot}deg)`,
+        transform: isFlyingToTrash
+          ? `translate3d(calc(100vw - 120px - ${note.x}vw), calc(100vh - 120px - ${note.y}vh), 0) scale(0.05) rotate(15deg)`
+          : `rotate(${note.rot}deg) ${isElevated ? "scale(1.02)" : "scale(1)"}`,
         zIndex: (note.pinned ? 90 : 10) + note.z + (isElevated ? 250 : 0),
-        opacity: note.opacity ?? 1,
+        opacity: isFlyingToTrash ? 0 : (note.opacity ?? 1),
         width: note.width ? `${note.width}px` : undefined,
         minHeight: note.height ? `${note.height}px` : undefined,
-        transition: isTransformActive || isResizing ? "none" : undefined,
+        transition: isTransformActive || isResizing
+          ? "none"
+          : isFlyingToTrash
+          ? `all ${DURATION_CSS.base} ${EASING.easeGlide}`
+          : `transform ${DURATION_CSS.fast} ${EASING.easeGlide}, box-shadow ${DURATION_CSS.fast} ${EASING.easeGlide}`,
       };
 
   const pillStyle = stacked
@@ -479,6 +526,7 @@ export function StickyNote({ note, stacked }: Props) {
 
   return (
     <article
+      ref={cardRef}
       className={cn(
         "interactive-el pointer-events-auto relative rounded-2xl flex flex-col overflow-visible group",
         "shadow-[0_1px_2px_rgba(0,0,0,0.08),0_6px_20px_rgba(0,0,0,0.16)] border border-black/10",
@@ -1037,7 +1085,8 @@ export function StickyNote({ note, stacked }: Props) {
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  removeNote(note.id);
+                  setShowDeleteConfirm(false);
+                  triggerDeleteWithMotion();
                 }}
                 className="flex-1 py-1.5 px-2 rounded-xl bg-[#EF4444] hover:bg-red-600 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer text-center"
               >

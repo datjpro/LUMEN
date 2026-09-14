@@ -9,6 +9,7 @@ import {
   Plus,
   Search,
   Sparkles,
+  Trash2,
   X,
 } from "lucide-react";
 import { sounds } from "@/lib/audio";
@@ -31,9 +32,11 @@ export function SpotlightSearch() {
   const setSelectedCluster = useLumen((s) => s.setSelectedCluster);
   const addNote = useLumen((s) => s.addNote);
   const restoreNote = useLumen((s) => s.restoreNote);
+  const permanentDeleteNote = useLumen((s) => s.permanentDeleteNote);
 
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [purgingNoteId, setPurgingNoteId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -226,10 +229,11 @@ export function SpotlightSearch() {
                 key={ev.id}
                 onClick={() => handleSelectEvent(ev)}
                 onMouseEnter={() => setSelectedIndex(idx)}
+                style={{ animationDelay: `${Math.min(idx, 15) * 25}ms` }}
                 className={cn(
-                  "flex items-start justify-between gap-3 p-3 rounded-xl cursor-pointer transition-all border",
+                  "flex items-start justify-between gap-3 p-3 rounded-xl cursor-pointer border transition-all duration-140 ease-[var(--ease-snap)] animate-in fade-in slide-in-from-bottom-1 fill-mode-both",
                   isSelected
-                    ? "bg-[#262A35] border-[#F5A623]/40 shadow-md text-white"
+                    ? "bg-[#262A35] border-[#F5A623]/50 shadow-md text-white translate-x-1"
                     : "bg-white/[0.02] border-transparent hover:bg-white/[0.05] text-[#F4F5F7]",
                 )}
               >
@@ -271,11 +275,12 @@ export function SpotlightSearch() {
               <div
                 key={n.id}
                 onClick={() => handleSelectNote(n)}
-                onMouseEnter={() => setSelectedIndex(idx)}
+                onMouseEnter={() => setSelectedIndex(itemIdx)}
+                style={{ animationDelay: `${Math.min(itemIdx, 15) * 25}ms` }}
                 className={cn(
-                  "flex items-start justify-between gap-3 p-3 rounded-xl cursor-pointer transition-all border",
+                  "flex items-start justify-between gap-3 p-3 rounded-xl cursor-pointer border transition-all duration-140 ease-[var(--ease-snap)] animate-in fade-in slide-in-from-bottom-1 fill-mode-both",
                   isSelected
-                    ? "bg-[#262A35] border-[#F5A623]/40 shadow-md text-white"
+                    ? "bg-[#262A35] border-[#F5A623]/50 shadow-md text-white translate-x-1"
                     : "bg-white/[0.02] border-transparent hover:bg-white/[0.05] text-[#F4F5F7]",
                 )}
               >
@@ -343,24 +348,54 @@ export function SpotlightSearch() {
                 const globalIdx = filteredNotes.length + idx;
                 const isSelected = selectedIndex === globalIdx;
 
+                const isPurging = purgingNoteId === n.id;
+
                 return (
                   <div
                     key={`trash-${n.id}`}
                     onClick={() => handleSelectNote(n, true)}
                     onMouseEnter={() => setSelectedIndex(globalIdx)}
+                    style={{ animationDelay: `${Math.min(idx, 10) * 25}ms` }}
                     className={cn(
-                      "flex items-center justify-between gap-3 p-2.5 rounded-xl cursor-pointer transition-all border",
+                      "flex items-center justify-between gap-3 p-2.5 rounded-xl cursor-pointer border transition-all duration-140 ease-[var(--ease-snap)] animate-in fade-in slide-in-from-bottom-1 fill-mode-both",
                       isSelected
-                        ? "bg-red-500/15 border-red-500/40 text-white"
+                        ? "bg-red-500/20 border-red-500/50 text-white translate-x-1"
                         : "bg-white/[0.01] border-transparent hover:bg-red-500/10 text-[#8B90A0]",
+                      isPurging && "item-purge-shatter pointer-events-none"
                     )}
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <span className="text-xs line-through opacity-70 truncate">{n.body}</span>
                     </div>
-                    <span className="text-[10px] font-bold text-[#3FAE6C] bg-[#3FAE6C]/10 px-2 py-0.5 rounded border border-[#3FAE6C]/20">
-                      Khôi phục
-                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sounds.playPop(520);
+                          restoreNote(n.id);
+                        }}
+                        className="text-[10px] font-bold text-[#3FAE6C] hover:text-[#3FAE6C]/80 bg-[#3FAE6C]/10 hover:bg-[#3FAE6C]/20 px-2 py-0.5 rounded border border-[#3FAE6C]/20 transition-colors"
+                      >
+                        Khôi phục
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sounds.playPop(300);
+                          setPurgingNoteId(n.id);
+                          setTimeout(() => {
+                            permanentDeleteNote(n.id);
+                            setPurgingNoteId(null);
+                          }, 260);
+                        }}
+                        title="Xóa vĩnh viễn"
+                        className="p-1 rounded hover:bg-red-500/25 text-[#8B90A0] hover:text-red-400 transition-colors"
+                      >
+                        <Trash2 className="size-3" />
+                      </button>
+                    </div>
                   </div>
                 );
               })}

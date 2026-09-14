@@ -13,7 +13,7 @@ import {
 import { useLumen } from "@/lib/store";
 import { AlarmRingingModal } from "./alarm-ringing-modal";
 import { AppStartupLoading } from "./app-loading";
-import { BallToy } from "./ball-toy";
+import { BallToy, triggerThrowBall } from "./ball-toy";
 import { Companion } from "./companion";
 import { FloatingTimers } from "./floating-timers";
 import { Hub } from "./hub";
@@ -574,10 +574,14 @@ export function DesktopScene() {
         e.preventDefault();
         setLayout(useLumen.getState().layout === "tray" ? "stickies" : "tray");
       }
-      // Toggle Pet: Alt+P
+      // Throw Ball or Toggle Pet: Alt+P
       if (e.altKey && key === "p") {
         e.preventDefault();
-        setPipEnabled(!useLumen.getState().pip.enabled);
+        if (useLumen.getState().pip.enabled) {
+          triggerThrowBall();
+        } else {
+          setPipEnabled(true);
+        }
       }
       if (e.key === "Escape") {
         setCaptureOpen(false);

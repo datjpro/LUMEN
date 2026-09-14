@@ -57,6 +57,13 @@ const DOCK_POSITION_CLASSES: Record<CalendarDockPosition, string> = {
   "bottom-left": "bottom-6 left-4",
 };
 
+const DOCK_ORIGIN_CLASSES: Record<CalendarDockPosition, string> = {
+  "top-right": "origin-top-right",
+  "top-left": "origin-top-left",
+  "bottom-right": "origin-bottom-right",
+  "bottom-left": "origin-bottom-left",
+};
+
 const CATEGORY_OPTIONS: { id: CalendarEventCategory; nameVi: string; nameEn: string; icon: any; color: string }[] = [
   { id: "work", nameVi: "Công việc", nameEn: "Work", icon: Briefcase, color: "bg-sky-500/20 text-sky-400 border-sky-500/40" },
   { id: "personal", nameVi: "Cá nhân", nameEn: "Personal", icon: User, color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40" },
@@ -107,6 +114,8 @@ export function StandaloneCalendar() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [isPillCollapsed, setIsPillCollapsed] = useState(false);
+  const [monthSlideDir, setMonthSlideDir] = useState<"left" | "right" | null>(null);
+  const [flyingNoteFromEvent, setFlyingNoteFromEvent] = useState<string | null>(null);
 
   // Active Scope Time Picker popover: "start" | "end" | null
   const [activeScopePicker, setActiveScopePicker] = useState<"start" | "end" | null>(null);
@@ -295,14 +304,16 @@ export function StandaloneCalendar() {
     sounds.playPop(520);
   };
 
-  // Month navigation
+  // Month navigation with directional slide animation
   const handlePrevMonth = () => {
     sounds.playPop(480);
+    setMonthSlideDir("left");
     setCurrentMonthDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
   };
 
   const handleNextMonth = () => {
     sounds.playPop(520);
+    setMonthSlideDir("right");
     setCurrentMonthDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
   };
 
@@ -504,6 +515,7 @@ export function StandaloneCalendar() {
           className={cn(
             "interactive-el pointer-events-auto fixed z-[88] flex items-center gap-2 rounded-2xl px-3 py-1.5 bg-[#14161D]/92 hover:bg-[#1D2029]/98 border border-white/12 text-[#F4F5F7] shadow-[0_12px_32px_rgba(0,0,0,0.75)] backdrop-blur-xl select-none cursor-pointer transition-all duration-140 hover:scale-105 active:scale-95 group",
             dockClass,
+            DOCK_ORIGIN_CLASSES[dockPos],
           )}
           title={isVi ? "Bấm để mở rộng Lịch trình hôm nay" : "Click to expand Today's Agenda"}
         >
@@ -527,6 +539,7 @@ export function StandaloneCalendar() {
         className={cn(
           "interactive-el pointer-events-auto fixed z-[88] flex flex-col w-64 sm:w-68 rounded-2xl bg-[#181A22]/98 border border-white/12 text-[#F4F5F7] shadow-[0_16px_40px_rgba(0,0,0,0.85)] backdrop-blur-2xl select-none overflow-hidden animate-in fade-in zoom-in-95 duration-140 max-h-[400px]",
           dockClass,
+          DOCK_ORIGIN_CLASSES[dockPos],
         )}
       >
         {modalOpen ? (
@@ -930,7 +943,15 @@ export function StandaloneCalendar() {
             </div>
 
             {/* 42-Day Month Grid */}
-            <div className="grid grid-cols-7 grid-rows-6 gap-1.5 flex-1 min-h-0">
+            <div
+              key={`${currentMonthDate.getFullYear()}-${currentMonthDate.getMonth()}`}
+              className={cn(
+                "grid grid-cols-7 grid-rows-6 gap-1.5 flex-1 min-h-0",
+                monthSlideDir === "left" && "animate-in slide-in-from-left-4 fade-in duration-180",
+                monthSlideDir === "right" && "animate-in slide-in-from-right-4 fade-in duration-180"
+              )}
+              onAnimationEnd={() => setMonthSlideDir(null)}
+            >
               {gridDays.map((date, idx) => {
                 const dateKey = formatDateKey(date);
                 const isCurrentMonth = date.getMonth() === currentMonthDate.getMonth();
@@ -1157,8 +1178,18 @@ export function StandaloneCalendar() {
                             <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button
                                 type="button"
-                                onClick={() => createNoteFromEvent(ev.id)}
-                                className="p-1 rounded-md hover:bg-white/10 text-[#8B90A0] hover:text-[#F5A623] cursor-pointer"
+                                onClick={() => {
+                                  setFlyingNoteFromEvent(ev.id);
+                                  sounds.playPop(560);
+                                  setTimeout(() => {
+                                    createNoteFromEvent(ev.id);
+                                    setFlyingNoteFromEvent(null);
+                                  }, 200);
+                                }}
+                                className={cn(
+                                  "p-1 rounded-md hover:bg-white/10 text-[#8B90A0] hover:text-[#F5A623] cursor-pointer transition-all duration-200 active:scale-90",
+                                  flyingNoteFromEvent === ev.id && "scale-125 text-[#F5A623] rotate-6 animate-pulse"
+                                )}
                                 title={dict.calendar.createNoteFromEvent}
                               >
                                 <NoteIcon className="size-3.5" />

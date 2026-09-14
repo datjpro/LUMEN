@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { PetBodyItem, PetHat, PetSkin, PetType, PipMood } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,31 @@ export function PipFigure({
   const isSleeping = mood === "sleep";
   const isEating = mood === "eating";
 
+  // Micro-motion: Natural random blinking (4–9s interval with deterministic teardown)
+  const [blinking, setBlinking] = useState(false);
+
+  useEffect(() => {
+    let timeoutId: number;
+    let blinkDurationId: number;
+
+    const scheduleBlink = () => {
+      const delay = 4000 + Math.random() * 5000;
+      timeoutId = window.setTimeout(() => {
+        setBlinking(true);
+        blinkDurationId = window.setTimeout(() => {
+          setBlinking(false);
+          scheduleBlink();
+        }, 130);
+      }, delay);
+    };
+
+    scheduleBlink();
+    return () => {
+      clearTimeout(timeoutId);
+      clearTimeout(blinkDurationId);
+    };
+  }, []);
+
   // Mathematical procedural limb angles (0% jitter, pure 120 FPS GPU rendering)
   const legLRot = walking ? Math.sin(walkPhase) * 22 : 0;
   const legRRot = walking ? -Math.sin(walkPhase) * 22 : 0;
@@ -47,11 +73,18 @@ export function PipFigure({
       }}
     >
       <svg viewBox="0 0 90 90" className="h-full w-full overflow-visible" aria-hidden>
-        {/* Soft Drop Shadow */}
-        <ellipse cx="45" cy="80" rx="22" ry="5" fill="currentColor" className="text-black/25" />
+        {/* Soft Drop Shadow with dynamic scaling */}
+        <ellipse
+          cx="45"
+          cy="80"
+          rx={walking ? 20 : 22}
+          ry={walking ? 4.5 : 5}
+          fill="currentColor"
+          className="text-black/25 transition-all duration-150"
+        />
 
         <g
-          className={!walking && !isSleeping ? "pip-bob" : undefined}
+          className={cn(!walking && !isSleeping && "pip-bob pip-breathe")}
           style={{ transform: `translateY(${bodyBobY}px)` }}
         >
           {/* BODY ITEMS / ACCESSORIES (Back Layer) */}
@@ -230,6 +263,11 @@ export function PipFigure({
                   <path d="M36 35 Q 40 30 44 35" fill="none" stroke="#292524" strokeWidth="2.6" strokeLinecap="round" />
                   <path d="M50 35 Q 54 30 58 35" fill="none" stroke="#292524" strokeWidth="2.6" strokeLinecap="round" />
                 </g>
+              ) : blinking ? (
+                <g>
+                  <path d="M37 34 Q 40 36 43 34" fill="none" stroke="#1c1917" strokeWidth="2.2" strokeLinecap="round" />
+                  <path d="M51 34 Q 54 36 57 34" fill="none" stroke="#1c1917" strokeWidth="2.2" strokeLinecap="round" />
+                </g>
               ) : (
                 <g className="pip-blink">
                   <ellipse cx="40" cy="34" rx="3.2" ry="3.8" fill="#1c1917" />
@@ -244,7 +282,7 @@ export function PipFigure({
               {/* Nose & Mouth */}
               <ellipse cx="47" cy="42" rx="2.4" ry="1.8" fill="#1c1917" />
               {isEating ? (
-                <ellipse cx="47" cy="46" rx="2.5" ry="3" fill="#1c1917" />
+                <ellipse cx="47" cy="46" rx="2.8" ry="3.2" fill="#1c1917" className="pip-chew" />
               ) : (
                 <path d="M44.5 44 Q 47 46.5 49.5 44" fill="none" stroke="#1c1917" strokeWidth="1.4" strokeLinecap="round" />
               )}
@@ -260,45 +298,49 @@ export function PipFigure({
           )}
 
           {/* HATS & HEAD ACCESSORIES */}
-          {hat === "sunglasses" && (
-            <g transform="translate(32, 28)">
-              <rect x="0" y="0" width="13" height="9" rx="3" fill="#18181b" stroke="#3f3f46" strokeWidth="1" />
-              <rect x="15" y="0" width="13" height="9" rx="3" fill="#18181b" stroke="#3f3f46" strokeWidth="1" />
-              <line x1="13" y1="3" x2="15" y2="3" stroke="#18181b" strokeWidth="2" />
-              <line x1="0" y1="3" x2="-4" y2="1" stroke="#18181b" strokeWidth="1.5" />
-              <line x1="28" y1="3" x2="32" y2="1" stroke="#18181b" strokeWidth="1.5" />
-            </g>
-          )}
+          {hat !== "none" && (
+            <g key={hat} className="wardrobe-item-enter">
+              {hat === "sunglasses" && (
+                <g transform="translate(32, 28)">
+                  <rect x="0" y="0" width="13" height="9" rx="3" fill="#18181b" stroke="#3f3f46" strokeWidth="1" />
+                  <rect x="15" y="0" width="13" height="9" rx="3" fill="#18181b" stroke="#3f3f46" strokeWidth="1" />
+                  <line x1="13" y1="3" x2="15" y2="3" stroke="#18181b" strokeWidth="2" />
+                  <line x1="0" y1="3" x2="-4" y2="1" stroke="#18181b" strokeWidth="1.5" />
+                  <line x1="28" y1="3" x2="32" y2="1" stroke="#18181b" strokeWidth="1.5" />
+                </g>
+              )}
 
-          {hat === "explorer_hat" && (
-            <g transform="translate(26, 12)">
-              <ellipse cx="20" cy="12" rx="20" ry="4" fill="#a16207" />
-              <rect x="8" y="2" width="24" height="10" rx="3" fill="#ca8a04" />
-              <rect x="8" y="9" width="24" height="3" fill="#713f12" />
-            </g>
-          )}
+              {hat === "explorer_hat" && (
+                <g transform="translate(26, 12)">
+                  <ellipse cx="20" cy="12" rx="20" ry="4" fill="#a16207" />
+                  <rect x="8" y="2" width="24" height="10" rx="3" fill="#ca8a04" />
+                  <rect x="8" y="9" width="24" height="3" fill="#713f12" />
+                </g>
+              )}
 
-          {hat === "wizard_hat" && (
-            <g transform="translate(30, 2)">
-              <polygon points="16,0 4,20 28,20" fill="#6d28d9" />
-              <ellipse cx="16" cy="20" rx="16" ry="3.5" fill="#4c1d95" />
-              <circle cx="16" cy="10" r="1.5" fill="#facc15" />
-            </g>
-          )}
+              {hat === "wizard_hat" && (
+                <g transform="translate(30, 2)">
+                  <polygon points="16,0 4,20 28,20" fill="#6d28d9" />
+                  <ellipse cx="16" cy="20" rx="16" ry="3.5" fill="#4c1d95" />
+                  <circle cx="16" cy="10" r="1.5" fill="#facc15" />
+                </g>
+              )}
 
-          {hat === "party_hat" && (
-            <g transform="translate(34, 4)">
-              <polygon points="12,0 2,18 22,18" fill="#f43f5e" />
-              <circle cx="12" cy="0" r="2.5" fill="#facc15" />
-              <line x1="4" y1="12" x2="20" y2="12" stroke="#38bdf8" strokeWidth="2" />
-            </g>
-          )}
+              {hat === "party_hat" && (
+                <g transform="translate(34, 4)">
+                  <polygon points="12,0 2,18 22,18" fill="#f43f5e" />
+                  <circle cx="12" cy="0" r="2.5" fill="#facc15" />
+                  <line x1="4" y1="12" x2="20" y2="12" stroke="#38bdf8" strokeWidth="2" />
+                </g>
+              )}
 
-          {hat === "sleep_cap" && (
-            <g transform="translate(30, 6)">
-              <path d="M 8 18 Q 4 0 26 4 Q 28 14 18 18 Z" fill="#1e3a8a" />
-              <ellipse cx="13" cy="18" rx="10" ry="3" fill="#ffffff" />
-              <circle cx="28" cy="5" r="3" fill="#ffffff" />
+              {hat === "sleep_cap" && (
+                <g transform="translate(30, 6)">
+                  <path d="M 8 18 Q 4 0 26 4 Q 28 14 18 18 Z" fill="#1e3a8a" />
+                  <ellipse cx="13" cy="18" rx="10" ry="3" fill="#ffffff" />
+                  <circle cx="28" cy="5" r="3" fill="#ffffff" />
+                </g>
+              )}
             </g>
           )}
         </g>

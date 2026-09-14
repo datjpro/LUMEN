@@ -436,13 +436,16 @@ export function ProUpgradeModal() {
             {/* 3. Pro Lifetime Master */}
             <div
               className={cn(
-                "p-3.5 rounded-2xl border flex flex-col justify-between bg-gradient-to-b from-[#1C1F2B] to-[#14161D] transition-all",
+                "relative overflow-hidden p-3.5 rounded-2xl border flex flex-col justify-between bg-gradient-to-b from-[#1C1F2B] to-[#14161D] transition-all",
                 pro.isPro && !isTrial
                   ? "border-emerald-500 ring-1 ring-emerald-500/50 shadow-md"
                   : "border-white/10 hover:border-amber-400/50",
               )}
             >
-              <div className="space-y-2">
+              {/* Shimmer Sweep Animation on Modal Open */}
+              <div className="absolute inset-0 pro-shimmer-sweep pointer-events-none" />
+
+              <div className="relative space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1">
                     <Crown className="size-3" />

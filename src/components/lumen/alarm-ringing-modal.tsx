@@ -26,8 +26,12 @@ export function AlarmRingingModal() {
         )}
       >
         {/* Animated Shaking Ringing Bell */}
-        <div className="relative flex size-20 items-center justify-center rounded-full bg-red-500/20 text-red-500 ring-4 ring-red-500/40 animate-bounce">
-          <Bell className="size-10 fill-red-500 animate-wiggle" />
+        <div className="relative flex size-20 items-center justify-center rounded-full bg-red-500/20 text-red-500 ring-4 ring-red-500/40 timer-ringing-shake">
+          {/* Sound wave ripple circles */}
+          <span className="absolute inset-0 rounded-full border-2 border-red-500/60 sound-ripple pointer-events-none" />
+          <span className="absolute inset-0 rounded-full border-2 border-amber-500/40 sound-ripple pointer-events-none" style={{ animationDelay: "0.35s" }} />
+          <span className="absolute inset-0 rounded-full border-2 border-red-400/30 sound-ripple pointer-events-none" style={{ animationDelay: "0.7s" }} />
+          <Bell className="size-10 fill-red-500" />
           <span className="absolute -top-1 -right-1 flex size-5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
             <span className="relative inline-flex rounded-full size-5 bg-amber-500" />
