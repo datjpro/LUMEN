@@ -1421,18 +1421,63 @@ export function StandaloneCalendar() {
           </div>
 
           {/* Time Controls & Scope Rotary Triggers */}
-          <div className="p-2.5 rounded-2xl bg-[#14161D]/70 border border-white/6 space-y-2">
+          <div
+            className={cn(
+              "p-3 rounded-2xl border transition-all duration-200 space-y-2.5",
+              allDay
+                ? "bg-emerald-950/20 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.06)]"
+                : "bg-[#14161D]/70 border-white/6",
+            )}
+          >
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-[#F4F5F7] flex items-center gap-2 cursor-pointer">
-                <Switch checked={allDay} onCheckedChange={setAllDay} />
-                <span>{dict.calendar.allDay}</span>
+              <label className="text-xs font-semibold text-[#F4F5F7] flex items-center gap-2.5 cursor-pointer select-none">
+                <Switch
+                  checked={allDay}
+                  onCheckedChange={(checked) => {
+                    sounds.playMechanicalClick(checked ? 1.2 : 0.9);
+                    setAllDay(checked);
+                  }}
+                  className={cn(allDay && "data-[state=checked]:bg-emerald-500")}
+                />
+                <span className="flex items-center gap-2">
+                  <span>{dict.calendar.allDay}</span>
+                  {allDay && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 animate-in fade-in zoom-in-95 duration-150 shadow-xs">
+                      <Check className="size-3 stroke-[3]" />
+                      {isVi ? "Đã chọn cả ngày" : "All day selected"}
+                    </span>
+                  )}
+                </span>
               </label>
-              {!allDay && calculatedDuration && (
+              {allDay ? (
+                <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 rounded-full flex items-center gap-1 animate-in fade-in duration-150">
+                  <Check className="size-3 stroke-[2.5]" />
+                  <span>24H</span>
+                </span>
+              ) : calculatedDuration ? (
                 <span className="text-[10px] font-mono text-[#F5A623] bg-[#F5A623]/15 border border-[#F5A623]/30 px-2 py-0.5 rounded-full">
                   ⏱️ {calculatedDuration}
                 </span>
-              )}
+              ) : null}
             </div>
+
+            {allDay && (
+              <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="size-5 rounded-lg bg-emerald-500/25 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                  <Check className="size-3.5 text-emerald-400 stroke-[2.5]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="font-semibold text-emerald-300 block text-[11px] leading-tight">
+                    {isVi ? "Sự kiện diễn ra trong suốt cả ngày" : "All-day event active"}
+                  </span>
+                  <span className="text-[10px] text-emerald-400/80">
+                    {isVi
+                      ? "Không giới hạn khung giờ bắt đầu / kết thúc cố định."
+                      : "Spans across the entire day without fixed hourly bounds."}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {!allDay && (
               <div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/5">

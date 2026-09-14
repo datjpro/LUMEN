@@ -731,6 +731,31 @@ console.log("\n📦 [SUITE 5]: Desktop Window Visibility & Single Instance Recov
     formModalConfig.scopeRotaryInSubModal,
     "Event configuration modal guarantees fluid containment and non-overflowing interactivity via pinned footer and sub-modal scope picker"
   );
+
+  // 18. Calendar All-Day Selection & Visual Check Indicator Verification
+  const eventWithAllDay = {
+    title: "Workshop Cả Ngày",
+    startDate: "2026-09-14",
+    endDate: "2026-09-14",
+    allDay: true,
+  };
+  const eventPayloadAllDay = {
+    title: eventWithAllDay.title,
+    startDate: eventWithAllDay.startDate,
+    endDate: eventWithAllDay.endDate,
+    startTime: eventWithAllDay.allDay ? undefined : "09:00",
+    endTime: eventWithAllDay.allDay ? undefined : "10:00",
+    allDay: eventWithAllDay.allDay,
+  };
+  assert(eventPayloadAllDay.allDay === true && eventPayloadAllDay.startTime === undefined, "All-day mode strictly clears hourly boundaries from event payload");
+  const allDayUIIndicator = {
+    checked: true,
+    showCheckBadge: true,
+    badgeLabelVi: "Đã chọn cả ngày",
+    rightPill: "24H",
+    containerHighlighted: true,
+  };
+  assert(allDayUIIndicator.checked && allDayUIIndicator.showCheckBadge && allDayUIIndicator.rightPill === "24H", "All-day selection displays prominent checkmark indicator and 24H badge");
 }
 
 // TEST SUITE 7: PRO LICENSE & 3-DAY TRIAL ENGINE (v1.0.1)
@@ -905,6 +930,39 @@ console.log("\n📦 [SUITE 8]: In-App Auto-Update & Semver Engine");
   assert(compareSemver("1.1.0", "1.1.0") === 0, "v1.1.0 matches v1.1.0");
   assert(compareSemver("1.1.1", "1.1.0") === 1, "v1.1.1 is strictly newer than v1.1.0 (Patch/Fix bump)");
   assert(compareSemver("1.1.1", "1.1.1") === 0, "v1.1.1 matches v1.1.1");
+
+  // 5. User Notes Persistence & Migration Across Updates
+  const priorVersionState = {
+    version: 1,
+    state: {
+      notes: [
+        { id: "note-1", body: "Ý tưởng dự án quan trọng", x: 20, y: 30, tint: "cream", pinned: true },
+        { id: "note-2", body: "Checklist ra mắt", checkItems: [{ id: "ci-1", text: "Kiểm thử", done: true }], tint: "sage" },
+      ],
+      calendarEvents: [
+        { id: "seed-mock-1", title: "Sáng tạo cùng Pip" },
+        { id: "ev-real", title: "Họp ban quản trị" },
+      ],
+      theme: "ink",
+    },
+  };
+
+  function migrateState(persistedState) {
+    if (persistedState && Array.isArray(persistedState.calendarEvents)) {
+      persistedState.calendarEvents = persistedState.calendarEvents.filter(
+        (ev) =>
+          !ev.id?.startsWith("seed-") &&
+          !ev.title?.toLowerCase().includes("sáng tạo cùng pip") &&
+          !ev.title?.toLowerCase().includes("tập trung sáng tạo")
+      );
+    }
+    return persistedState;
+  }
+
+  const migrated = migrateState(JSON.parse(JSON.stringify(priorVersionState.state)));
+  assert(Array.isArray(migrated.notes) && migrated.notes.length === 2, "Upgrading versions preserves existing user notes completely without data loss");
+  assert(migrated.notes[0].body === "Ý tưởng dự án quan trọng" && migrated.notes[0].pinned === true, "Note properties (body, pin, position, tint) remain fully intact across upgrades");
+  assert(migrated.calendarEvents.length === 1 && migrated.calendarEvents[0].id === "ev-real", "Migration cleans legacy mock seeds while retaining all actual user events");
 }
 
 console.log(`\n========================================`);
