@@ -320,3 +320,33 @@ export async function toggleAlwaysOnTop(onTop: boolean): Promise<void> {
   }
 }
 
+export interface NativeSystemMetricsPayload {
+  is_native: boolean;
+  cpu_usage: number;
+  ram_usage: number;
+  ram_used_mb: number;
+  ram_total_mb: number;
+  battery_level: number | null;
+  battery_charging: boolean | null;
+  cpu_cores: number;
+}
+
+/**
+ * Query real system metrics from native Tauri host (Win32 API)
+ */
+export async function getNativeSystemMetrics(): Promise<NativeSystemMetricsPayload | null> {
+  if (typeof window === "undefined") return null;
+  if (window.__TAURI_INTERNALS__ || window.__TAURI__) {
+    try {
+      const { invoke } = await import("@tauri-apps/api/core");
+      const metrics = await invoke<NativeSystemMetricsPayload>("get_system_metrics");
+      return metrics;
+    } catch (err) {
+      console.debug("[DesktopBridge] get_system_metrics error:", err);
+      return null;
+    }
+  }
+  return null;
+}
+
+

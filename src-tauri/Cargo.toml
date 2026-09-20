@@ -1,6 +1,6 @@
 [package]
 name = "lumen-desktop"
-version = "1.2.0"
+version = "1.2.1"
 description = "Lumen — Artisanal Desktop Spatial Companion & Workspace"
 authors = ["Lumen Desktop Engineering Team"]
 edition = "2021"
@@ -24,7 +24,10 @@ serde_json = "1.0"
 windows-sys = { version = "0.59", features = [
     "Win32_Foundation",
     "Win32_UI_WindowsAndMessaging",
-    "Win32_Graphics_Gdi"
+    "Win32_Graphics_Gdi",
+    "Win32_System_SystemInformation",
+    "Win32_System_Power",
+    "Win32_System_Threading"
 ] }
 
 [profile.dev]

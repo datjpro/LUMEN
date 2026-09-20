@@ -181,12 +181,17 @@ export type SystemHudSettings = {
 };
 
 export type SystemStats = {
+  isNative: boolean; // true if running on native Tauri OS bridge, false if browser web sampling
+  memoryMode: "system" | "heap"; // 'system' for real physical OS RAM, 'heap' for browser JS memory
   cpuUsage: number; // 0 - 100
+  cpuCores: number;
+  fps: number; // UI Frame Rendering budget (e.g. 60 FPS)
   ramUsage: number; // 0 - 100
   ramUsedMb: number;
   ramTotalMb: number;
   networkDownKbps: number;
   networkUpKbps: number;
+  networkOnline: boolean;
   batteryLevel: number | null; // 0 - 100
   batteryCharging: boolean | null;
   cpuHistory: number[]; // Array of last 10 points

@@ -4,6 +4,30 @@
 
 ---
 
+## 🚀 [v1.2.1] — 2026-09-20 — System Telemetry Accuracy & UI Decluttering Optimization
+
+### 🔧 Fixes & Telemetry Inaccuracy Resolutions:
+- **🎯 Authentic Native Hardware Telemetry (Win32 & Tauri v2):**
+  - Added native `get_system_metrics` command in Rust using `windows-sys` (`GlobalMemoryStatusEx`, `GetSystemTimes`, `GetSystemPowerStatus`).
+  - Sub-millisecond physical RAM calculation (Exact Total MB, Available MB, OS Memory Load %).
+  - Exact CPU% load calculated from system time delta (matching Windows Task Manager).
+  - Accurate battery percentage & AC charging status directly from Windows kernel.
+- **🌐 Honest Web/Browser Heap & FPS Sampling:**
+  - Removed all fake jitter & random math spikes (`Math.random()`) that previously generated unrealistic CPU oscillation.
+  - Accurately labeled and sampled JavaScript Heap Memory (`performance.memory`) when running in browser mode.
+  - Integrated live 60/120 FPS UI frame budget tracking.
+  - Connected live telemetry into Settings Hub ("Hệ thống") with clear `[Win32 Native]` vs `[Web Engine]` badges.
+
+### 🎨 UI Optimization & Workspace Decluttering:
+- **🌿 Clean-by-Default Spatial Desktop:**
+  - HUD and secondary widgets default to hidden (`enabled: false`) upon startup, keeping the workspace pristine and zen.
+- **⚡ Streamlined Floating Action Hub:**
+  - Redesigned floating tray into an organized 2x2 primary action grid (`Alt+N`, `Alt+T`, `Alt+C`, `Alt+F`).
+  - Added clean workspace control pills (`Alt+A`, `Alt+O`, `Alt+P`) and 1-click widget toggle strip.
+  - Removed intrusive hover popups for an artisanal, lightweight desktop experience.
+
+---
+
 ## 🚀 [v1.2.0] — 2026-09-20 — Phase 5: Spatial Widget Ecosystem & System HUD Monitor
 
 ### ✨ What's New:

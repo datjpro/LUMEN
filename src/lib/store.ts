@@ -233,7 +233,7 @@ export const useLumen = create<LumenState>()(
 
       // Phase 5: System HUD & Widget Ecosystem Initial State
       hudSettings: {
-        enabled: true,
+        enabled: false,
         position: "top-left",
         showCpu: true,
         showRam: true,
@@ -243,26 +243,38 @@ export const useLumen = create<LumenState>()(
         alertOnHighLoad: true,
       },
       systemStats: {
-        cpuUsage: 12,
-        ramUsage: 38,
-        ramUsedMb: 6144,
-        ramTotalMb: 16384,
-        networkDownKbps: 240,
-        networkUpKbps: 45,
-        batteryLevel: 98,
-        batteryCharging: true,
-        cpuHistory: [10, 14, 12, 16, 15, 12, 18, 14, 15, 12],
-        ramHistory: [38, 38, 38, 38, 38, 39, 38, 38, 38, 38],
+        isNative: false,
+        memoryMode: "heap",
+        cpuUsage: 4,
+        cpuCores: 8,
+        fps: 60,
+        ramUsage: 15,
+        ramUsedMb: 64,
+        ramTotalMb: 4096,
+        networkDownKbps: 0,
+        networkUpKbps: 0,
+        networkOnline: true,
+        batteryLevel: null,
+        batteryCharging: null,
+        cpuHistory: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+        ramHistory: [15, 15, 15, 15, 15, 15, 15, 15, 15, 15],
       },
       setHudSettings: (patch) =>
         set((state) => ({ hudSettings: { ...state.hudSettings, ...patch } })),
       toggleHud: (enabled) =>
-        set((state) => ({
-          hudSettings: {
-            ...state.hudSettings,
-            enabled: enabled !== undefined ? enabled : !state.hudSettings.enabled,
-          },
-        })),
+        set((state) => {
+          const next = enabled !== undefined ? enabled : !state.hudSettings.enabled;
+          return {
+            hudSettings: {
+              ...state.hudSettings,
+              enabled: next,
+            },
+            activeWidgets: {
+              ...state.activeWidgets,
+              hud: next,
+            },
+          };
+        }),
       updateSystemStats: (patch) =>
         set((state) => {
           const newStats = { ...state.systemStats, ...patch };
@@ -607,7 +619,7 @@ export const useLumen = create<LumenState>()(
         })),
 
       activeWidgets: {
-        hud: true,
+        hud: false,
         pomodoro: false,
         habit: false,
         scratchpad: false,
@@ -615,12 +627,22 @@ export const useLumen = create<LumenState>()(
       },
       toggleWidget: (id, val) => {
         sounds.playPop(520);
-        set((state) => ({
-          activeWidgets: {
-            ...state.activeWidgets,
-            [id]: val !== undefined ? val : !state.activeWidgets[id],
-          },
-        }));
+        set((state) => {
+          const nextVal = val !== undefined ? val : !state.activeWidgets[id];
+          const patch: Partial<LumenState> = {
+            activeWidgets: {
+              ...state.activeWidgets,
+              [id]: nextVal,
+            },
+          };
+          if (id === "hud") {
+            patch.hudSettings = { ...state.hudSettings, enabled: nextVal };
+          }
+          if (id === "scratchpad") {
+            patch.scratchpad = { ...state.scratchpad, enabled: nextVal };
+          }
+          return patch;
+        });
       },
 
       snippets: [

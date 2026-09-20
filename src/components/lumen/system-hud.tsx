@@ -1,11 +1,34 @@
-import { useEffect, useRef, useState } from "react";
-import { Activity, Battery, BatteryCharging, ChevronDown, ChevronUp, Cpu, HardDrive, Sparkles, Wifi, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Activity,
+  Battery,
+  BatteryCharging,
+  ChevronDown,
+  ChevronUp,
+  Cpu,
+  Gauge,
+  HardDrive,
+  Wifi,
+  WifiOff,
+  X,
+} from "lucide-react";
 import { sounds } from "@/lib/audio";
 import { useLumen } from "@/lib/store";
+import { sampleSystemMetrics } from "@/lib/system-monitor";
 import { cn } from "@/lib/utils";
 
-// Mini SVG Sparkline renderer for real-time CPU/RAM history (Zero Layout Reflow)
-function Sparkline({ data, color, height = 16, width = 50 }: { data: number[]; color: string; height?: number; width?: number }) {
+// Mini SVG Sparkline renderer for real-time history (Zero Layout Reflow)
+function Sparkline({
+  data,
+  color,
+  height = 16,
+  width = 50,
+}: {
+  data: number[];
+  color: string;
+  height?: number;
+  width?: number;
+}) {
   if (!data || data.length < 2) return null;
   const max = Math.max(...data, 100);
   const min = Math.min(...data, 0);
@@ -35,7 +58,6 @@ function Sparkline({ data, color, height = 16, width = 50 }: { data: number[]; c
 
 export function SystemHudWidget() {
   const hudSettings = useLumen((s) => s.hudSettings);
-  const setHudSettings = useLumen((s) => s.setHudSettings);
   const toggleHud = useLumen((s) => s.toggleHud);
   const stats = useLumen((s) => s.systemStats);
   const updateSystemStats = useLumen((s) => s.updateSystemStats);
@@ -44,58 +66,36 @@ export function SystemHudWidget() {
 
   const isVi = lang === "vi";
 
-  // Real-time system monitoring simulation & native performance sampling
+  // Real-time system monitoring sampling (Native Win32 IPC + Browser Heap/FPS)
   useEffect(() => {
     if (!hudSettings.enabled) return;
 
-    const interval = setInterval(() => {
-      // Sample browser memory if available (Chrome/Chromium/Electron)
-      let ramUsage = stats.ramUsage;
-      let ramUsedMb = stats.ramUsedMb;
-      const ramTotalMb = stats.ramTotalMb || 16384;
-
-      if (typeof window !== "undefined" && (window.performance as any)?.memory) {
-        const mem = (window.performance as any).memory;
-        const usedBytes = mem.usedJSHeapSize;
-        const totalBytes = mem.jsHeapSizeLimit;
-        if (totalBytes > 0) {
-          // Weighted estimate of overall system RAM based on JS heap + base OS reservation
-          const baseEstimatedMb = 4800 + Math.round(usedBytes / (1024 * 1024));
-          ramUsedMb = baseEstimatedMb;
-          ramUsage = Math.min(95, Math.max(15, Math.round((ramUsedMb / ramTotalMb) * 100)));
+    let isMounted = true;
+    const sample = async () => {
+      try {
+        const patch = await sampleSystemMetrics(stats);
+        if (isMounted) {
+          updateSystemStats(patch);
         }
-      } else {
-        // Natural gentle oscillation for realistic monitor display
-        const delta = (Math.random() - 0.48) * 1.5;
-        ramUsage = Math.min(92, Math.max(20, Math.round(stats.ramUsage + delta)));
-        ramUsedMb = Math.round((ramUsage / 100) * ramTotalMb);
+      } catch (err) {
+        console.debug("[SystemHUD] Sample error:", err);
       }
+    };
 
-      // Smooth CPU oscillation
-      const cpuDelta = (Math.random() - 0.5) * 6;
-      const cpuUsage = Math.min(98, Math.max(4, Math.round(stats.cpuUsage + cpuDelta)));
+    // Initial sample
+    void sample();
+    const interval = setInterval(sample, 1500);
 
-      // Network speed jitter
-      const netDown = Math.max(20, Math.round(stats.networkDownKbps + (Math.random() - 0.48) * 60));
-      const netUp = Math.max(8, Math.round(stats.networkUpKbps + (Math.random() - 0.48) * 20));
-
-      updateSystemStats({
-        cpuUsage,
-        ramUsage,
-        ramUsedMb,
-        ramTotalMb,
-        networkDownKbps: netDown,
-        networkUpKbps: netUp,
-      });
-    }, 1200);
-
-    return () => clearInterval(interval);
-  }, [hudSettings.enabled, stats.cpuUsage, stats.ramUsage, stats.networkDownKbps, stats.networkUpKbps, stats.ramUsedMb, stats.ramTotalMb, updateSystemStats]);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [hudSettings.enabled, updateSystemStats]);
 
   if (!hudSettings.enabled) return null;
 
-  const isHighCpu = stats.cpuUsage >= 85;
-  const isHighRam = stats.ramUsage >= 85;
+  const isHighCpu = stats.cpuUsage >= 90;
+  const isHighRam = stats.ramUsage >= 90;
 
   // Position alignment styling
   const posClass =
@@ -118,12 +118,22 @@ export function SystemHudWidget() {
         posClass
       )}
     >
-      <div className="relative rounded-2xl bg-[#181B22]/90 backdrop-blur-xl border border-white/10 shadow-[0_12px_36px_rgba(0,0,0,0.5)] text-[#F4F5F7] text-xs overflow-hidden group">
+      <div className="relative rounded-2xl bg-[#181B22]/95 backdrop-blur-2xl border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.55)] text-[#F4F5F7] text-xs overflow-hidden group">
         {/* Header Capsule Bar */}
         <div className="flex items-center gap-3 px-3 py-2 border-b border-white/5">
           <div className="flex items-center gap-1.5 font-semibold text-[#8B90A0] text-[11px] tracking-wider uppercase">
             <Activity className="size-3.5 text-[#F5A623] animate-pulse" />
-            <span>Lumen HUD</span>
+            <span>HUD</span>
+            <span
+              className={cn(
+                "px-1.5 py-0.2 rounded text-[9px] font-mono font-bold tracking-tight",
+                stats.isNative
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                  : "bg-sky-500/20 text-sky-400 border border-sky-500/30"
+              )}
+            >
+              {stats.isNative ? "WIN32" : "HEAP"}
+            </span>
           </div>
 
           {/* Alert on High Load Indicator */}
@@ -145,12 +155,18 @@ export function SystemHudWidget() {
             )}
             {hudSettings.showRam && (
               <div className="flex items-center gap-1">
-                <span className="text-[#8B90A0] text-[10px]">RAM</span>
+                <span className="text-[#8B90A0] text-[10px]">
+                  {stats.memoryMode === "heap" ? "HEAP" : "RAM"}
+                </span>
                 <span className={cn("font-bold", isHighRam ? "text-red-400" : "text-emerald-400")}>
                   {stats.ramUsage}%
                 </span>
               </div>
             )}
+            <div className="hidden sm:flex items-center gap-1 text-[10px] text-amber-400/90 font-mono">
+              <Gauge className="size-3 text-amber-400" />
+              <span>{stats.fps || 60} FPS</span>
+            </div>
           </div>
 
           {/* Controls */}
@@ -189,7 +205,7 @@ export function SystemHudWidget() {
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-[#8B90A0] font-medium">
                     <Cpu className="size-3.5 text-sky-400" />
-                    <span>CPU Core</span>
+                    <span>{stats.isNative ? "CPU Host" : "Frame Load"}</span>
                   </span>
                   <span className="font-mono font-bold text-sky-300">{stats.cpuUsage}%</span>
                 </div>
@@ -197,11 +213,14 @@ export function SystemHudWidget() {
                   <div className="h-1.5 w-16 bg-white/10 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-full transition-all duration-300"
-                      style={{ width: `${stats.cpuUsage}%` }}
+                      style={{ width: `${Math.min(100, Math.max(0, stats.cpuUsage))}%` }}
                     />
                   </div>
                   <Sparkline data={stats.cpuHistory} color="#38bdf8" />
                 </div>
+                <span className="text-[10px] text-[#8B90A0] font-mono mt-0.5">
+                  {stats.cpuCores || 4} Threads • {stats.fps || 60} FPS
+                </span>
               </div>
             )}
 
@@ -211,7 +230,7 @@ export function SystemHudWidget() {
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-[#8B90A0] font-medium">
                     <HardDrive className="size-3.5 text-emerald-400" />
-                    <span>Memory</span>
+                    <span>{stats.memoryMode === "heap" ? "JS Heap" : "System RAM"}</span>
                   </span>
                   <span className="font-mono font-bold text-emerald-300">{stats.ramUsage}%</span>
                 </div>
@@ -219,13 +238,15 @@ export function SystemHudWidget() {
                   <div className="h-1.5 w-16 bg-white/10 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all duration-300"
-                      style={{ width: `${stats.ramUsage}%` }}
+                      style={{ width: `${Math.min(100, Math.max(0, stats.ramUsage))}%` }}
                     />
                   </div>
                   <Sparkline data={stats.ramHistory} color="#34d399" />
                 </div>
                 <span className="text-[10px] text-[#8B90A0] font-mono mt-0.5">
-                  {(stats.ramUsedMb / 1024).toFixed(1)} GB / {(stats.ramTotalMb / 1024).toFixed(0)} GB
+                  {stats.memoryMode === "heap"
+                    ? `${stats.ramUsedMb} MB / ${(stats.ramTotalMb / 1024).toFixed(1)} GB Heap`
+                    : `${(stats.ramUsedMb / 1024).toFixed(1)} GB / ${(stats.ramTotalMb / 1024).toFixed(0)} GB`}
                 </span>
               </div>
             )}
@@ -235,16 +256,33 @@ export function SystemHudWidget() {
               <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/5 flex flex-col gap-1 col-span-2">
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-[#8B90A0] font-medium">
-                    <Wifi className="size-3.5 text-amber-400" />
-                    <span>{isVi ? "Tốc độ mạng" : "Network Rate"}</span>
+                    {stats.networkOnline ? (
+                      <Wifi className="size-3.5 text-emerald-400" />
+                    ) : (
+                      <WifiOff className="size-3.5 text-red-400" />
+                    )}
+                    <span>{isVi ? "Trạng thái mạng" : "Network Status"}</span>
                   </span>
                   <div className="flex items-center gap-3 font-mono text-[10px]">
-                    <span className="text-emerald-400 font-semibold">
-                      ⭳ {stats.networkDownKbps > 1024 ? `${(stats.networkDownKbps / 1024).toFixed(1)} MB/s` : `${stats.networkDownKbps} KB/s`}
+                    <span
+                      className={cn(
+                        "font-semibold",
+                        stats.networkOnline ? "text-emerald-400" : "text-red-400"
+                      )}
+                    >
+                      {stats.networkOnline
+                        ? isVi
+                          ? "Đã kết nối Internet"
+                          : "Online"
+                        : isVi
+                        ? "Mất kết nối"
+                        : "Offline"}
                     </span>
-                    <span className="text-sky-400 font-semibold">
-                      ⭱ {stats.networkUpKbps > 1024 ? `${(stats.networkUpKbps / 1024).toFixed(1)} MB/s` : `${stats.networkUpKbps} KB/s`}
-                    </span>
+                    {stats.networkDownKbps > 0 && (
+                      <span className="text-sky-400 font-semibold">
+                        ⭳ {stats.networkDownKbps > 1024 ? `${(stats.networkDownKbps / 1024).toFixed(1)} MB/s` : `${stats.networkDownKbps} KB/s`}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -264,7 +302,13 @@ export function SystemHudWidget() {
                 <div className="flex items-center gap-2 font-mono">
                   <span className="text-white font-bold">{stats.batteryLevel}%</span>
                   <span className="text-[10px] text-emerald-400 font-semibold">
-                    {stats.batteryCharging ? (isVi ? "Đang sạc" : "Charging") : (isVi ? "Dùng pin" : "Discharging")}
+                    {stats.batteryCharging
+                      ? isVi
+                        ? "Đang sạc"
+                        : "Charging"
+                      : isVi
+                      ? "Dùng pin"
+                      : "Battery"}
                   </span>
                 </div>
               </div>

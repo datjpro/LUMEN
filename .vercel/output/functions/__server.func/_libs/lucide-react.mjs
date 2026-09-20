@@ -823,6 +823,19 @@ var Folder = createLucideIcon("folder", [["path", {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var Gauge = createLucideIcon("gauge", [["path", {
+	d: "m12 14 4-4",
+	key: "9kzdfg"
+}], ["path", {
+	d: "M3.34 19a10 10 0 1 1 17.32 0",
+	key: "19p75a"
+}]]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Gift = createLucideIcon("gift", [
 	["rect", {
 		x: "3",
@@ -1733,6 +1746,42 @@ var VolumeX = createLucideIcon("volume-x", [
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var WifiOff = createLucideIcon("wifi-off", [
+	["path", {
+		d: "M12 20h.01",
+		key: "zekei9"
+	}],
+	["path", {
+		d: "M8.5 16.429a5 5 0 0 1 7 0",
+		key: "1bycff"
+	}],
+	["path", {
+		d: "M5 12.859a10 10 0 0 1 5.17-2.69",
+		key: "1dl1wf"
+	}],
+	["path", {
+		d: "M19 12.859a10 10 0 0 0-2.007-1.523",
+		key: "4k23kn"
+	}],
+	["path", {
+		d: "M2 8.82a15 15 0 0 1 4.177-2.643",
+		key: "1grhjp"
+	}],
+	["path", {
+		d: "M22 8.82a15 15 0 0 0-11.288-3.764",
+		key: "z3jwby"
+	}],
+	["path", {
+		d: "m2 2 20 20",
+		key: "1ooewy"
+	}]
+]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Wifi = createLucideIcon("wifi", [
 	["path", {
 		d: "M12 20h.01",
@@ -1775,4 +1824,4 @@ var Zap = createLucideIcon("zap", [["path", {
 	key: "1xq2db"
 }]]);
 //#endregion
-export { EyeOff as $, Pause as A, Layers as B, RotateCw as C, BellRing as Ct, Plus as D, ALargeSmall as Dt, RefreshCw as E, Activity as Et, Minimize2 as F, GripHorizontal as G, History as H, Maximize2 as I, FolderPlus as J, Gift as K, Lock as L, Music2 as M, Moon as N, Play as O, Minus as P, Eye as Q, LockOpen as R, Scaling as S, Bell as St, Rocket as T, BatteryCharging as Tt, Heart as U, KeyRound as V, HardDrive as W, Focus as X, FolderOpen as Y, Flame as Z, SkipForward as _, ChevronDown as _t, Volume2 as a, Crosshair as at, Settings as b, Calculator as bt, Upload as c, Copy as ct, Target as d, Clock as dt, ExternalLink as et, Sun as f, CircleCheck as ft, Sparkles as g, ChevronLeft as gt, SquareCheckBig as h, ChevronRight as ht, VolumeX as i, Crown as it, Palette as j, Pin as k, TriangleAlert as l, Cookie as lt, Square as m, ChevronUp as mt, X as n, Droplets as nt, Users as o, Cpu as ot, StickyNote as p, CircleAlert as pt, Folder as q, Wifi as r, Download as rt, User as s, CornerDownLeft as st, Zap as t, Ellipsis as tt, Trash2 as u, CodeXml as ut, Shield as v, Check as vt, RotateCcw as w, Battery as wt, Search as x, Briefcase as xt, ShieldCheck as y, Calendar as yt, LayoutGrid as z };
+export { Flame as $, Pin as A, LayoutGrid as B, Scaling as C, Briefcase as Ct, RefreshCw as D, BatteryCharging as Dt, Rocket as E, Battery as Et, Minus as F, HardDrive as G, KeyRound as H, Minimize2 as I, Gauge as J, GripHorizontal as K, Maximize2 as L, Palette as M, Music2 as N, Plus as O, Activity as Ot, Moon as P, Focus as Q, Lock as R, Search as S, Calculator as St, RotateCcw as T, BellRing as Tt, History as U, Layers as V, Heart as W, FolderPlus as X, Folder as Y, FolderOpen as Z, Sparkles as _, ChevronRight as _t, VolumeX as a, Download as at, ShieldCheck as b, Check as bt, User as c, Cpu as ct, Trash2 as d, Cookie as dt, Eye as et, Target as f, CodeXml as ft, SquareCheckBig as g, ChevronUp as gt, Square as h, CircleAlert as ht, WifiOff as i, Droplets as it, Pause as j, Play as k, ALargeSmall as kt, Upload as l, CornerDownLeft as lt, StickyNote as m, CircleCheck as mt, X as n, ExternalLink as nt, Volume2 as o, Crown as ot, Sun as p, Clock as pt, Gift as q, Wifi as r, Ellipsis as rt, Users as s, Crosshair as st, Zap as t, EyeOff as tt, TriangleAlert as u, Copy as ut, SkipForward as v, ChevronLeft as vt, RotateCw as w, Bell as wt, Settings as x, Calendar as xt, Shield as y, ChevronDown as yt, LockOpen as z };

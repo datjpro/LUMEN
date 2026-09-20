@@ -17,10 +17,38 @@ export interface VersionRelease {
 
 export const APP_RELEASES: VersionRelease[] = [
   {
+    version: "1.2.1",
+    releaseName: "Lumen v1.2.1 — System Telemetry Accuracy & UI Decluttering Optimization",
+    releaseDate: "2026-09-20",
+    isLatest: true,
+    highlights: [
+      {
+        icon: "🎯",
+        badge: "fix",
+        titleVi: "Đo Đạc Phần Cứng Chính Xác 100% (Win32 Native & V8 Heap)",
+        titleEn: "Authentic Hardware Telemetry (Win32 & Heap)",
+        descriptionVi:
+          "Tích hợp lệnh Win32 trực tiếp từ nhân Windows: GlobalMemoryStatusEx cho RAM, GetSystemTimes cho CPU và GetSystemPowerStatus cho pin. Loại bỏ hoàn toàn số liệu giả lập và cảnh báo sai.",
+        descriptionEn:
+          "Integrated direct Windows Win32 kernel telemetry for exact RAM, CPU% and battery. Completely eliminated jitter and false high-load alarms.",
+      },
+      {
+        icon: "⚡",
+        badge: "ui",
+        titleVi: "Tối Ưu Giao Diện & Khay Điều Khiển Tinh Gọn",
+        titleEn: "Streamlined Action Hub & Clean Desktop",
+        descriptionVi:
+          "Giao diện khởi động mặc định siêu sạch (Clean-by-default). Tái cấu trúc menu điều khiển nổi dạng lưới 2x2 thông minh (Ghi chú, Đặt giờ, Lịch trình, Tìm kiếm) và thanh toggle tiện ích 1-chạm.",
+        descriptionEn:
+          "Clean-by-default spatial workspace with redesigned 2x2 Action Hub (Note, Timer, Calendar, Spotlight) and 1-click widget toggles.",
+      },
+    ],
+  },
+  {
     version: "1.2.0",
     releaseName: "Lumen v1.2.0 — Spatial Widget Ecosystem & System HUD Monitor",
     releaseDate: "2026-09-20",
-    isLatest: true,
+    isLatest: false,
     highlights: [
       {
         icon: "📊",

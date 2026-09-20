@@ -34,15 +34,9 @@ import { PomodoroWidget } from "./widgets/pomodoro-widget";
 import { ScratchpadWidget } from "./widgets/scratchpad-widget";
 import { cn } from "@/lib/utils";
 
-// Floating Quick Tray Menu & Hover-Revealed Paper Well Dock (Supports Direct Drag to Canvas)
+// Clean, Streamlined Floating Action Hub (Minimalist & Uncluttered)
 function FloatingTrayMenu() {
   const [open, setOpen] = useState(false);
-  const [paperVisible, setPaperVisible] = useState(false);
-  const [isDraggingPaper, setIsDraggingPaper] = useState(false);
-  const [dragCursorPos, setDragCursorPos] = useState({ x: 0, y: 0 });
-  const dragStartPos = useRef({ x: 0, y: 0 });
-  const isDraggingRef = useRef(false);
-  const leaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const lang = useLumen((s) => s.lang);
   const layout = useLumen((s) => s.layout);
@@ -56,7 +50,6 @@ function FloatingTrayMenu() {
   const tidyNotes = useLumen((s) => s.tidyNotes);
   const pipEnabled = useLumen((s) => s.pip.enabled);
   const setPipEnabled = useLumen((s) => s.setPipEnabled);
-  const requestNoteFromPip = useLumen((s) => s.requestNoteFromPip);
   const pro = useLumen((s) => s.pro);
   const setProModalOpen = useLumen((s) => s.setProModalOpen);
   const toggleWidget = useLumen((s) => s.toggleWidget);
@@ -67,411 +60,258 @@ function FloatingTrayMenu() {
 
   const isVi = lang === "vi";
 
-  const handleMouseEnter = () => {
-    if (leaveTimerRef.current) {
-      clearTimeout(leaveTimerRef.current);
-      leaveTimerRef.current = null;
-    }
-    setPaperVisible(true);
-  };
-
-  const handleMouseLeave = () => {
-    if (isDraggingRef.current) return;
-    if (leaveTimerRef.current) {
-      clearTimeout(leaveTimerRef.current);
-    }
-    // 500ms delay hysteresis so user has ample time to move cursor to the paper stack
-    leaveTimerRef.current = setTimeout(() => {
-      setPaperVisible(false);
-    }, 500);
-  };
-
-  const handlePaperPointerDown = (e: React.PointerEvent) => {
-    e.stopPropagation();
-    isDraggingRef.current = true;
-    dragStartPos.current = { x: e.clientX, y: e.clientY };
-    setDragCursorPos({ x: e.clientX, y: e.clientY });
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {}
-  };
-
-  const handlePaperPointerMove = (e: React.PointerEvent) => {
-    if (!isDraggingRef.current) return;
-    const dx = e.clientX - dragStartPos.current.x;
-    const dy = e.clientY - dragStartPos.current.y;
-    if (Math.hypot(dx, dy) > 8) {
-      setIsDraggingPaper(true);
-      setDragCursorPos({ x: e.clientX, y: e.clientY });
-    }
-  };
-
-  const handlePaperPointerUp = (e: React.PointerEvent) => {
-    if (!isDraggingRef.current) return;
-    isDraggingRef.current = false;
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {}
-
-    const dx = e.clientX - dragStartPos.current.x;
-    const dy = e.clientY - dragStartPos.current.y;
-    const distMoved = Math.hypot(dx, dy);
-
-    if (distMoved > 25) {
-      // User dragged to a location on the screen -> spawn note directly at dropped coordinates!
-      const screenW = window.innerWidth || 1920;
-      const screenH = window.innerHeight || 1080;
-      const dropX = Math.max(4, Math.min(82, ((e.clientX - 120) / screenW) * 100));
-      const dropY = Math.max(4, Math.min(76, ((e.clientY - 40) / screenH) * 100));
-
-      sounds.playPop(640);
-      addNote({
-        x: dropX,
-        y: dropY,
-        body: "",
-        tint: "cream",
-      });
-    } else {
-      // Quick click on paper stack
-      sounds.playPop(620);
-      if (pipEnabled) {
-        requestNoteFromPip();
-      } else {
-        addNote({
-          x: Math.max(10, Math.min(80, 50 + (Math.random() - 0.5) * 30)),
-          y: Math.max(10, Math.min(75, 40 + (Math.random() - 0.5) * 25)),
-          body: "",
-          tint: "cream",
-        });
-      }
-    }
-
-    setIsDraggingPaper(false);
-  };
-
   return (
-    <div
-      className="interactive-el fixed right-6 bottom-5 z-[85] flex flex-col items-end gap-2 select-none"
-      onPointerEnter={handleMouseEnter}
-      onPointerLeave={handleMouseLeave}
-    >
-      {/* 1. Full Glassmorphism Tray Menu */}
+    <div className="interactive-el fixed right-6 bottom-5 z-[85] flex flex-col items-end gap-2 select-none">
+      {/* Streamlined Glassmorphism Quick Action Hub */}
       {open ? (
-        <div className="animate-in fade-in slide-in-from-bottom-2 w-64 rounded-2xl bg-[#1D2029]/90 text-[#F4F5F7] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.65)] border border-white/6 backdrop-blur-2xl">
-          <div className="flex flex-col gap-1 text-xs font-medium">
-            {/* Header label */}
-            <div className="flex items-center justify-between px-2.5 py-1 text-[10px] font-semibold text-[#8B90A0] uppercase tracking-wider border-b border-white/5 mb-0.5">
-              <span>Lumen Desk</span>
-              <span className="text-[#F5A623]">Overlay</span>
+        <div className="animate-in fade-in slide-in-from-bottom-2 w-72 rounded-2xl bg-[#181B22]/95 text-[#F4F5F7] p-3 shadow-[0_24px_60px_rgba(0,0,0,0.65)] border border-white/10 backdrop-blur-2xl">
+          {/* Header */}
+          <div className="flex items-center justify-between px-1 pb-2 border-b border-white/5 mb-2.5">
+            <div className="flex items-center gap-2">
+              <img src="/logo.png" alt="Lumen" className="size-4.5 rounded-md" />
+              <span className="text-xs font-bold tracking-tight text-white">Lumen Desk</span>
             </div>
+            <span className="text-[10px] text-[#8B90A0] font-mono uppercase bg-white/5 px-2 py-0.5 rounded-full border border-white/5">
+              Workspace
+            </span>
+          </div>
 
-            {/* + New Note */}
+          {/* 1. Core Actions (2x2 Grid) */}
+          <div className="grid grid-cols-2 gap-1.5 mb-2.5">
+            {/* New Note */}
             <button
               type="button"
               onClick={() => {
                 setCaptureOpen(true);
                 setOpen(false);
               }}
-              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer group"
+              className="flex flex-col items-start gap-1 p-2.5 rounded-xl bg-white/[0.04] hover:bg-[#F5A623]/15 border border-white/5 hover:border-[#F5A623]/30 transition-all text-left cursor-pointer group"
             >
-              <div className="flex items-center gap-2.5">
-                <Plus className="size-4.5 text-[#F5A623] group-hover:scale-110 transition-transform duration-120" />
-                <span className="font-medium text-[#F4F5F7]">{isVi ? "Ghi chú mới" : "New Note"}</span>
+              <div className="flex items-center justify-between w-full">
+                <Plus className="size-4 text-[#F5A623] group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] text-[#8B90A0] font-mono">Alt+N</span>
               </div>
-              <span className="text-[10px] text-[#8B90A0] font-mono">Alt+N</span>
+              <span className="text-xs font-medium text-white group-hover:text-[#F5A623] transition-colors">
+                {isVi ? "Ghi chú mới" : "New Note"}
+              </span>
             </button>
 
-            {/* + Quick Timer */}
+            {/* Quick Timer */}
             <button
               type="button"
               onClick={() => {
                 setQuickTimerOpen(true);
                 setOpen(false);
               }}
-              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer group"
+              className="flex flex-col items-start gap-1 p-2.5 rounded-xl bg-white/[0.04] hover:bg-[#F5A623]/15 border border-white/5 hover:border-[#F5A623]/30 transition-all text-left cursor-pointer group"
             >
-              <div className="flex items-center gap-2.5">
-                <Clock className="size-4.5 text-[#F5A623] group-hover:scale-110 transition-transform duration-120" />
-                <span className="font-medium text-[#F4F5F7]">{isVi ? "Đặt giờ nhanh" : "Quick Timer"}</span>
+              <div className="flex items-center justify-between w-full">
+                <Clock className="size-4 text-[#F5A623] group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] text-[#8B90A0] font-mono">Alt+T</span>
               </div>
-              <span className="text-[10px] text-[#8B90A0] font-mono">Alt+T</span>
+              <span className="text-xs font-medium text-white group-hover:text-[#F5A623] transition-colors">
+                {isVi ? "Đặt giờ" : "Timer"}
+              </span>
             </button>
 
-            {/* Spatial Calendar & Planner */}
+            {/* Calendar */}
             <button
               type="button"
               onClick={() => {
                 setCalendarOpen(true);
                 setOpen(false);
               }}
-              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer group"
+              className="flex flex-col items-start gap-1 p-2.5 rounded-xl bg-white/[0.04] hover:bg-[#F5A623]/15 border border-white/5 hover:border-[#F5A623]/30 transition-all text-left cursor-pointer group"
             >
-              <div className="flex items-center gap-2.5">
-                <Calendar className="size-4.5 text-[#F5A623] group-hover:scale-110 transition-transform duration-120" />
-                <span className="font-medium text-[#F4F5F7]">{isVi ? "Lịch trình & Kế hoạch" : "Calendar & Planner"}</span>
+              <div className="flex items-center justify-between w-full">
+                <Calendar className="size-4 text-[#F5A623] group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] text-[#8B90A0] font-mono">Alt+C</span>
               </div>
-              <span className="text-[10px] text-[#8B90A0] font-mono">Alt+C</span>
+              <span className="text-xs font-medium text-white group-hover:text-[#F5A623] transition-colors">
+                {isVi ? "Lịch trình" : "Calendar"}
+              </span>
             </button>
 
-            {/* Spotlight Search */}
+            {/* Spotlight */}
             <button
               type="button"
               onClick={() => {
                 setSearchOpen(true);
                 setOpen(false);
               }}
-              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer group"
+              className="flex flex-col items-start gap-1 p-2.5 rounded-xl bg-white/[0.04] hover:bg-[#F5A623]/15 border border-white/5 hover:border-[#F5A623]/30 transition-all text-left cursor-pointer group"
             >
-              <div className="flex items-center gap-2.5">
-                <Search className="size-4.5 text-[#F5A623] group-hover:scale-110 transition-transform duration-120" />
-                <span className="font-medium text-[#F4F5F7]">{isVi ? "Tìm kiếm nhanh" : "Spotlight"}</span>
+              <div className="flex items-center justify-between w-full">
+                <Search className="size-4 text-[#F5A623] group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] text-[#8B90A0] font-mono">Alt+F</span>
               </div>
-              <span className="text-[10px] text-[#8B90A0] font-mono">Alt+F</span>
-            </button>
-
-            {/* Pomodoro Matrix Toggle */}
-            <button
-              type="button"
-              onClick={() => {
-                toggleWidget("pomodoro");
-                setOpen(false);
-              }}
-              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer group"
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="text-base group-hover:scale-110 transition-transform">🍅</span>
-                <span className="font-medium text-[#F4F5F7]">
-                  {isVi ? "Pomodoro Tập Trung" : "Pomodoro Matrix"}
-                </span>
-              </div>
-              <span className={cn("text-[10px] font-mono px-1.5 py-0.2 rounded font-semibold", activeWidgets.pomodoro ? "bg-red-500/20 text-red-400" : "text-[#8B90A0]")}>
-                {activeWidgets.pomodoro ? "ON" : "OFF"}
+              <span className="text-xs font-medium text-white group-hover:text-[#F5A623] transition-colors">
+                {isVi ? "Tìm kiếm" : "Spotlight"}
               </span>
             </button>
+          </div>
 
-            {/* System HUD Monitor Toggle */}
+          {/* 2. Workspace Layout Quick Bar */}
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/[0.03] border border-white/5 mb-2.5 text-[11px]">
             <button
               type="button"
-              onClick={() => {
-                toggleHud();
-                setOpen(false);
-              }}
-              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer group"
+              onClick={() => tidyNotes()}
+              className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg hover:bg-white/10 text-[#8B90A0] hover:text-white transition-colors cursor-pointer"
+              title={isVi ? "Sắp xếp ghi chú (Alt+A)" : "Arrange Notes (Alt+A)"}
             >
-              <div className="flex items-center gap-2.5">
-                <span className="text-base group-hover:scale-110 transition-transform">📊</span>
-                <span className="font-medium text-[#F4F5F7]">
-                  {isVi ? "Giám Sát Phần Cứng" : "System HUD"}
-                </span>
-              </div>
-              <span className={cn("text-[10px] font-mono px-1.5 py-0.2 rounded font-semibold", hudSettings.enabled ? "bg-sky-500/20 text-sky-400" : "text-[#8B90A0]")}>
-                {hudSettings.enabled ? "ON" : "OFF"}
-              </span>
+              <LayoutGrid className="size-3.5 text-[#F5A623]" />
+              <span>{isVi ? "Sắp xếp" : "Arrange"}</span>
             </button>
-
-            {/* Habit & Water Tracker Toggle */}
-            <button
-              type="button"
-              onClick={() => {
-                toggleWidget("habit");
-                setOpen(false);
-              }}
-              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer group"
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="text-base group-hover:scale-110 transition-transform">💧</span>
-                <span className="font-medium text-[#F4F5F7]">
-                  {isVi ? "Uống Nước & Thói Quen" : "Habits & Water"}
-                </span>
-              </div>
-              <span className={cn("text-[10px] font-mono px-1.5 py-0.2 rounded font-semibold", activeWidgets.habit ? "bg-emerald-500/20 text-emerald-400" : "text-[#8B90A0]")}>
-                {activeWidgets.habit ? "ON" : "OFF"}
-              </span>
-            </button>
-
-            {/* Quick Scratchpad Toggle */}
-            <button
-              type="button"
-              onClick={() => {
-                toggleScratchpad();
-                setOpen(false);
-              }}
-              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer group"
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="text-base group-hover:scale-110 transition-transform">📝</span>
-                <span className="font-medium text-[#F4F5F7]">
-                  {isVi ? "Sổ Tay Code / Nháp" : "Quick Scratchpad"}
-                </span>
-              </div>
-              <span className={cn("text-[10px] font-mono px-1.5 py-0.2 rounded font-semibold", activeWidgets.scratchpad ? "bg-amber-500/20 text-amber-400" : "text-[#8B90A0]")}>
-                {activeWidgets.scratchpad ? "ON" : "OFF"}
-              </span>
-            </button>
-
-            {/* Toggle Pet Hide/Show */}
-            <button
-              type="button"
-              onClick={() => {
-                setPipEnabled(!pipEnabled);
-                setOpen(false);
-              }}
-              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer group"
-            >
-              <div className="flex items-center gap-2.5">
-                <Sparkles className="size-4.5 text-[#F5A623] group-hover:scale-110 transition-transform duration-120" />
-                <span className="font-medium text-[#F4F5F7]">
-                  {pipEnabled ? (isVi ? "Ẩn Thú cưng" : "Hide Pet") : (isVi ? "Hiện Thú cưng" : "Show Pet")}
-                </span>
-              </div>
-              <span className="text-[10px] text-[#8B90A0] font-mono">Alt+P</span>
-            </button>
-
-            {/* Hide All / Show All Notes */}
+            <div className="w-px h-4 bg-white/10" />
             <button
               type="button"
               onClick={() => setLayout(layout === "tray" ? "stickies" : "tray")}
-              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer"
+              className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg hover:bg-white/10 text-[#8B90A0] hover:text-white transition-colors cursor-pointer"
+              title={isVi ? "Ẩn/Hiện note (Alt+O)" : "Toggle Notes (Alt+O)"}
             >
-              <div className="flex items-center gap-2.5">
-                {layout === "tray" ? (
-                  <>
-                    <Eye className="size-4.5 text-[#8B90A0]" />
-                    <span className="font-medium text-[#F4F5F7]">{isVi ? "Hiện tất cả note" : "Show All Notes"}</span>
-                  </>
-                ) : (
-                  <>
-                    <EyeOff className="size-4.5 text-[#8B90A0]" />
-                    <span className="font-medium text-[#F4F5F7]">{isVi ? "Ẩn tất cả note" : "Hide All Notes"}</span>
-                  </>
-                )}
-              </div>
-              <span className="text-[10px] text-[#8B90A0] font-mono">Alt+O</span>
+              {layout === "tray" ? <Eye className="size-3.5" /> : <EyeOff className="size-3.5" />}
+              <span>{layout === "tray" ? (isVi ? "Hiện Note" : "Show") : isVi ? "Ẩn Note" : "Hide"}</span>
             </button>
+            <div className="w-px h-4 bg-white/10" />
+            <button
+              type="button"
+              onClick={() => setPipEnabled(!pipEnabled)}
+              className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg hover:bg-white/10 text-[#8B90A0] hover:text-white transition-colors cursor-pointer"
+              title={isVi ? "Ẩn/Hiện Thú cưng (Alt+P)" : "Toggle Pet (Alt+P)"}
+            >
+              <Sparkles className={cn("size-3.5", pipEnabled ? "text-[#F5A623]" : "text-[#8B90A0]")} />
+              <span>{isVi ? "Pet" : "Pet"}</span>
+            </button>
+          </div>
 
-            {/* Settings */}
+          {/* 3. Optional Widgets Toggle Strip */}
+          <div className="mb-2.5">
+            <div className="text-[10px] font-semibold text-[#8B90A0] uppercase tracking-wider px-1 mb-1.5">
+              {isVi ? "Tiện ích mở rộng" : "Widgets"}
+            </div>
+            <div className="grid grid-cols-4 gap-1">
+              {/* HUD */}
+              <button
+                type="button"
+                onClick={() => toggleHud()}
+                className={cn(
+                  "flex flex-col items-center gap-1 py-1.5 rounded-lg border text-[10px] font-medium transition-all cursor-pointer",
+                  hudSettings.enabled
+                    ? "bg-sky-500/20 border-sky-500/40 text-sky-300"
+                    : "bg-white/[0.02] border-white/5 text-[#8B90A0] hover:bg-white/5"
+                )}
+                title="System HUD Monitor"
+              >
+                <span>📊</span>
+                <span>HUD</span>
+              </button>
+
+              {/* Pomodoro */}
+              <button
+                type="button"
+                onClick={() => toggleWidget("pomodoro")}
+                className={cn(
+                  "flex flex-col items-center gap-1 py-1.5 rounded-lg border text-[10px] font-medium transition-all cursor-pointer",
+                  activeWidgets.pomodoro
+                    ? "bg-red-500/20 border-red-500/40 text-red-300"
+                    : "bg-white/[0.02] border-white/5 text-[#8B90A0] hover:bg-white/5"
+                )}
+                title="Pomodoro Focus"
+              >
+                <span>🍅</span>
+                <span>Focus</span>
+              </button>
+
+              {/* Habits */}
+              <button
+                type="button"
+                onClick={() => toggleWidget("habit")}
+                className={cn(
+                  "flex flex-col items-center gap-1 py-1.5 rounded-lg border text-[10px] font-medium transition-all cursor-pointer",
+                  activeWidgets.habit
+                    ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+                    : "bg-white/[0.02] border-white/5 text-[#8B90A0] hover:bg-white/5"
+                )}
+                title="Water & Habits Tracker"
+              >
+                <span>💧</span>
+                <span>Habits</span>
+              </button>
+
+              {/* Scratchpad */}
+              <button
+                type="button"
+                onClick={() => toggleScratchpad()}
+                className={cn(
+                  "flex flex-col items-center gap-1 py-1.5 rounded-lg border text-[10px] font-medium transition-all cursor-pointer",
+                  activeWidgets.scratchpad
+                    ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
+                    : "bg-white/[0.02] border-white/5 text-[#8B90A0] hover:bg-white/5"
+                )}
+                title="Quick Code Scratchpad"
+              >
+                <span>📝</span>
+                <span>Scratch</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 4. Footer Actions (Settings, Pro, Quit) */}
+          <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs">
             <button
               type="button"
               onClick={() => {
                 setHubOpen(true);
                 setOpen(false);
               }}
-              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer"
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 text-[#8B90A0] hover:text-white transition-colors cursor-pointer text-[11px]"
             >
-              <div className="flex items-center gap-2.5">
-                <Settings className="size-4.5 text-[#8B90A0]" />
-                <span className="font-medium text-[#F4F5F7]">{isVi ? "Cài đặt hệ thống" : "Settings"}</span>
-              </div>
-              <span className="text-[10px] text-[#8B90A0] font-mono">Alt+S</span>
+              <Settings className="size-3.5" />
+              <span>{isVi ? "Cài đặt" : "Settings"}</span>
             </button>
 
-            {/* Lumen Pro Upgrade / Status */}
             <button
               type="button"
               onClick={() => {
                 setProModalOpen(true);
                 setOpen(false);
               }}
-              className="flex items-center justify-between px-2.5 h-9 rounded-xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 border border-amber-500/30 hover:border-amber-400 text-amber-300 font-medium transition-colors duration-120 text-left cursor-pointer"
+              className={cn(
+                "flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors cursor-pointer",
+                pro.isPro
+                  ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                  : "bg-white/5 hover:bg-amber-500/15 text-[#8B90A0] hover:text-amber-300"
+              )}
             >
-              <div className="flex items-center gap-2.5">
-                <Crown className="size-4.5 text-amber-400" />
-                <span>{pro.isPro ? (isVi ? "Lumen Pro (Đã Kích Hoạt)" : "Lumen Pro Active") : (isVi ? "Nâng cấp Lumen Pro" : "Upgrade Pro")}</span>
-              </div>
-              <span className="text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.2 rounded font-mono font-semibold">
-                PRO
-              </span>
+              <Crown className="size-3 text-amber-400" />
+              <span>{pro.isPro ? "PRO" : "Upgrade"}</span>
             </button>
 
-            {/* Arrange Notes (Highlighted with Left Accent Bar + Surface Elevated) */}
-            <button
-              type="button"
-              onClick={() => {
-                tidyNotes();
-                setOpen(false);
-              }}
-              className="flex items-center justify-between pl-3 pr-2.5 h-9 rounded-xl bg-[#262A35] border-l-2 border-[#F5A623] hover:bg-[#2e3340] text-[#F4F5F7] font-medium shadow-xs transition-all duration-120 active:scale-98 text-left cursor-pointer"
-            >
-              <div className="flex items-center gap-2.5">
-                <LayoutGrid className="size-4.5 text-[#F5A623]" />
-                <span>{isVi ? "Sắp xếp ghi chú" : "Arrange Notes"}</span>
-              </div>
-              <span className="text-[10px] bg-[#F5A623]/20 text-[#F5A623] px-1.5 py-0.2 rounded font-mono font-semibold">
-                Alt+A
-              </span>
-            </button>
-
-            {/* Hairline Divider & Quit Button */}
-            <div className="h-px bg-white/5 my-1" />
             <button
               type="button"
               onClick={() => void closeOrQuitDesktopApp()}
-              className="flex items-center gap-2.5 px-2.5 h-8.5 rounded-xl hover:bg-red-500/15 text-[#EF4444] transition-colors duration-120 text-left cursor-pointer text-xs font-medium"
+              className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-red-500/20 text-[#8B90A0] hover:text-red-400 transition-colors cursor-pointer text-[11px]"
+              title={isVi ? "Thoát ứng dụng" : "Quit"}
             >
-              <X className="size-4 text-[#EF4444]" />
-              <span>{isVi ? "Thoát ứng dụng" : "Quit"}</span>
+              <X className="size-3.5" />
+              <span>{isVi ? "Thoát" : "Quit"}</span>
             </button>
           </div>
         </div>
       ) : null}
 
-      {/* 2. Hover-Revealed Paper Stack (Hidden by default, pops out on hover with 500ms leave delay buffer) */}
-      {!open && paperVisible ? (
-        <div
-          className="animate-in fade-in slide-in-from-bottom-3 zoom-in-95 duration-200 mb-1 flex flex-col items-center cursor-grab active:cursor-grabbing group touch-none select-none"
-          onPointerEnter={handleMouseEnter}
-          onPointerLeave={handleMouseLeave}
-          onPointerDown={handlePaperPointerDown}
-          onPointerMove={handlePaperPointerMove}
-          onPointerUp={handlePaperPointerUp}
-          onPointerCancel={handlePaperPointerUp}
-          title={isVi ? "Kéo để đặt ghi chú vào vị trí mong muốn • Hoặc nhấp để lấy nhanh" : "Drag to place note anywhere • Or click for quick note"}
-          aria-label="Lấy giấy ghi chú"
-        >
-          <div className="relative h-16 w-14 hover:scale-110 active:scale-95 transition-transform duration-150">
-            <span className="absolute inset-x-1 top-2.5 h-11 rotate-[-8deg] rounded-md bg-[#bae6fd] shadow-md border border-sky-300/40" />
-            <span className="absolute inset-x-0.5 top-1.5 h-11 rotate-[4deg] rounded-md bg-[#bbf7d0] shadow-md border border-emerald-300/40" />
-            <span className="absolute inset-x-0 top-0 h-11 rounded-md bg-[#fef08a] shadow-xl border border-amber-300 flex items-center justify-center">
-              <span className="text-xs font-bold text-amber-900">📝</span>
-            </span>
-          </div>
-          <span className="mt-1 rounded-full bg-[#1D2029]/95 px-2 py-0.5 text-[9px] font-bold text-[#F5A623] shadow-md border border-white/10 tracking-wide uppercase">
-            {isVi ? "Kéo / Lấy giấy" : "Drag / Take"}
-          </span>
-        </div>
-      ) : null}
-
-      {/* 3. Dragged Paper Note Ghost Preview */}
-      {isDraggingPaper ? (
-        <div
-          className="pointer-events-none fixed z-[99999] w-64 rounded-2xl bg-[#fef08a] p-4 text-stone-800 shadow-[0_20px_60px_rgba(0,0,0,0.45)] border border-amber-300 ring-2 ring-[#F5A623] rotate-[-2deg] opacity-90 backdrop-blur-sm animate-in zoom-in-95 duration-100"
-          style={{
-            left: `${dragCursorPos.x - 120}px`,
-            top: `${dragCursorPos.y - 40}px`,
-          }}
-        >
-          <div className="flex items-center justify-between pb-2 border-b border-amber-400/40 text-amber-900/70 text-[11px] font-semibold">
-            <span>📝 {isVi ? "Thả để dán ghi chú" : "Drop to stick note"}</span>
-            <span className="text-[10px] uppercase font-mono">Lumen</span>
-          </div>
-          <p className="mt-2 text-xs text-amber-900/60 italic">
-            {isVi ? "Kéo đến vị trí bạn muốn đặt ghi chú..." : "Drag to your desired note position..."}
-          </p>
-        </div>
-      ) : null}
-
-      {/* 4. Brand Logo Trigger Button at Corner of Desktop */}
+      {/* Modern Floating Brand Trigger Button */}
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex size-11 items-center justify-center rounded-2xl bg-[#1D2029]/95 hover:bg-[#262A35] text-white shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/10 backdrop-blur-xl hover:scale-110 active:scale-95 transition-transform duration-140 cursor-pointer overflow-hidden p-1.5 group"
-        title="Lumen Workspace (Chỉ chuột để hiện khay giấy)"
+        className="flex size-11 items-center justify-center rounded-2xl bg-[#181B22]/95 hover:bg-[#262A35] text-white shadow-[0_12px_32px_rgba(0,0,0,0.55)] border border-white/10 backdrop-blur-2xl hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer overflow-hidden p-2 group"
+        title="Lumen Desk (Nhấp để mở menu điều khiển)"
         aria-label="Lumen Menu"
       >
         <img
           src="/logo.png"
           alt="Lumen Logo"
-          className="size-full object-contain rounded-xl drop-shadow-md group-hover:scale-105 transition-transform duration-140 select-none pointer-events-none"
+          className="size-full object-contain rounded-xl drop-shadow-md group-hover:scale-110 transition-transform duration-150 select-none pointer-events-none"
         />
       </button>
     </div>

@@ -1024,22 +1024,44 @@ export function Hub() {
           <TabsContent value="about" className="space-y-3 text-xs text-[#8B90A0] mt-0">
             {/* Live Performance Telemetry */}
             <div className="rounded-2xl bg-[#262A35]/50 p-3 space-y-2 border border-white/6">
-              <p className="font-semibold text-[#F4F5F7] flex items-center gap-1.5 text-xs">
-                <Activity className="size-3 text-[#3FAE6C]" />
-                <span>Giám sát hiệu năng</span>
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-[#F4F5F7] flex items-center gap-1.5 text-xs">
+                  <Activity className="size-3 text-[#3FAE6C]" />
+                  <span>{isVi ? "Giám sát hiệu năng thời gian thực" : "Live Performance Telemetry"}</span>
+                </p>
+                <span
+                  className={cn(
+                    "text-[9px] font-mono px-1.5 py-0.2 rounded font-semibold",
+                    useLumen.getState().systemStats.isNative
+                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                      : "bg-sky-500/20 text-sky-400 border border-sky-500/30"
+                  )}
+                >
+                  {useLumen.getState().systemStats.isNative ? "Win32 Native" : "Web Engine"}
+                </span>
+              </div>
               <div className="grid grid-cols-3 gap-2 text-center font-mono">
                 <div className="bg-[#14161D] p-2 rounded-xl border border-white/5">
-                  <p className="text-[9px] text-[#8B90A0]">RAM</p>
-                  <p className="text-xs font-bold text-[#3FAE6C] mt-0.5">~38 MB</p>
+                  <p className="text-[9px] text-[#8B90A0]">
+                    {useLumen.getState().systemStats.memoryMode === "heap" ? "JS HEAP" : "RAM"}
+                  </p>
+                  <p className="text-xs font-bold text-[#3FAE6C] mt-0.5">
+                    {useLumen.getState().systemStats.memoryMode === "heap"
+                      ? `${useLumen.getState().systemStats.ramUsedMb} MB`
+                      : `${(useLumen.getState().systemStats.ramUsedMb / 1024).toFixed(1)} GB`}
+                  </p>
                 </div>
                 <div className="bg-[#14161D] p-2 rounded-xl border border-white/5">
                   <p className="text-[9px] text-[#8B90A0]">FPS</p>
-                  <p className="text-xs font-bold text-[#F5A623] mt-0.5">120 FPS</p>
+                  <p className="text-xs font-bold text-[#F5A623] mt-0.5">
+                    {useLumen.getState().systemStats.fps || 60} FPS
+                  </p>
                 </div>
                 <div className="bg-[#14161D] p-2 rounded-xl border border-white/5">
-                  <p className="text-[9px] text-[#8B90A0]">CPU</p>
-                  <p className="text-xs font-bold text-sky-400 mt-0.5">&lt; 0.4%</p>
+                  <p className="text-[9px] text-[#8B90A0]">CPU LOAD</p>
+                  <p className="text-xs font-bold text-sky-400 mt-0.5">
+                    {useLumen.getState().systemStats.cpuUsage}%
+                  </p>
                 </div>
               </div>
             </div>

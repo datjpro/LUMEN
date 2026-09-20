@@ -17,6 +17,132 @@ pub struct HitRect {
     pub height: f64,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SystemMetricsPayload {
+    pub is_native: bool,
+    pub cpu_usage: f32,
+    pub ram_usage: f32,
+    pub ram_used_mb: u64,
+    pub ram_total_mb: u64,
+    pub battery_level: Option<u8>,
+    pub battery_charging: Option<bool>,
+    pub cpu_cores: usize,
+}
+
+#[cfg(windows)]
+static LAST_CPU_TIMES: Mutex<Option<(u64, u64, u64)>> = Mutex::new(None);
+
+#[tauri::command]
+fn get_system_metrics() -> Result<SystemMetricsPayload, String> {
+    #[cfg(windows)]
+    {
+        use windows_sys::Win32::System::SystemInformation::{GlobalMemoryStatusEx, MEMORYSTATUSEX, GetSystemInfo, SYSTEM_INFO};
+        use windows_sys::Win32::System::Threading::GetSystemTimes;
+        use windows_sys::Win32::System::Power::{GetSystemPowerStatus, SYSTEM_POWER_STATUS};
+        use windows_sys::Win32::Foundation::FILETIME;
+
+        // 1. Physical RAM
+        let mut mem: MEMORYSTATUSEX = unsafe { std::mem::zeroed() };
+        mem.dwLength = std::mem::size_of::<MEMORYSTATUSEX>() as u32;
+        let (ram_usage, ram_used_mb, ram_total_mb) = unsafe {
+            if GlobalMemoryStatusEx(&mut mem) != 0 {
+                let total_mb = mem.ullTotalPhys / (1024 * 1024);
+                let avail_mb = mem.ullAvailPhys / (1024 * 1024);
+                let used_mb = total_mb.saturating_sub(avail_mb);
+                (mem.dwMemoryLoad as f32, used_mb, total_mb)
+            } else {
+                (0.0, 0, 0)
+            }
+        };
+
+        // 2. CPU Usage via GetSystemTimes delta
+        let mut idle_time: FILETIME = unsafe { std::mem::zeroed() };
+        let mut kernel_time: FILETIME = unsafe { std::mem::zeroed() };
+        let mut user_time: FILETIME = unsafe { std::mem::zeroed() };
+
+        let cpu_usage = unsafe {
+            if GetSystemTimes(&mut idle_time, &mut kernel_time, &mut user_time) != 0 {
+                let idle = ((idle_time.dwHighDateTime as u64) << 32) | (idle_time.dwLowDateTime as u64);
+                let kernel = ((kernel_time.dwHighDateTime as u64) << 32) | (kernel_time.dwLowDateTime as u64);
+                let user = ((user_time.dwHighDateTime as u64) << 32) | (user_time.dwLowDateTime as u64);
+
+                let mut last = LAST_CPU_TIMES.lock().unwrap_or_else(|e| e.into_inner());
+                let usage = if let Some((last_idle, last_kernel, last_user)) = *last {
+                    let d_idle = idle.saturating_sub(last_idle);
+                    let d_kernel = kernel.saturating_sub(last_kernel);
+                    let d_user = user.saturating_sub(last_user);
+                    let total_sys = d_kernel + d_user;
+                    if total_sys > 0 {
+                        let active = total_sys.saturating_sub(d_idle);
+                        ((active as f64 / total_sys as f64) * 100.0) as f32
+                    } else {
+                        0.0
+                    }
+                } else {
+                    4.0
+                };
+                *last = Some((idle, kernel, user));
+                usage.clamp(0.0, 100.0)
+            } else {
+                0.0
+            }
+        };
+
+        // 3. CPU Cores
+        let mut sys_info: SYSTEM_INFO = unsafe { std::mem::zeroed() };
+        let cpu_cores = unsafe {
+            GetSystemInfo(&mut sys_info);
+            sys_info.dwNumberOfProcessors as usize
+        };
+
+        // 4. Battery / Power
+        let mut power: SYSTEM_POWER_STATUS = unsafe { std::mem::zeroed() };
+        let (battery_level, battery_charging) = unsafe {
+            if GetSystemPowerStatus(&mut power) != 0 {
+                let level = if power.BatteryLifePercent <= 100 {
+                    Some(power.BatteryLifePercent)
+                } else {
+                    None
+                };
+                let charging = if power.ACLineStatus == 1 {
+                    Some(true)
+                } else if power.ACLineStatus == 0 {
+                    Some(false)
+                } else {
+                    None
+                };
+                (level, charging)
+            } else {
+                (None, None)
+            }
+        };
+
+        Ok(SystemMetricsPayload {
+            is_native: true,
+            cpu_usage: (cpu_usage * 10.0).round() / 10.0,
+            ram_usage: (ram_usage * 10.0).round() / 10.0,
+            ram_used_mb,
+            ram_total_mb,
+            battery_level,
+            battery_charging,
+            cpu_cores: if cpu_cores > 0 { cpu_cores } else { 4 },
+        })
+    }
+    #[cfg(not(windows))]
+    {
+        Ok(SystemMetricsPayload {
+            is_native: false,
+            cpu_usage: 10.0,
+            ram_usage: 30.0,
+            ram_used_mb: 2048,
+            ram_total_mb: 8192,
+            battery_level: None,
+            battery_charging: None,
+            cpu_cores: 4,
+        })
+    }
+}
+
 pub struct AppState {
     pub interactive_rects: Mutex<Vec<HitRect>>,
     pub is_ignoring: AtomicBool,
@@ -126,7 +252,8 @@ pub fn run() {
             show_window,
             hide_window,
             toggle_window,
-            quit_app
+            quit_app,
+            get_system_metrics
         ])
         .setup(move |app| {
             let app_state_thread = app_state.clone();
