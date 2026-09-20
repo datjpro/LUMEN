@@ -41,7 +41,7 @@ export function Onboarding() {
 
         <p className="text-xs leading-relaxed text-[#d6d3d1]">
           {isVi
-            ? "Lớp phủ màn hình trong suốt, tự do ghim giấy note 3D, đặt giờ thông minh (như xây nhà trong COC) và nuôi thú cưng dạo bước trên Desktop."
+            ? "Lớp phủ màn hình trong suốt, tự do ghim giấy note 3D, đặt giờ thông minh và nuôi thú cưng dạo bước trên màn hình làm việc."
             : "A transparent desktop overlay workspace with 3D sticky notes, smart countdown timers, and roaming virtual pet companions."}
         </p>
 
@@ -62,7 +62,7 @@ export function Onboarding() {
             </span>
             <span>
               {isVi
-                ? "Đặt giờ thông minh: Bấm Alt+T (ví dụ: xây nhà trong COC : 2g14p) để đếm ngược nổi."
+                ? "Đặt giờ thông minh: Bấm Alt+T (ví dụ: Tập trung làm việc 25p hoặc Nấu ăn 15p) để đếm ngược nổi."
                 : "Smart timers: Press Alt+T to start game countdown timers with alarm bell."}
             </span>
           </li>

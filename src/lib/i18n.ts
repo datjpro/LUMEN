@@ -235,7 +235,7 @@ export const DICTIONARY = {
     look: {
       theme: "Chủ đề màu sắc",
       layout: "Bố cục hiển thị",
-      language: "Ngôn ngữ / Language",
+      language: "Ngôn ngữ",
       proceduralAudio: "Âm thanh sống động",
       audioDesc: "Hiệu ứng âm thanh click và tiếng Pip gừ êm tai",
       compactMode: "Chế độ Thu nhỏ Góc màn hình",

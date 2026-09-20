@@ -61,7 +61,7 @@ export function HabitTrackerWidget() {
               toggleWidget("habit", false);
             }}
             className="p-1.5 rounded-xl hover:bg-red-500/20 text-[#8B90A0] hover:text-red-400 transition-colors cursor-pointer"
-            title="Đóng Widget"
+            title={isVi ? "Đóng tiện ích" : "Close Widget"}
           >
             <X className="size-3.5" />
           </button>
@@ -115,7 +115,7 @@ export function HabitTrackerWidget() {
               type="button"
               onClick={resetWaterToday}
               className="size-8 rounded-xl bg-white/5 hover:bg-white/10 text-[#8B90A0] hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
-              title={isVi ? "Đặt lại về 0ml" : "Reset Water"}
+              title={isVi ? "Đặt lại về 0 ml" : "Reset Water"}
             >
               <RotateCcw className="size-3.5" />
             </button>
@@ -145,7 +145,7 @@ export function HabitTrackerWidget() {
                 type="text"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                placeholder={isVi ? "Tên thói quen (VD: Đọc sách 15p)..." : "Habit name..."}
+                placeholder={isVi ? "Tên thói quen (VD: Đọc sách 15 phút)..." : "Habit name..."}
                 className="w-full px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#F5A623]"
                 autoFocus
               />
@@ -157,20 +157,20 @@ export function HabitTrackerWidget() {
                   value={newTarget}
                   onChange={(e) => setNewTarget(e.target.value)}
                   className="w-16 px-2 py-1 rounded-xl bg-black/40 border border-white/10 text-xs text-white text-center focus:outline-none"
-                  placeholder="Mục tiêu"
+                  placeholder={isVi ? "Mục tiêu" : "Target"}
                 />
                 <input
                   type="text"
                   value={newUnit}
                   onChange={(e) => setNewUnit(e.target.value)}
                   className="flex-1 px-2.5 py-1 rounded-xl bg-black/40 border border-white/10 text-xs text-white focus:outline-none"
-                  placeholder="Đơn vị (VD: lần, trang, phút)"
+                  placeholder={isVi ? "Đơn vị (VD: lần, trang, phút)" : "Unit (e.g. times, pages)"}
                 />
                 <button
                   type="submit"
                   className="px-3 py-1 rounded-xl bg-[#F5A623] text-stone-900 font-bold text-xs cursor-pointer hover:bg-amber-400"
                 >
-                  Lưu
+                  {isVi ? "Lưu" : "Save"}
                 </button>
               </div>
             </form>
@@ -197,7 +197,7 @@ export function HabitTrackerWidget() {
                         {habit.streak > 0 && (
                           <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-400 shrink-0">
                             <Flame className="size-3 fill-amber-400" />
-                            <span>{habit.streak}d</span>
+                            <span>{habit.streak}{isVi ? " ngày" : "d"}</span>
                           </span>
                         )}
                       </div>
@@ -225,7 +225,7 @@ export function HabitTrackerWidget() {
                       type="button"
                       onClick={() => deleteHabit(habit.id)}
                       className="size-7 rounded-xl hover:bg-red-500/20 text-[#8B90A0] hover:text-red-400 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
-                      title="Xóa thói quen"
+                      title={isVi ? "Xóa thói quen" : "Delete habit"}
                     >
                       <Trash2 className="size-3" />
                     </button>

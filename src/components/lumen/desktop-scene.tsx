@@ -163,7 +163,7 @@ function FloatingTrayMenu() {
               <span className="text-xs font-bold tracking-tight text-white">Lumen Desk</span>
             </div>
             <span className="text-[10px] text-[#8B90A0] font-mono uppercase bg-white/5 px-2 py-0.5 rounded-full border border-white/5">
-              Workspace
+              {isVi ? "Bàn Làm Việc" : "Workspace"}
             </span>
           </div>
 
@@ -196,6 +196,7 @@ function FloatingTrayMenu() {
                 setOpen(false);
               }}
               className="flex flex-col items-start gap-1 p-2.5 rounded-xl bg-white/[0.04] hover:bg-[#F5A623]/15 border border-white/5 hover:border-[#F5A623]/30 transition-all text-left cursor-pointer group"
+              title={isVi ? "Đặt hẹn giờ đếm ngược (Alt+T)" : "Quick Timer (Alt+T)"}
             >
               <div className="flex items-center justify-between w-full">
                 <Clock className="size-4 text-[#F5A623] group-hover:scale-110 transition-transform" />
@@ -214,6 +215,7 @@ function FloatingTrayMenu() {
                 setOpen(false);
               }}
               className="flex flex-col items-start gap-1 p-2.5 rounded-xl bg-white/[0.04] hover:bg-[#F5A623]/15 border border-white/5 hover:border-[#F5A623]/30 transition-all text-left cursor-pointer group"
+              title={isVi ? "Mở lịch trình & kế hoạch (Alt+C)" : "Calendar & Schedule (Alt+C)"}
             >
               <div className="flex items-center justify-between w-full">
                 <Calendar className="size-4 text-[#F5A623] group-hover:scale-110 transition-transform" />
@@ -232,6 +234,7 @@ function FloatingTrayMenu() {
                 setOpen(false);
               }}
               className="flex flex-col items-start gap-1 p-2.5 rounded-xl bg-white/[0.04] hover:bg-[#F5A623]/15 border border-white/5 hover:border-[#F5A623]/30 transition-all text-left cursor-pointer group"
+              title={isVi ? "Tìm kiếm & Tính toán nhanh (Alt+F)" : "Spotlight Search (Alt+F)"}
             >
               <div className="flex items-center justify-between w-full">
                 <Search className="size-4 text-[#F5A623] group-hover:scale-110 transition-transform" />
@@ -249,7 +252,7 @@ function FloatingTrayMenu() {
               type="button"
               onClick={() => tidyNotes()}
               className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg hover:bg-white/10 text-[#8B90A0] hover:text-white transition-colors cursor-pointer"
-              title={isVi ? "Sắp xếp ghi chú (Alt+A)" : "Arrange Notes (Alt+A)"}
+              title={isVi ? "Sắp xếp gọn gàng ghi chú (Alt+A)" : "Arrange Notes (Alt+A)"}
             >
               <LayoutGrid className="size-3.5 text-[#F5A623]" />
               <span>{isVi ? "Sắp xếp" : "Arrange"}</span>
@@ -259,20 +262,20 @@ function FloatingTrayMenu() {
               type="button"
               onClick={() => setLayout(layout === "tray" ? "stickies" : "tray")}
               className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg hover:bg-white/10 text-[#8B90A0] hover:text-white transition-colors cursor-pointer"
-              title={isVi ? "Ẩn/Hiện note (Alt+O)" : "Toggle Notes (Alt+O)"}
+              title={isVi ? "Ẩn hoặc Hiện tất cả ghi chú (Alt+O)" : "Toggle Notes (Alt+O)"}
             >
               {layout === "tray" ? <Eye className="size-3.5" /> : <EyeOff className="size-3.5" />}
-              <span>{layout === "tray" ? (isVi ? "Hiện Note" : "Show") : isVi ? "Ẩn Note" : "Hide"}</span>
+              <span>{layout === "tray" ? (isVi ? "Hiện Note" : "Show") : (isVi ? "Ẩn Note" : "Hide")}</span>
             </button>
             <div className="w-px h-4 bg-white/10" />
             <button
               type="button"
               onClick={() => setPipEnabled(!pipEnabled)}
               className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg hover:bg-white/10 text-[#8B90A0] hover:text-white transition-colors cursor-pointer"
-              title={isVi ? "Ẩn/Hiện Thú cưng (Alt+P)" : "Toggle Pet (Alt+P)"}
+              title={isVi ? "Bật hoặc Tắt Thú cưng Pip (Alt+P)" : "Toggle Pet (Alt+P)"}
             >
               <Sparkles className={cn("size-3.5", pipEnabled ? "text-[#F5A623]" : "text-[#8B90A0]")} />
-              <span>{isVi ? "Pet" : "Pet"}</span>
+              <span>{isVi ? "Thú cưng" : "Pet"}</span>
             </button>
           </div>
 
@@ -292,10 +295,10 @@ function FloatingTrayMenu() {
                     ? "bg-sky-500/20 border-sky-500/40 text-sky-300"
                     : "bg-white/[0.02] border-white/5 text-[#8B90A0] hover:bg-white/5"
                 )}
-                title="System HUD Monitor"
+                title={isVi ? "Giám sát hiệu năng hệ thống" : "System HUD Monitor"}
               >
                 <span>📊</span>
-                <span>HUD</span>
+                <span>{isVi ? "Hệ thống" : "HUD"}</span>
               </button>
 
               {/* Pomodoro */}
@@ -308,10 +311,10 @@ function FloatingTrayMenu() {
                     ? "bg-red-500/20 border-red-500/40 text-red-300"
                     : "bg-white/[0.02] border-white/5 text-[#8B90A0] hover:bg-white/5"
                 )}
-                title="Pomodoro Focus"
+                title={isVi ? "Đồng hồ tập trung sâu Pomodoro" : "Pomodoro Focus"}
               >
                 <span>🍅</span>
-                <span>Focus</span>
+                <span>{isVi ? "Tập trung" : "Focus"}</span>
               </button>
 
               {/* Habits */}
@@ -324,10 +327,10 @@ function FloatingTrayMenu() {
                     ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
                     : "bg-white/[0.02] border-white/5 text-[#8B90A0] hover:bg-white/5"
                 )}
-                title="Water & Habits Tracker"
+                title={isVi ? "Theo dõi uống nước & thói quen" : "Water & Habits Tracker"}
               >
                 <span>💧</span>
-                <span>Habits</span>
+                <span>{isVi ? "Thói quen" : "Habits"}</span>
               </button>
 
               {/* Scratchpad */}
@@ -340,10 +343,10 @@ function FloatingTrayMenu() {
                     ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
                     : "bg-white/[0.02] border-white/5 text-[#8B90A0] hover:bg-white/5"
                 )}
-                title="Quick Code Scratchpad"
+                title={isVi ? "Sổ tay nháp mã nguồn nhanh" : "Quick Code Scratchpad"}
               >
                 <span>📝</span>
-                <span>Scratch</span>
+                <span>{isVi ? "Sổ nháp" : "Scratch"}</span>
               </button>
             </div>
           </div>

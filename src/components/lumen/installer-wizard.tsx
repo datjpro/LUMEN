@@ -205,7 +205,7 @@ export function SetupWizardModal() {
                 )}
               >
                 <Zap className="size-3" />
-                <span>{isVi ? "1. Trình Cài Đặt (Setup)" : "1. Setup Wizard"}</span>
+                <span>{isVi ? "1. Trình Cài Đặt" : "1. Setup Wizard"}</span>
               </button>
 
               <button
@@ -222,7 +222,7 @@ export function SetupWizardModal() {
                 )}
               >
                 <Trash2 className="size-3" />
-                <span>{isVi ? "2. Trình Gỡ Cài Đặt (Uninstall)" : "2. Uninstaller"}</span>
+                <span>{isVi ? "2. Trình Gỡ Cài Đặt" : "2. Uninstaller"}</span>
               </button>
             </div>
           </div>
@@ -275,7 +275,7 @@ export function SetupWizardModal() {
                     className="w-full h-12 rounded-2xl bg-gradient-to-r from-[#F5A623] to-[#FFD166] text-[#14161D] font-bold text-sm shadow-[0_8px_25px_rgba(245,166,35,0.4)] hover:shadow-[0_10px_30px_rgba(245,166,35,0.6)] hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <Zap className="size-4.5 fill-current" />
-                    <span>{isVi ? "⚡ Cài đặt nhanh 1-Click (Khuyên dùng)" : "⚡ Quick 1-Click Install"}</span>
+                    <span>{isVi ? "⚡ Cài đặt nhanh 1 chạm" : "⚡ Quick 1-Click Install"}</span>
                   </button>
 
                   <button
@@ -287,7 +287,7 @@ export function SetupWizardModal() {
                     className="w-full h-10 rounded-2xl bg-[#262A35]/60 hover:bg-[#262A35] text-[#F4F5F7] text-xs font-semibold border border-white/10 hover:border-white/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <Settings className="size-3.5 text-[#8B90A0]" />
-                    <span>{isVi ? "Tùy chỉnh nâng cao (Thư mục & Tùy chọn)" : "Custom Install (Folder & Options)"}</span>
+                    <span>{isVi ? "Tùy chỉnh nâng cao" : "Custom Install"}</span>
                   </button>
                 </div>
 
@@ -351,7 +351,7 @@ export function SetupWizardModal() {
                       onChange={(e) => setCreateShortcut(e.target.checked)}
                       className="size-4 rounded accent-[#F5A623] cursor-pointer"
                     />
-                    <span>{isVi ? "Tạo biểu tượng ngoài màn hình Desktop (Desktop Shortcut)" : "Create Desktop Shortcut"}</span>
+                    <span>{isVi ? "Tạo biểu tượng ngoài màn hình Desktop" : "Create Desktop Shortcut"}</span>
                   </label>
 
                   <label className="flex items-center gap-2.5 text-xs text-[#F4F5F7] cursor-pointer">
@@ -532,7 +532,7 @@ export function SetupWizardModal() {
                     />
                     <div>
                       <p className="font-semibold text-white">
-                        {isVi ? "Giữ lại ghi chú và dữ liệu lịch nhắc cá nhân (Khuyên dùng)" : "Keep my personal notes and timer database"}
+                        {isVi ? "Giữ lại ghi chú và dữ liệu lịch nhắc cá nhân" : "Keep my personal notes and timer database"}
                       </p>
                       <p className="text-[11px] text-[#8B90A0] mt-0.5">
                         {isVi
@@ -550,7 +550,7 @@ export function SetupWizardModal() {
                     onClick={handleClose}
                     className="h-11 rounded-xl bg-[#262A35] hover:bg-[#323746] text-white text-xs font-semibold border border-white/10 transition-all cursor-pointer"
                   >
-                    {isVi ? "Hủy bỏ (Giữ lại Lumen)" : "Cancel (Keep Lumen)"}
+                    {isVi ? "Hủy bỏ (Giữ lại ứng dụng)" : "Cancel (Keep Lumen)"}
                   </button>
 
                   <button

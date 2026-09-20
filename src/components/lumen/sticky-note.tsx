@@ -37,15 +37,16 @@ type Props = {
   stacked?: boolean;
 };
 
-const NOTE_PALETTE: { id: NoteTint; name: string; bg: string; dot: string }[] = [
-  { id: "cream", name: "Hổ phách (Amber)", bg: "#FCEFD3", dot: "#F5A623" },
-  { id: "sage", name: "Bạc hà (Mint)", bg: "#E4F5EA", dot: "#3FAE6C" },
-  { id: "blush", name: "Hoa hồng (Rose)", bg: "#F8E1E7", dot: "#E8779A" },
-  { id: "mist", name: "Cáo lửa (Fox)", bg: "#F3DCC7", dot: "#C9793B" },
+const NOTE_PALETTE: { id: NoteTint; name: string; nameEn: string; bg: string; dot: string }[] = [
+  { id: "cream", name: "Vàng hổ phách", nameEn: "Amber", bg: "#FCEFD3", dot: "#F5A623" },
+  { id: "sage", name: "Xanh bạc hà", nameEn: "Mint", bg: "#E4F5EA", dot: "#3FAE6C" },
+  { id: "blush", name: "Hồng phấn", nameEn: "Rose", bg: "#F8E1E7", dot: "#E8779A" },
+  { id: "mist", name: "Cam cáo lửa", nameEn: "Fox Orange", bg: "#F3DCC7", dot: "#C9793B" },
 ];
 
 export function StickyNote({ note, stacked }: Props) {
   const lang = useLumen((s) => s.lang);
+  const isVi = lang === "vi";
   const dict = DICTIONARY[lang];
   const updateNote = useLumen((s) => s.updateNote);
   const removeNote = useLumen((s) => s.removeNote);
@@ -429,7 +430,7 @@ export function StickyNote({ note, stacked }: Props) {
       content += `Nội dung:\n${note.body.trim()}\n\n`;
     }
     if (note.checkItems && note.checkItems.length > 0) {
-      content += "Danh sách công việc (Checklist):\n";
+      content += `${isVi ? "Danh sách công việc:" : "Checklist:"}\n`;
       note.checkItems.forEach((item) => {
         content += `${item.done ? "[x]" : "[ ]"} ${item.text}\n`;
       });
@@ -591,7 +592,7 @@ export function StickyNote({ note, stacked }: Props) {
                     updateNote(note.id, { tint: p.id });
                     setColorPickerOpen(false);
                   }}
-                  title={p.name}
+                  title={isVi ? p.name : p.nameEn}
                   className={cn(
                     "flex size-5 items-center justify-center rounded-full transition-transform hover:scale-110 cursor-pointer",
                     note.tint === p.id && "ring-1.5 ring-white shadow-xs",
@@ -1174,7 +1175,7 @@ export function StickyNote({ note, stacked }: Props) {
             {/* Word Standard Font Size Control (10, 11, 12, 14, 16, 18, 24) */}
             <div className="space-y-1 pb-1.5 border-b border-black/5">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-[10px] uppercase opacity-75">Cỡ chữ (Chuẩn Word)</span>
+                <span className="font-semibold text-[10px] uppercase opacity-75">{isVi ? "Cỡ chữ" : "Font size"}</span>
                 <span className="font-mono text-[10px] tabular-nums font-bold opacity-85 text-[#F5A623]">
                   {typeof note.fontSize === "number" ? `${note.fontSize} pt` : "12 pt"}
                 </span>
@@ -1234,7 +1235,7 @@ export function StickyNote({ note, stacked }: Props) {
             // Ensure the Electron window is focused so the blinking text cursor (caret) is visible
             void focusDesktopWindow();
           }}
-          placeholder="Viết ghi chú của bạn..."
+          placeholder={isVi ? "Viết ghi chú của bạn..." : "Write your note..."}
           suppressHydrationWarning
           style={{
             fontSize: typeof note.fontSize === "number" ? `${note.fontSize}px` : note.fontSize === "sm" ? "11px" : note.fontSize === "lg" ? "16px" : "13.5px",
@@ -1270,7 +1271,7 @@ export function StickyNote({ note, stacked }: Props) {
                   type="button"
                   onClick={() => removeCheckItem(item.id)}
                   className="opacity-0 group-hover/todo:opacity-100 text-[#EF4444] px-1 cursor-pointer transition-opacity text-xs"
-                  title="Xóa mục việc"
+                  title={isVi ? "Xóa mục việc" : "Delete todo item"}
                 >
                   ×
                 </button>
@@ -1291,7 +1292,7 @@ export function StickyNote({ note, stacked }: Props) {
             type="text"
             value={newCheckText}
             onChange={(e) => setNewCheckText(e.target.value)}
-            placeholder="+ Thêm mục việc (todo)..."
+            placeholder={isVi ? "+ Thêm mục việc..." : "+ Add todo item..."}
             className="flex-1 bg-black/5 px-2.5 py-1 rounded-lg text-xs text-[#23262F] outline-none placeholder:text-[#23262F]/40 focus:bg-black/10 transition-colors select-text cursor-text touch-auto caret-[#000000]"
           />
           {newCheckText.trim() && (

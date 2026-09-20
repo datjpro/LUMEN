@@ -4,6 +4,21 @@
 
 ---
 
+## 🚀 [v1.2.4] — 2026-09-20 — Comprehensive Vietnamese Localization & Natural Phrasing
+
+### 🌐 Ngôn Ngữ & Bản Địa Hóa Chuẩn Mực (Comprehensive Vietnamese Localization):
+- **🇻🇳 Việt Hóa 100% Toàn Diện Mọi Giao Diện & Tiện Ích:**
+  - Chuyển ngữ 100% tất cả các chuỗi hiển thị, chú giải công cụ (`tooltip`), bảng thoại (`dialog`), bảng cài đặt (`hub`), huy hiệu (`badge`), và lời thoại thú cưng sang tiếng Việt tự nhiên, trong sáng.
+  - Loại bỏ triệt để các từ tiếng Anh đặt trong dấu ngoặc đơn (`(Amber)`, `(Mint)`, `(Rose)`, `(Fox)`, `(Checklist)`, `(Chuẩn Word)`, `(Multi-Timer)`, `(Setup)`, `(Uninstall)`, `(Khuyên dùng)`...).
+- **🛠️ Chuẩn Hóa Thuật Ngữ Kỹ Thuật & Giám Sát Phần Cứng:**
+  - Giữ lại các thuật ngữ và đơn vị chuyên môn quốc tế không thể dịch thay thế (`CPU`, `RAM`, `FPS`, `Alt+N`, `Alt+T`, `MB/s`, `KB/s`, `JSON`, `SQL`, `WIN32`, `HEAP`).
+  - Dịch tự nhiên các cảnh báo hệ thống: `"CPU Quá tải"`, `"RAM Quá tải"`, `"Vi xử lý CPU"`, `"Bộ nhớ RAM"`, `"Luồng"`, `"Đã kết nối Internet"`, `"Mất kết nối"`.
+- **🦊 Đồng Bộ Tên Loài Thú Cưng & Bảng Màu Note:**
+  - Danh sách loài thú cưng: *"Cáo Nhỏ"*, *"Mèo Mướp"*, *"Chó Shiba"*, *"Rồng Con"*, *"Robot Trợ Lý"*.
+  - Danh sách màu sắc giấy note: *"Vàng hổ phách"*, *"Xanh bạc hà"*, *"Hồng phấn"*, *"Cam cáo lửa"*.
+
+---
+
 ## 🚀 [v1.2.3] — 2026-09-20 — Hover-Reveal Paper Drag Dock & Note Creation Isolation
 
 ### 🛠️ Bug Fixes & UX Ergonomics:

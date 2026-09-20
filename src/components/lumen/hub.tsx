@@ -37,11 +37,11 @@ import { PipFigure } from "./pip";
 import { cn } from "@/lib/utils";
 
 const PET_TYPES: { id: PetType; name: string; icon: string; desc: string }[] = [
-  { id: "fox", name: "Cáo Nhỏ (Fox)", icon: "🦊", desc: "Chú cáo thám hiểm đeo ba lô vàng tinh nghịch" },
-  { id: "cat", name: "Mèo Mướp (Cat)", icon: "🐱", desc: "Mèo tam thể ngoan ngoãn, thích bắt bóng" },
+  { id: "fox", name: "Cáo Nhỏ", icon: "🦊", desc: "Chú cáo thám hiểm đeo ba lô vàng tinh nghịch" },
+  { id: "cat", name: "Mèo Mướp", icon: "🐱", desc: "Mèo tam thể ngoan ngoãn, thích bắt bóng" },
   { id: "shiba", name: "Chó Shiba", icon: "🐕", desc: "Shiba vàng thông minh đeo khăn quàng đỏ" },
-  { id: "dragon", name: "Rồng Con (Dragon)", icon: "🐉", desc: "Rồng xanh ngộ nghĩnh có cánh nhỏ bay lượn" },
-  { id: "cyber", name: "Cyber Bot", icon: "🤖", desc: "Robot trợ lý tương lai phát sáng neon" },
+  { id: "dragon", name: "Rồng Con", icon: "🐉", desc: "Rồng xanh ngộ nghĩnh có cánh nhỏ bay lượn" },
+  { id: "cyber", name: "Robot Trợ Lý", icon: "🤖", desc: "Robot trợ lý tương lai phát sáng neon" },
 ];
 
 const HATS: { id: PetHat; name: string; icon: string }[] = [
@@ -410,7 +410,7 @@ export function Hub() {
             {/* Themes Grid */}
             <div className="space-y-1.5">
               <p className="text-[10px] font-semibold text-[#8B90A0] uppercase tracking-wider">
-                {isVi ? "Bảng màu chủ đề (Spatial Themes)" : "Spatial Themes"}
+                {isVi ? "Bảng màu chủ đề" : "Spatial Themes"}
               </p>
               <div className="space-y-1">
                 {THEMES.map((t) => {
@@ -450,7 +450,7 @@ export function Hub() {
             {/* Language Selection */}
             <div className="space-y-1.5 pt-1">
               <p className="text-[10px] font-semibold text-[#8B90A0] uppercase tracking-wider">
-                {isVi ? "Ngôn ngữ hiển thị (Language)" : "Display Language"}
+                {isVi ? "Ngôn ngữ hiển thị" : "Display Language"}
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -538,7 +538,7 @@ export function Hub() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-[#F4F5F7]">
                   <Volume2 className="size-3.5 text-[#F5A623]" />
-                  <span>{isVi ? "Âm thanh chuông báo (Alarm Tone)" : "Alarm Sound Tone"}</span>
+                  <span>{isVi ? "Âm thanh chuông báo" : "Alarm Sound Tone"}</span>
                 </div>
                 <button
                   type="button"
@@ -625,7 +625,7 @@ export function Hub() {
             <div className="rounded-2xl bg-[#262A35]/50 p-3 border border-white/6 space-y-2.5 shadow-xs">
               <div>
                 <p className="text-xs font-semibold text-[#F4F5F7]">
-                  {isVi ? "Vị trí Dock Lịch thu gọn (Calendar Corner Dock)" : "Compact Calendar Corner Dock"}
+                  {isVi ? "Vị trí lịch thu gọn" : "Compact Calendar Corner Dock"}
                 </p>
                 <p className="text-[10px] text-[#8B90A0]">
                   {isVi
@@ -636,10 +636,10 @@ export function Hub() {
 
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { id: "top-left", name: isVi ? "Góc trên Trái (Top-Left)" : "Top-Left", icon: "↖️" },
-                  { id: "top-right", name: isVi ? "Góc trên Phải (Top-Right)" : "Top-Right", icon: "↗️" },
-                  { id: "bottom-left", name: isVi ? "Góc dưới Trái (Bottom-Left)" : "Bottom-Left", icon: "↙️" },
-                  { id: "bottom-right", name: isVi ? "Góc dưới Phải (Bottom-Right)" : "Bottom-Right", icon: "↘️" },
+                  { id: "top-left", name: isVi ? "Góc trên Trái" : "Top-Left", icon: "↖️" },
+                  { id: "top-right", name: isVi ? "Góc trên Phải" : "Top-Right", icon: "↗️" },
+                  { id: "bottom-left", name: isVi ? "Góc dưới Trái" : "Bottom-Left", icon: "↙️" },
+                  { id: "bottom-right", name: isVi ? "Góc dưới Phải" : "Bottom-Right", icon: "↘️" },
                 ].map((posOption) => {
                   const isSelected = calendarDockPosition === posOption.id;
                   return (
@@ -673,7 +673,7 @@ export function Hub() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-semibold text-[#F4F5F7]">
-                    {isVi ? "Giám Sát Phần Cứng (Lumen HUD)" : "System HUD Hardware Monitor"}
+                    {isVi ? "Giám Sát Phần Cứng HUD" : "System HUD Hardware Monitor"}
                   </p>
                   <p className="text-[10px] text-[#8B90A0]">
                     {isVi ? "Hiển thị widget CPU, RAM, Tốc độ mạng & Pin siêu nhẹ" : "Ultra-low CPU/RAM hardware monitor widget"}
@@ -737,7 +737,7 @@ export function Hub() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-semibold text-[#F4F5F7]">
-                    {isVi ? "Pomodoro Matrix (Tập Trung Sâu)" : "Pomodoro Deep Focus Matrix"}
+                    {isVi ? "Tập Trung Sâu Pomodoro" : "Pomodoro Deep Focus Matrix"}
                   </p>
                   <p className="text-[10px] text-[#8B90A0]">
                     {isVi ? "Cấu hình chu kỳ làm việc & làm mờ màn hình" : "Configure work cycles & focus dimming"}
@@ -866,7 +866,7 @@ export function Hub() {
                     </div>
                     <div className="flex-1 space-y-1.5">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-[11px] font-medium text-[#8B90A0]">Vui vẻ (Happiness)</span>
+                        <span className="text-[11px] font-medium text-[#8B90A0]">{isVi ? "Mức độ vui vẻ" : "Happiness"}</span>
                         <span className="font-mono text-xs font-bold text-[#F5A623] tabular-nums">{pip.happiness}%</span>
                       </div>
                       <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#14161D]">
@@ -876,8 +876,8 @@ export function Hub() {
                         />
                       </div>
                       <div className="flex items-center justify-between text-[10px] text-[#8B90A0]">
-                        <span>🍪 Đã ăn: <b className="text-[#F4F5F7]">{pip.treatsEaten}</b></span>
-                        <span>✨ Mood: <b className="capitalize text-[#F5A623]">{pip.mood}</b></span>
+                        <span>🍪 {isVi ? "Đã ăn:" : "Treats:"} <b className="text-[#F4F5F7]">{pip.treatsEaten}</b></span>
+                        <span>✨ {isVi ? "Tâm trạng:" : "Mood:"} <b className="capitalize text-[#F5A623]">{pip.mood}</b></span>
                       </div>
                     </div>
                   </div>
@@ -894,7 +894,7 @@ export function Hub() {
                       className="flex items-center justify-center gap-1.5 cursor-pointer border-[#3FAE6C]/30 bg-[#3FAE6C]/10 text-[#3FAE6C] hover:bg-[#3FAE6C]/20 h-7 text-[11px] font-semibold rounded-xl"
                     >
                       <span>🎾</span>
-                      <span>Ném bóng</span>
+                      <span>{isVi ? "Ném bóng" : "Throw ball"}</span>
                     </Button>
                     <Button
                       variant="outline"
@@ -929,7 +929,7 @@ export function Hub() {
                 {/* Pet Species */}
                 <div className="space-y-1.5">
                   <p className="text-[10px] font-semibold text-[#8B90A0] uppercase tracking-wider">
-                    Loài thú cưng (Pet Species)
+                    {isVi ? "Loài thú cưng" : "Pet Species"}
                   </p>
                   <div className="grid grid-cols-1 gap-1">
                     {PET_TYPES.map((pt) => (
@@ -1100,16 +1100,16 @@ export function Hub() {
 
             {/* Shortcuts */}
             <div className="rounded-2xl bg-[#262A35]/50 p-3 space-y-1.5 border border-white/6">
-              <p className="font-semibold text-[#F4F5F7] text-xs mb-1">Tổ hợp phím tắt nhanh (Alt):</p>
+              <p className="font-semibold text-[#F4F5F7] text-xs mb-1">{isVi ? "Tổ hợp phím tắt nhanh:" : "Keyboard Shortcuts:"}</p>
               <div className="divide-y divide-white/5 text-[11px]">
                 <div className="flex items-center justify-between py-1">
-                  <span>Lịch trình & Kế hoạch (Calendar):</span>
+                  <span>{isVi ? "Lịch trình & Kế hoạch:" : "Calendar & Agenda:"}</span>
                   <span className="font-mono bg-[#14161D] px-1.5 py-0.5 rounded-md border border-white/5 text-[#F5A623] font-semibold">
                     Alt + C
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-1">
-                  <span>Ghi chú nhanh:</span>
+                  <span>{isVi ? "Ghi chú nhanh:" : "Quick Note:"}</span>
                   <div className="flex gap-1">
                     <span className="font-mono bg-[#14161D] px-1.5 py-0.5 rounded-md border border-white/5 text-[#F5A623] font-semibold">
                       Alt + N
@@ -1120,13 +1120,13 @@ export function Hub() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between py-1">
-                  <span>Đặt giờ nhanh:</span>
+                  <span>{isVi ? "Đặt giờ nhanh:" : "Quick Timer:"}</span>
                   <span className="font-mono bg-[#14161D] px-1.5 py-0.5 rounded-md border border-white/5 text-[#F5A623] font-semibold">
                     Alt + T
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-1">
-                  <span>Bảng cài đặt (Settings):</span>
+                  <span>{isVi ? "Bảng cài đặt:" : "Settings Hub:"}</span>
                   <div className="flex gap-1">
                     <span className="font-mono bg-[#14161D] px-1.5 py-0.5 rounded-md border border-white/5 text-[#F5A623] font-semibold">
                       Alt + S
@@ -1137,31 +1137,31 @@ export function Hub() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between py-1">
-                  <span>Sắp xếp ghi chú:</span>
+                  <span>{isVi ? "Sắp xếp ghi chú:" : "Arrange Notes:"}</span>
                   <span className="font-mono bg-[#14161D] px-1.5 py-0.5 rounded-md border border-white/5 text-[#F5A623] font-semibold">
                     Alt + A
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-1">
-                  <span>Ẩn / Hiện tất cả note:</span>
+                  <span>{isVi ? "Ẩn / Hiện tất cả note:" : "Toggle All Notes:"}</span>
                   <span className="font-mono bg-[#14161D] px-1.5 py-0.5 rounded-md border border-white/5 text-[#F5A623] font-semibold">
                     Alt + O
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-1">
-                  <span>Bật / Tắt Thú cưng:</span>
+                  <span>{isVi ? "Bật / Tắt Thú cưng:" : "Toggle Companion:"}</span>
                   <span className="font-mono bg-[#14161D] px-1.5 py-0.5 rounded-md border border-white/5 text-[#F5A623] font-semibold">
                     Alt + P
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-1">
-                  <span>Tìm kiếm nhanh (Spotlight):</span>
+                  <span>{isVi ? "Tìm kiếm & Tính toán nhanh:" : "Spotlight Search:"}</span>
                   <span className="font-mono bg-[#14161D] px-1.5 py-0.5 rounded-md border border-white/5 text-[#F5A623] font-semibold">
                     Alt + F
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-1">
-                  <span>Đóng cửa sổ / Modal:</span>
+                  <span>{isVi ? "Đóng cửa sổ / Modal:" : "Close Window / Modal:"}</span>
                   <span className="font-mono bg-[#14161D] px-1.5 py-0.5 rounded-md border border-white/5 text-[#F4F5F7]">
                     Escape
                   </span>
@@ -1174,7 +1174,7 @@ export function Hub() {
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-[#F4F5F7] text-xs flex items-center gap-1.5">
                   <History className="size-3.5 text-[#F5A623]" />
-                  <span>{isVi ? "Lịch sử cập nhật phiên bản (Changelog)" : "Release History & Changelog"}</span>
+                  <span>{isVi ? "Lịch sử cập nhật phiên bản" : "Release History & Changelog"}</span>
                 </p>
                 <span className="text-[10px] text-[#F5A623] font-mono font-bold bg-[#F5A623]/15 border border-[#F5A623]/30 px-1.5 py-0.2 rounded-md">
                   v{CURRENT_APP_VERSION}

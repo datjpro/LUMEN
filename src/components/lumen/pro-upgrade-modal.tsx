@@ -35,10 +35,10 @@ const PRO_FEATURES = [
   {
     id: "multi_timers",
     icon: BellRing,
-    titleVi: "Hẹn giờ đa luồng (Multi-Timer)",
+    titleVi: "Hẹn giờ đa luồng",
     titleEn: "Multi-Timer System",
-    descVi: "Chạy cùng lúc nhiều đồng hồ đếm ngược (nâng cấp nhà game COC, Pomodoro, nấu ăn).",
-    descEn: "Run multiple concurrent countdowns (COC builder tracking, Pomodoro, cooking).",
+    descVi: "Chạy cùng lúc nhiều đồng hồ đếm ngược (nâng cấp nhà game, Pomodoro, nấu ăn).",
+    descEn: "Run multiple concurrent countdowns (game builder tracking, Pomodoro, cooking).",
     tagVi: "PRO",
     tagEn: "PRO",
   },
@@ -47,7 +47,7 @@ const PRO_FEATURES = [
     icon: Palette,
     titleVi: "Toàn bộ chủ đề PRO cao cấp",
     titleEn: "All Premium PRO Themes",
-    descVi: "Chủ đề Kính mờ Mạ vàng (Glassmorphism Gold), Cyberpunk Neon, và Giấy cổ điển Ink.",
+    descVi: "Chủ đề Kính mờ Mạ vàng, Cyberpunk Neon, và Giấy cổ điển Ink.",
     descEn: "Glassmorphism Gold, Cyberpunk Neon, and Classic Ink themes.",
     tagVi: "PRO",
     tagEn: "PRO",
@@ -57,7 +57,7 @@ const PRO_FEATURES = [
     icon: Crown,
     titleVi: "Tủ đồ & Skin Cáo PRO độc quyền",
     titleEn: "Exclusive Companion PRO Skins",
-    descVi: "Trang phục Cáo Tuyết (Snow Fox), Obsidian Void, Mũ pháp sư và Phụ kiện cánh.",
+    descVi: "Trang phục Cáo Tuyết, Obsidian Void, Mũ pháp sư và Phụ kiện cánh.",
     descEn: "Snow Fox, Obsidian Void skins, Wizard Hats, and Wings accessories.",
     tagVi: "PRO",
     tagEn: "PRO",
@@ -221,7 +221,9 @@ export function ProUpgradeModal() {
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-extrabold tracking-tight text-white">Lumen Tiers & Bản Quyền</h2>
+                <h2 className="text-lg font-extrabold tracking-tight text-white">
+                  {isVi ? "Gói Đăng Ký & Bản Quyền" : "Lumen Tiers & License"}
+                </h2>
                 {pro.isPro ? (
                   isTrial ? (
                     <span className="flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-400/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-300">
@@ -255,7 +257,7 @@ export function ProUpgradeModal() {
               setOpen(false);
             }}
             className="size-8 rounded-xl hover:bg-white/10 flex items-center justify-center text-[#8B90A0] hover:text-white transition-colors cursor-pointer shrink-0"
-            title="Đóng (Escape)"
+            title={isVi ? "Đóng" : "Close"}
           >
             <X className="size-4" />
           </button>
@@ -382,7 +384,7 @@ export function ProUpgradeModal() {
             >
               <div className="absolute -top-2.5 right-3 px-2 py-0.2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-[#14161D] text-[9px] font-black uppercase tracking-wider shadow-sm flex items-center gap-0.5">
                 <Flame className="size-2.5" />
-                <span>HOT PRO TRIAL</span>
+                <span>{isVi ? "DÙNG THỬ PRO" : "HOT PRO TRIAL"}</span>
               </div>
 
               <div className="space-y-2">

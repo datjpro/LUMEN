@@ -55,7 +55,9 @@ function parseTimerInput(raw: string): { title: string; durationMs: number } {
 export function QuickTimer() {
   const open = useLumen((s) => s.quickTimerOpen);
   const setOpen = useLumen((s) => s.setQuickTimerOpen);
-  const [input, setInput] = useState("xây nhà trong COC : 2g14p");
+  const lang = useLumen((s) => s.lang);
+  const isVi = lang === "vi";
+  const [input, setInput] = useState(isVi ? "Tập trung làm việc : 25p" : "Focus work : 25m");
   const [pinToDesktop, setPinToDesktop] = useState(true);
   const addReminder = useLumen((s) => s.addReminder);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -88,7 +90,7 @@ export function QuickTimer() {
         <div className="flex items-center justify-between pb-2.5 border-b border-white/6">
           <p className="font-semibold text-xs text-[#F5A623] flex items-center gap-1.5 uppercase tracking-wide">
             <Clock className="size-3.5" />
-            <span>Đặt giờ nhanh (Alt + T)</span>
+            <span>{isVi ? "Đặt giờ nhanh (Alt+T)" : "Quick Timer (Alt+T)"}</span>
           </p>
           <button
             type="button"
@@ -102,7 +104,7 @@ export function QuickTimer() {
         <div className="space-y-2">
           <Input
             ref={inputRef}
-            placeholder="Ví dụ: xây nhà trong COC : 2g14p hoặc nấu canh 15p..."
+            placeholder={isVi ? "Ví dụ: Tập trung làm việc : 25p hoặc Nấu ăn 15p..." : "Example: Focus work : 25m or Cooking 15m..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             className="bg-[#14161D] border-white/10 text-xs text-[#F4F5F7] placeholder:text-[#8B90A0]/50 focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 h-8.5 rounded-xl"
@@ -111,11 +113,11 @@ export function QuickTimer() {
           {/* Quick Preset Chips */}
           <div className="flex flex-wrap gap-1">
             {[
-              { label: "🏰 COC: 2g14p", val: "xây nhà trong COC : 2g14p" },
-              { label: "🍅 Pomodoro: 25p", val: "Tập trung làm việc : 25p" },
-              { label: "☕ Nghỉ: 5p", val: "Nghỉ ngơi giải lao : 5p" },
-              { label: "🍲 Nấu ăn: 15p", val: "Nấu ăn canh súp : 15p" },
-              { label: "⏳ 1 Giờ", val: "Hẹn giờ làm việc : 1g" },
+              { label: isVi ? "🍅 Pomodoro: 25p" : "🍅 Pomodoro: 25m", val: isVi ? "Tập trung làm việc : 25p" : "Focus work : 25m" },
+              { label: isVi ? "☕ Nghỉ: 5p" : "☕ Break: 5m", val: isVi ? "Nghỉ ngơi giải lao : 5p" : "Short break : 5m" },
+              { label: isVi ? "🍲 Nấu ăn: 15p" : "🍲 Cooking: 15m", val: isVi ? "Nấu ăn : 15p" : "Cooking soup : 15m" },
+              { label: isVi ? "⏳ 1 Giờ" : "⏳ 1 Hour", val: isVi ? "Hẹn giờ làm việc : 1g" : "Work session : 1h" },
+              { label: isVi ? "⚡ 10 Phút" : "⚡ 10 Mins", val: isVi ? "Làm việc nhanh : 10p" : "Quick sprint : 10m" },
             ].map((preset) => (
               <button
                 key={preset.label}
@@ -130,7 +132,7 @@ export function QuickTimer() {
         </div>
 
         <div className="flex items-center justify-between pt-1.5 border-t border-white/5">
-          <span className="text-[11px] text-[#8B90A0]">Ghim đồng hồ đếm ngược nổi trên Desktop</span>
+          <span className="text-[11px] text-[#8B90A0]">{isVi ? "Ghim đồng hồ đếm ngược nổi trên màn hình" : "Pin floating timer on desktop"}</span>
           <Switch checked={pinToDesktop} onCheckedChange={setPinToDesktop} />
         </div>
 
@@ -142,14 +144,14 @@ export function QuickTimer() {
             className="cursor-pointer text-[#8B90A0] hover:text-white hover:bg-white/10 text-xs rounded-xl"
             onClick={() => setOpen(false)}
           >
-            Hủy
+            {isVi ? "Hủy" : "Cancel"}
           </Button>
           <Button
             type="submit"
             size="sm"
             className="cursor-pointer bg-[#F5A623] hover:bg-[#D6871A] text-[#14161D] font-bold text-xs px-4 rounded-xl shadow-xs transition-colors"
           >
-            Bắt đầu đếm giờ
+            {isVi ? "Bắt đầu đếm giờ" : "Start timer"}
           </Button>
         </div>
       </form>

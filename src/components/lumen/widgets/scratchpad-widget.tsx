@@ -69,14 +69,14 @@ export function ScratchpadWidget() {
               title={isVi ? "Sao chép toàn bộ mã" : "Copy to Clipboard"}
             >
               {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-              {copied && <span className="text-[10px]">{isVi ? "Đã copy!" : "Copied!"}</span>}
+              {copied && <span className="text-[10px]">{isVi ? "Đã sao chép!" : "Copied!"}</span>}
             </button>
 
             <button
               type="button"
               onClick={handleStickToDesktop}
               className="p-1.5 rounded-xl hover:bg-white/10 text-[#8B90A0] hover:text-[#F5A623] transition-colors cursor-pointer"
-              title={isVi ? "Dán thành Sticky Note trên Desktop" : "Stick note on Desktop"}
+              title={isVi ? "Dán thành ghi chú trên màn hình" : "Stick note on Desktop"}
             >
               <StickyNote className="size-3.5" />
             </button>
@@ -88,7 +88,7 @@ export function ScratchpadWidget() {
                 toggleScratchpad(false);
               }}
               className="p-1.5 rounded-xl hover:bg-red-500/20 text-[#8B90A0] hover:text-red-400 transition-colors cursor-pointer"
-              title="Đóng Scratchpad"
+              title={isVi ? "Đóng sổ nháp" : "Close Scratchpad"}
             >
               <X className="size-3.5" />
             </button>

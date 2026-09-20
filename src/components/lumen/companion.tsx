@@ -371,7 +371,7 @@ export function Companion() {
                 e.stopPropagation();
                 handlePet();
               }}
-              title="Xoa đầu (Pet)"
+              title={lang === "vi" ? "Xoa đầu vuốt ve" : "Pet companion"}
               className="action-btn flex size-7 items-center justify-center rounded-full text-rose-400 hover:bg-white/10 hover:scale-110 active:scale-95 transition-all cursor-pointer"
             >
               <Heart className="size-3.5 fill-rose-400/30" />
@@ -382,7 +382,7 @@ export function Companion() {
                 e.stopPropagation();
                 handleFeed();
               }}
-              title="Cho ăn dâu (Feed)"
+              title={lang === "vi" ? "Cho ăn dâu tây" : "Feed snack"}
               className="action-btn flex size-7 items-center justify-center rounded-full text-amber-400 hover:bg-white/10 hover:scale-110 active:scale-95 transition-all cursor-pointer"
             >
               <Cookie className="size-3.5" />
@@ -394,7 +394,7 @@ export function Companion() {
                 triggerThrowBall();
                 setMenuOpen(false);
               }}
-              title="Ném bóng chơi (Throw Ball 🎾)"
+              title={lang === "vi" ? "Ném bóng chơi cùng thú cưng" : "Throw ball 🎾"}
               className="action-btn flex size-7 items-center justify-center rounded-full text-lime-400 hover:bg-white/10 hover:scale-110 active:scale-95 transition-all cursor-pointer text-xs"
             >
               🎾
@@ -406,7 +406,7 @@ export function Companion() {
                 requestNoteFromPip();
                 setMenuOpen(false);
               }}
-              title="Lấy giấy ghi chú (Fetch Note)"
+              title={lang === "vi" ? "Nhờ lấy giấy ghi chú" : "Fetch note"}
               className="action-btn flex size-7 items-center justify-center rounded-full text-emerald-400 hover:bg-white/10 hover:scale-110 active:scale-95 transition-all cursor-pointer"
             >
               <NoteIcon className="size-3.5" />
@@ -435,7 +435,7 @@ export function Companion() {
                 setPip({ mood: "dance", speech: msg });
                 setMenuOpen(false);
               }}
-              title="Xem Lịch hôm nay (Schedule Briefing)"
+              title={lang === "vi" ? "Xem tóm tắt lịch trình hôm nay" : "Schedule briefing"}
               className="action-btn flex size-7 items-center justify-center rounded-full text-amber-400 hover:bg-white/10 hover:scale-110 active:scale-95 transition-all cursor-pointer"
             >
               <Calendar className="size-3.5" />
@@ -450,7 +450,7 @@ export function Companion() {
                   dancePip();
                 }
               }}
-              title="Nhảy múa (Dance)"
+              title={lang === "vi" ? "Bật nhạc nhảy múa" : "Dance"}
               className={cn(
                 "action-btn flex size-7 items-center justify-center rounded-full text-indigo-400 hover:bg-white/10 hover:scale-110 active:scale-95 transition-all cursor-pointer",
                 mood === "dance" && "bg-indigo-500/20 text-indigo-300 ring-1 ring-indigo-400/40",
@@ -464,7 +464,7 @@ export function Companion() {
                 e.stopPropagation();
                 setPip({ mood: mood === "sleep" ? "wander" : "sleep" });
               }}
-              title={mood === "sleep" ? "Đánh thức" : "Ngủ (Sleep)"}
+              title={mood === "sleep" ? (lang === "vi" ? "Đánh thức thú cưng" : "Wake up") : (lang === "vi" ? "Cho thú cưng đi ngủ" : "Sleep")}
               className="action-btn flex size-7 items-center justify-center rounded-full text-blue-400 hover:bg-white/10 hover:scale-110 active:scale-95 transition-all cursor-pointer"
             >
               {mood === "sleep" ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
@@ -476,7 +476,7 @@ export function Companion() {
                 e.stopPropagation();
                 setPipEnabled(false);
               }}
-              title="Ẩn thú cưng (Hide Pet)"
+              title={lang === "vi" ? "Ẩn thú cưng" : "Hide pet"}
               className="action-btn flex size-7 items-center justify-center rounded-full text-muted hover:bg-red-500/20 hover:text-red-500 hover:scale-110 active:scale-95 transition-all cursor-pointer"
             >
               <EyeOff className="size-3.5" />

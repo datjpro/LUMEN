@@ -50,10 +50,10 @@ export function PomodoroWidget() {
 
   const modeBadge =
     pomodoroState.mode === "work"
-      ? { label: isVi ? "Tập trung (Work)" : "Deep Focus", color: "text-red-400 bg-red-500/15 border-red-500/30", icon: "🍅" }
+      ? { label: isVi ? "Tập trung sâu" : "Deep Focus", color: "text-red-400 bg-red-500/15 border-red-500/30", icon: "🍅" }
       : pomodoroState.mode === "short_break"
-      ? { label: isVi ? "Nghỉ ngắn (5m)" : "Short Break", color: "text-emerald-400 bg-emerald-500/15 border-emerald-500/30", icon: "☕" }
-      : { label: isVi ? "Nghỉ dài (15m)" : "Long Break", color: "text-sky-400 bg-sky-500/15 border-sky-500/30", icon: "🌴" };
+      ? { label: isVi ? "Nghỉ ngắn (5 phút)" : "Short Break", color: "text-emerald-400 bg-emerald-500/15 border-emerald-500/30", icon: "☕" }
+      : { label: isVi ? "Nghỉ dài (15 phút)" : "Long Break", color: "text-sky-400 bg-sky-500/15 border-sky-500/30", icon: "🌴" };
 
   return (
     <div className="interactive-el fixed top-20 right-4 z-[8400] select-none touch-none animate-in fade-in slide-in-from-top-3 duration-200">
@@ -62,7 +62,9 @@ export function PomodoroWidget() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-base">{modeBadge.icon}</span>
-            <span className="font-bold text-xs tracking-wide uppercase text-white/90">Pomodoro Matrix</span>
+            <span className="font-bold text-xs tracking-wide uppercase text-white/90">
+              {isVi ? "Đồng Hồ Pomodoro" : "Pomodoro Matrix"}
+            </span>
           </div>
 
           <div className="flex items-center gap-1">
@@ -77,7 +79,7 @@ export function PomodoroWidget() {
                 "p-1.5 rounded-xl transition-colors cursor-pointer text-xs",
                 pomodoroSettings.tickingSound ? "bg-amber-500/20 text-amber-400" : "hover:bg-white/10 text-[#8B90A0]"
               )}
-              title={pomodoroSettings.tickingSound ? "Tắt âm tích tắc" : "Bật âm tích tắc gỗ"}
+              title={pomodoroSettings.tickingSound ? (isVi ? "Tắt âm tích tắc" : "Mute ticking") : (isVi ? "Bật âm tích tắc gỗ" : "Enable ticking")}
             >
               {pomodoroSettings.tickingSound ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
             </button>
@@ -93,7 +95,7 @@ export function PomodoroWidget() {
                 "p-1.5 rounded-xl transition-colors cursor-pointer text-xs",
                 pomodoroSettings.dimBackground ? "bg-purple-500/20 text-purple-400" : "hover:bg-white/10 text-[#8B90A0]"
               )}
-              title={pomodoroSettings.dimBackground ? "Tắt làm mờ màn hình" : "Bật làm mờ màn hình tập trung"}
+              title={pomodoroSettings.dimBackground ? (isVi ? "Tắt làm mờ màn hình" : "Disable focus dim") : (isVi ? "Bật làm mờ màn hình tập trung" : "Enable focus dim")}
             >
               <Moon className="size-3.5" />
             </button>
@@ -106,7 +108,7 @@ export function PomodoroWidget() {
                 toggleWidget("pomodoro", false);
               }}
               className="p-1.5 rounded-xl hover:bg-red-500/20 text-[#8B90A0] hover:text-red-400 transition-colors cursor-pointer"
-              title="Đóng Pomodoro"
+              title={isVi ? "Đóng Pomodoro" : "Close Pomodoro"}
             >
               <X className="size-3.5" />
             </button>

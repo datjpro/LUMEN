@@ -582,7 +582,7 @@ export function StandaloneCalendar() {
                     setIsPillCollapsed(true);
                   }}
                   className="size-6 flex items-center justify-center rounded-md hover:bg-white/10 text-[#8B90A0] hover:text-white transition-colors cursor-pointer"
-                  title={isVi ? "Thu nhỏ thành thẻ (Collapse to pill)" : "Collapse to pill"}
+                  title={isVi ? "Thu nhỏ thành thẻ" : "Collapse to pill"}
                 >
                   <Minus className="size-3" />
                 </button>
@@ -591,7 +591,7 @@ export function StandaloneCalendar() {
                   type="button"
                   onClick={toggleCompact}
                   className="size-6 flex items-center justify-center rounded-md hover:bg-white/10 text-[#8B90A0] hover:text-[#F5A623] transition-colors cursor-pointer"
-                  title={isVi ? "Mở rộng lịch lớn (Expansive Mode)" : "Maximize calendar"}
+                  title={isVi ? "Mở rộng lịch lớn" : "Maximize calendar"}
                 >
                   <Maximize2 className="size-3" />
                 </button>
@@ -603,7 +603,7 @@ export function StandaloneCalendar() {
                     setCalendarOpen(false);
                   }}
                   className="size-6 flex items-center justify-center rounded-md hover:bg-red-500/20 text-[#8B90A0] hover:text-red-400 transition-colors cursor-pointer"
-                  title={isVi ? "Ẩn lịch trình hôm nay (Escape / Alt+C)" : "Hide today's agenda (Escape / Alt+C)"}
+                  title={isVi ? "Ẩn lịch trình hôm nay" : "Hide today's agenda"}
                 >
                   <EyeOff className="size-3" />
                 </button>
@@ -786,7 +786,7 @@ export function StandaloneCalendar() {
             <div>
               <div className="flex items-center gap-1.5">
                 <h3 className="font-bold text-xs tracking-tight text-[#F4F5F7]">
-                  {isVi ? "Lumen Spatial Planner — Lịch Không Gian" : "Lumen Spatial Planner"}
+                  {isVi ? "Lịch Trình & Kế Hoạch Không Gian" : "Lumen Spatial Planner"}
                 </h3>
                 <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-md bg-white/10 text-[#8B90A0]">
                   v1.0.1
@@ -814,7 +814,7 @@ export function StandaloneCalendar() {
               type="button"
               onClick={toggleCompact}
               className="size-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-[#8B90A0] hover:text-[#F5A623] transition-colors cursor-pointer"
-              title="Thu nhỏ thành Widget góc màn hình (Compact Dock Mode)"
+              title={isVi ? "Thu nhỏ thành thẻ góc màn hình" : "Dock into corner widget"}
             >
               <Minimize2 className="size-3.5" />
             </button>

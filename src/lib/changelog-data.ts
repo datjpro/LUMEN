@@ -17,10 +17,38 @@ export interface VersionRelease {
 
 export const APP_RELEASES: VersionRelease[] = [
   {
+    version: "1.2.4",
+    releaseName: "Lumen v1.2.4 — Comprehensive Vietnamese Localization & Natural Phrasing",
+    releaseDate: "2026-09-20",
+    isLatest: true,
+    highlights: [
+      {
+        icon: "🇻🇳",
+        badge: "ui",
+        titleVi: "Việt Hóa 100% Toàn Diện Mọi Giao Diện & Tiện Ích",
+        titleEn: "100% Comprehensive Vietnamese Localization",
+        descriptionVi:
+          "Chuyển ngữ 100% toàn bộ giao diện sang tiếng Việt tự nhiên, chuẩn mực; loại bỏ hoàn toàn các từ tiếng Anh kèm trong ngoặc đơn trên khắp các menu, bảng cài đặt, thanh công cụ và thú cưng.",
+        descriptionEn:
+          "Thoroughly localized 100% of UI copy, tooltips, dialogs, badges, and companion speech to natural Vietnamese, eliminating hybrid English parenthesized tags.",
+      },
+      {
+        icon: "✨",
+        badge: "perf",
+        titleVi: "Chuẩn Hóa Thuật Ngữ Kỹ Thuật & Giám Sát Phần Cứng",
+        titleEn: "Technical Terminology & System HUD Polish",
+        descriptionVi:
+          "Giữ nguyên các đơn vị và ký hiệu chuyên môn chuẩn (CPU, RAM, FPS, Alt+N, MB/s) đồng thời dịch mượt mà các nhãn cảnh báo quá tải và phân luồng.",
+        descriptionEn:
+          "Preserved essential technical acronyms (CPU, RAM, FPS, Alt+N) while ensuring seamless natural Vietnamese telemetry indicators.",
+      },
+    ],
+  },
+  {
     version: "1.2.3",
     releaseName: "Lumen v1.2.3 — Hover-Reveal Drag Dock & Note Creation Isolation",
     releaseDate: "2026-09-20",
-    isLatest: true,
+    isLatest: false,
     highlights: [
       {
         icon: "🎯",

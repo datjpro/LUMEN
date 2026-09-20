@@ -7,6 +7,7 @@ import { Sparkles, X } from "lucide-react";
 
 export function QuickCapture() {
   const lang = useLumen((s) => s.lang);
+  const isVi = lang === "vi";
   const dict = DICTIONARY[lang];
   const open = useLumen((s) => s.captureOpen);
   const setCaptureOpen = useLumen((s) => s.setCaptureOpen);
@@ -51,7 +52,7 @@ export function QuickCapture() {
         <div className="flex items-center justify-between pb-2.5 border-b border-white/6 mb-3">
           <p className="font-semibold text-xs text-[#F5A623] flex items-center gap-1.5 uppercase tracking-wide">
             <Sparkles className="size-3.5" />
-            <span>Ghi chú nhanh (Alt + N)</span>
+            <span>{dict.quickNote} (Alt+N)</span>
           </p>
           <button
             type="button"
@@ -73,12 +74,12 @@ export function QuickCapture() {
             }
           }}
           rows={4}
-          placeholder="Nhập nội dung ghi chú nhanh... (Bấm Enter để lưu)"
+          placeholder={isVi ? "Nhập nội dung ghi chú nhanh... (Bấm Enter để lưu)" : "Type quick note... (Press Enter to save)"}
           className="w-full resize-none rounded-xl bg-[#14161D] p-3 text-xs text-[#F4F5F7] outline-none placeholder:text-[#8B90A0]/50 border border-white/6 focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/50 transition-all duration-120 cursor-text select-text touch-auto caret-[#F5A623]"
         />
 
         <div className="mt-3 flex items-center justify-between gap-2">
-          <p className="text-[11px] text-[#8B90A0]">Shift + Enter để xuống dòng</p>
+          <p className="text-[11px] text-[#8B90A0]">{isVi ? "Shift + Enter để xuống dòng" : "Shift + Enter for new line"}</p>
           <div className="flex gap-2">
             <Button
               type="button"

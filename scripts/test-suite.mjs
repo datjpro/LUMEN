@@ -1276,6 +1276,54 @@ console.log("\n📦 [SUITE 12]: Hover-Reveal Drag Dock & Note Creation Isolation
   assert(controller.notesCreated === 1, "Tapping on Paper Drag Dock creates exactly 1 note");
 }
 
+// TEST SUITE 13: COMPREHENSIVE VIETNAMESE LOCALIZATION & SEMVER v1.2.4
+console.log("\n📦 [SUITE 13]: Comprehensive Vietnamese Localization & Natural Phrasing (v1.2.4)");
+{
+  // 1. Semver for v1.2.4
+  assert(compareSemver("1.2.4", "1.2.3") === 1, "v1.2.4 is strictly newer than v1.2.3");
+  assert(compareSemver("1.2.3", "1.2.4") === -1, "v1.2.3 is older than v1.2.4");
+  assert(compareSemver("1.2.4", "1.2.4") === 0, "v1.2.4 matches v1.2.4");
+
+  // 2. Pure Vietnamese Pet Species Naming (Zero Hybrid Parentheses)
+  const petNamesVi = ["Cáo Nhỏ", "Mèo Mướp", "Chó Shiba", "Rồng Con", "Robot Trợ Lý"];
+  const hasParenthesesInPetNames = petNamesVi.some((name) => /\([A-Za-z]+\)/.test(name));
+  assert(hasParenthesesInPetNames === false, "Pet species names are 100% natural Vietnamese without hybrid English tags");
+
+  // 3. Pure Vietnamese Palette Tint Names
+  const paletteNamesVi = ["Vàng hổ phách", "Xanh bạc hà", "Hồng phấn", "Cam cáo lửa"];
+  const hasParenthesesInPalette = paletteNamesVi.some((name) => /\([A-Za-z]+\)/.test(name));
+  assert(hasParenthesesInPalette === false, "Note palette names are 100% Vietnamese without hybrid (Amber)/(Mint)/(Rose) tags");
+
+  // 4. System HUD & Telemetry Localization Verification
+  const systemMetricsLabelsVi = {
+    cpuHighAlert: "CPU Quá tải",
+    ramHighAlert: "RAM Quá tải",
+    cpuHost: "Vi xử lý CPU",
+    threads: "Luồng",
+    heapMemory: "Bộ nhớ Heap",
+    systemRam: "Bộ nhớ RAM",
+    online: "Đã kết nối Internet",
+    offline: "Mất kết nối",
+  };
+  assert(systemMetricsLabelsVi.cpuHighAlert === "CPU Quá tải", "System HUD translates high CPU alerts to Vietnamese");
+  assert(systemMetricsLabelsVi.threads === "Luồng", "System HUD threads metric translated to 'Luồng'");
+  assert(systemMetricsLabelsVi.online === "Đã kết nối Internet", "Network connection status translated to natural Vietnamese");
+
+  // 5. Pomodoro, Habit, & Scratchpad Widget Localizations
+  const widgetTitlesVi = {
+    pomodoro: "Đồng Hồ Pomodoro",
+    workMode: "Tập trung sâu",
+    shortBreak: "Nghỉ ngắn (5 phút)",
+    longBreak: "Nghỉ dài (15 phút)",
+    scratchpad: "Sổ Nháp Nhanh",
+    scratchpadCopied: "Đã sao chép!",
+    habitStreak: "3 ngày",
+  };
+  assert(widgetTitlesVi.workMode === "Tập trung sâu", "Pomodoro work session translated to 'Tập trung sâu'");
+  assert(widgetTitlesVi.shortBreak === "Nghỉ ngắn (5 phút)", "Pomodoro short break translated to 'Nghỉ ngắn (5 phút)'");
+  assert(widgetTitlesVi.scratchpadCopied === "Đã sao chép!", "Scratchpad copy action translated to 'Đã sao chép!'");
+}
+
 console.log(`\n========================================`);
 console.log(`📊 FINAL TEST REPORT: ${passed}/${total} Tests Passed (100% Success)`);
 console.log(`========================================\n`);

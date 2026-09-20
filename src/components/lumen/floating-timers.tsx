@@ -124,7 +124,7 @@ function FloatingTimerCard({ timer }: { timer: Reminder }) {
           <button
             type="button"
             onClick={() => setMinimal(false)}
-            title="Mở rộng đầy đủ"
+            title={lang === "vi" ? "Mở rộng đầy đủ" : "Expand"}
             className="p-0.5 rounded hover:bg-white/20 text-[#8B90A0] hover:text-white cursor-pointer"
           >
             <Eye className="size-3" />
@@ -132,7 +132,7 @@ function FloatingTimerCard({ timer }: { timer: Reminder }) {
           <button
             type="button"
             onClick={() => removeReminder(timer.id)}
-            title="Đóng / Xóa"
+            title={lang === "vi" ? "Đóng / Xóa" : "Close"}
             className="p-0.5 rounded hover:bg-red-500/30 text-[#8B90A0] hover:text-red-400 cursor-pointer"
           >
             <X className="size-3" />
@@ -175,7 +175,7 @@ function FloatingTimerCard({ timer }: { timer: Reminder }) {
           <button
             type="button"
             onClick={() => setMinimal(true)}
-            title="Thu gọn trong suốt"
+            title={lang === "vi" ? "Thu gọn trong suốt" : "Collapse"}
             className="flex size-5 items-center justify-center rounded hover:bg-white/10 transition-colors cursor-pointer text-[#8B90A0] hover:text-white"
           >
             <EyeOff className="size-3" />
@@ -183,7 +183,7 @@ function FloatingTimerCard({ timer }: { timer: Reminder }) {
           <button
             type="button"
             onClick={() => togglePinReminder(timer.id)}
-            title="Bỏ ghim màn hình"
+            title={lang === "vi" ? "Bỏ ghim màn hình" : "Unpin"}
             className="flex size-5 items-center justify-center rounded hover:bg-white/10 transition-colors cursor-pointer text-[#F5A623]"
           >
             <Pin className="size-3 fill-[#F5A623]" />
@@ -191,7 +191,7 @@ function FloatingTimerCard({ timer }: { timer: Reminder }) {
           <button
             type="button"
             onClick={() => removeReminder(timer.id)}
-            title="Xóa hẹn giờ"
+            title={lang === "vi" ? "Xóa hẹn giờ" : "Delete timer"}
             className="flex size-5 items-center justify-center rounded hover:bg-red-500/20 transition-colors cursor-pointer text-[#8B90A0] hover:text-[#EF4444]"
           >
             <X className="size-3" />
@@ -215,7 +215,7 @@ function FloatingTimerCard({ timer }: { timer: Reminder }) {
             className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white text-[#14161D] font-bold text-xs shadow-md cursor-pointer hover:bg-slate-100 transition-colors"
           >
             <Check className="size-3" />
-            <span>Tắt chuông</span>
+            <span>{lang === "vi" ? "Tắt chuông" : "Dismiss"}</span>
           </button>
         ) : (
           <button

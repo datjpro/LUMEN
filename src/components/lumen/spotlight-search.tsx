@@ -135,7 +135,7 @@ export function SpotlightSearch() {
     },
     {
       id: "action-hud",
-      title: isVi ? "📊 Bật / Tắt Giám Sát Phần Cứng (Lumen HUD)" : "📊 Toggle System HUD Monitor",
+      title: isVi ? "📊 Bật / Tắt Giám Sát Phần Cứng" : "📊 Toggle System HUD Monitor",
       keywords: ["hud", "cpu", "ram", "system", "giam sat", "phan cung"],
       run: () => {
         toggleHud();
@@ -354,7 +354,7 @@ export function SpotlightSearch() {
             </button>
           )}
           <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-mono font-semibold text-[#8B90A0] bg-white/5 border border-white/10 rounded-md">
-            ESC đóng
+            {isVi ? "ESC Đóng" : "ESC Close"}
           </kbd>
         </div>
 
@@ -387,7 +387,7 @@ export function SpotlightSearch() {
                   className="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   {copiedText === "calc" ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
-                  <span>{copiedText === "calc" ? "Đã chép" : "Copy"}</span>
+                  <span>{copiedText === "calc" ? (isVi ? "Đã sao chép" : "Copied") : (isVi ? "Sao chép" : "Copy")}</span>
                 </button>
                 <button
                   type="button"
@@ -395,7 +395,7 @@ export function SpotlightSearch() {
                   className="px-2.5 py-1.5 rounded-xl bg-[#F5A623] hover:bg-amber-400 text-stone-900 text-xs font-bold flex items-center gap-1 transition-all active:scale-95 cursor-pointer shadow-md"
                 >
                   <Plus className="size-3.5" />
-                  <span>Dán note</span>
+                  <span>{isVi ? "Dán ghi chú" : "Stick note"}</span>
                 </button>
               </div>
             </div>
@@ -405,7 +405,11 @@ export function SpotlightSearch() {
           {totalResults === 0 && !calcResult && (
             <div className="py-8 px-4 text-center text-[#8B90A0] flex flex-col items-center gap-2">
               <Sparkles className="size-8 text-[#F5A623]/40" />
-              <p className="text-xs">Không tìm thấy ghi chú hoặc lệnh nào khớp với &quot;{query}&quot;</p>
+              <p className="text-xs">
+                {isVi
+                  ? `Không tìm thấy ghi chú hoặc lệnh nào khớp với "${query}"`
+                  : `No matching notes or actions found for "${query}"`}
+              </p>
               {trimmed && (
                 <button
                   type="button"
@@ -413,7 +417,7 @@ export function SpotlightSearch() {
                   className="mt-2 flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#F5A623] hover:bg-[#D6871A] text-[#14161D] font-bold text-xs shadow-md transition-all cursor-pointer"
                 >
                   <Plus className="size-3.5" />
-                  <span>Tạo ghi chú mới: &quot;{query.slice(0, 30)}&quot;</span>
+                  <span>{isVi ? `Tạo ghi chú mới: "${query.slice(0, 30)}"` : `Create new note: "${query.slice(0, 30)}"`}</span>
                 </button>
               )}
             </div>
@@ -423,7 +427,7 @@ export function SpotlightSearch() {
           {filteredSnippets.length > 0 && (
             <div className="space-y-1">
               <span className="text-[10px] font-bold text-[#F5A623] uppercase tracking-wider px-2 block">
-                Kho Mẫu Văn Bản (Snippets Vault)
+                {isVi ? "Kho Mẫu Văn Bản" : "Snippets Vault"}
               </span>
               {filteredSnippets.map((snip) => (
                 <div
@@ -450,7 +454,7 @@ export function SpotlightSearch() {
                     className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/15 text-xs text-[#8B90A0] hover:text-white flex items-center gap-1 transition-colors shrink-0"
                   >
                     {copiedText === snip.id ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
-                    <span className="text-[10px] font-medium">{copiedText === snip.id ? "Đã copy!" : "Copy"}</span>
+                    <span className="text-[10px] font-medium">{copiedText === snip.id ? (isVi ? "Đã sao chép!" : "Copied!") : (isVi ? "Sao chép" : "Copy")}</span>
                   </button>
                 </div>
               ))}
@@ -461,7 +465,7 @@ export function SpotlightSearch() {
           {filteredCalendarEvents.length > 0 && (
             <div className="space-y-1">
               <span className="text-[10px] font-bold text-[#F5A623] uppercase tracking-wider px-2 block">
-                Sự Kiện Lịch Trình (Calendar Events)
+                {isVi ? "Sự Kiện Lịch Trình" : "Calendar Events"}
               </span>
               {filteredCalendarEvents.map((ev) => (
                 <div
@@ -483,7 +487,7 @@ export function SpotlightSearch() {
                     </div>
                   </div>
                   <kbd className="text-[10px] font-mono text-[#8B90A0] bg-white/5 px-2 py-0.5 rounded">
-                    ↵ Mở Lịch
+                    {isVi ? "↵ Mở Lịch" : "↵ Open Calendar"}
                   </kbd>
                 </div>
               ))}
@@ -494,7 +498,7 @@ export function SpotlightSearch() {
           {filteredNotes.length > 0 && (
             <div className="space-y-1">
               <span className="text-[10px] font-bold text-[#8B90A0] uppercase tracking-wider px-2 block">
-                Ghi Chú Trên Màn Hình ({filteredNotes.length})
+                {isVi ? `Ghi Chú Trên Màn Hình (${filteredNotes.length})` : `Desk Notes (${filteredNotes.length})`}
               </span>
               {filteredNotes.map((n) => {
                 const completedTodos = n.checkItems?.filter((t) => t.done).length || 0;
@@ -515,7 +519,7 @@ export function SpotlightSearch() {
                       />
                       <div className="min-w-0 flex-1">
                         <p className="text-xs font-medium leading-snug line-clamp-2">
-                          {n.body.trim() || "(Ghi chú không lời)"}
+                          {n.body.trim() || (isVi ? "(Ghi chú không lời)" : "(Untitled Note)")}
                         </p>
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                           {n.cluster && (
@@ -528,14 +532,14 @@ export function SpotlightSearch() {
                             <span className="flex items-center gap-1 text-[10px] text-[#3FAE6C] bg-[#3FAE6C]/10 px-1.5 py-0.5 rounded border border-[#3FAE6C]/20">
                               <CheckSquare className="size-2.5" />
                               <span>
-                                {completedTodos}/{totalTodos} việc
+                                {completedTodos}/{totalTodos} {isVi ? "việc" : "done"}
                               </span>
                             </span>
                           )}
                           {n.pinned && (
                             <span className="flex items-center gap-1 text-[10px] text-[#F5A623] bg-white/5 px-1.5 py-0.5 rounded">
                               <Pin className="size-2.5" />
-                              <span>Ghim</span>
+                              <span>{isVi ? "Ghim" : "Pinned"}</span>
                             </span>
                           )}
                         </div>
@@ -543,7 +547,7 @@ export function SpotlightSearch() {
                     </div>
 
                     <kbd className="hidden sm:inline-flex items-center text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[#8B90A0]">
-                      <CornerDownLeft className="size-2.5 mr-0.5" /> Nhảy tới
+                      <CornerDownLeft className="size-2.5 mr-0.5" /> {isVi ? "Nhảy tới" : "Jump to"}
                     </kbd>
                   </div>
                 );
@@ -555,7 +559,7 @@ export function SpotlightSearch() {
           {quickActions.length > 0 && (
             <div className="space-y-1">
               <span className="text-[10px] font-bold text-[#8B90A0] uppercase tracking-wider px-2 block">
-                Lệnh Nhanh & Tiện Ích (Quick Actions)
+                {isVi ? "Lệnh Nhanh & Tiện Ích" : "Quick Actions"}
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                 {quickActions.map((act) => (
@@ -577,7 +581,7 @@ export function SpotlightSearch() {
           {filteredTrash.length > 0 && (
             <div className="pt-2 border-t border-white/10 space-y-1">
               <span className="text-[10px] font-bold text-[#EF4444] uppercase tracking-wider px-2 block">
-                Trong thùng rác (Nhấn để khôi phục)
+                {isVi ? "Trong thùng rác (Nhấn để khôi phục)" : "In Trash (Click to restore)"}
               </span>
               {filteredTrash.map((n) => (
                 <div
@@ -586,7 +590,7 @@ export function SpotlightSearch() {
                   className="flex items-center justify-between p-2.5 rounded-2xl bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 cursor-pointer transition-colors text-xs"
                 >
                   <span className="truncate line-clamp-1">{n.body}</span>
-                  <span className="text-[10px] text-red-400 font-bold shrink-0">Khôi phục ↺</span>
+                  <span className="text-[10px] text-red-400 font-bold shrink-0">{isVi ? "Khôi phục ↺" : "Restore ↺"}</span>
                 </div>
               ))}
             </div>

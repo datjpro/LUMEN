@@ -139,7 +139,7 @@ export function SystemHudWidget() {
           {/* Alert on High Load Indicator */}
           {hudSettings.alertOnHighLoad && (isHighCpu || isHighRam) && (
             <span className="flex items-center gap-1 px-1.5 py-0.2 rounded-full bg-red-500/20 text-red-400 text-[10px] font-bold animate-bounce">
-              ⚠️ {isHighCpu ? "CPU High" : "RAM High"}
+              ⚠️ {isHighCpu ? (isVi ? "CPU Quá tải" : "CPU High") : (isVi ? "RAM Quá tải" : "RAM High")}
             </span>
           )}
 
@@ -178,7 +178,7 @@ export function SystemHudWidget() {
                 setExpanded(!expanded);
               }}
               className="p-1 rounded-lg hover:bg-white/10 text-[#8B90A0] hover:text-white transition-colors cursor-pointer"
-              title={expanded ? "Thu gọn" : "Mở rộng"}
+              title={expanded ? (isVi ? "Thu gọn" : "Collapse") : (isVi ? "Mở rộng" : "Expand")}
             >
               {expanded ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
             </button>
@@ -189,7 +189,7 @@ export function SystemHudWidget() {
                 toggleHud(false);
               }}
               className="p-1 rounded-lg hover:bg-red-500/20 text-[#8B90A0] hover:text-red-400 transition-colors cursor-pointer"
-              title="Đóng HUD"
+              title={isVi ? "Đóng Giám Sát" : "Close HUD"}
             >
               <X className="size-3.5" />
             </button>
@@ -205,7 +205,7 @@ export function SystemHudWidget() {
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-[#8B90A0] font-medium">
                     <Cpu className="size-3.5 text-sky-400" />
-                    <span>{stats.isNative ? "CPU Host" : "Frame Load"}</span>
+                    <span>{stats.isNative ? (isVi ? "Vi xử lý CPU" : "CPU Host") : (isVi ? "Tải khung hình" : "Frame Load")}</span>
                   </span>
                   <span className="font-mono font-bold text-sky-300">{stats.cpuUsage}%</span>
                 </div>
@@ -219,7 +219,7 @@ export function SystemHudWidget() {
                   <Sparkline data={stats.cpuHistory} color="#38bdf8" />
                 </div>
                 <span className="text-[10px] text-[#8B90A0] font-mono mt-0.5">
-                  {stats.cpuCores || 4} Threads • {stats.fps || 60} FPS
+                  {stats.cpuCores || 4} {isVi ? "Luồng" : "Threads"} • {stats.fps || 60} FPS
                 </span>
               </div>
             )}
@@ -230,7 +230,7 @@ export function SystemHudWidget() {
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-[#8B90A0] font-medium">
                     <HardDrive className="size-3.5 text-emerald-400" />
-                    <span>{stats.memoryMode === "heap" ? "JS Heap" : "System RAM"}</span>
+                    <span>{stats.memoryMode === "heap" ? (isVi ? "Bộ nhớ Heap" : "JS Heap") : (isVi ? "Bộ nhớ RAM" : "System RAM")}</span>
                   </span>
                   <span className="font-mono font-bold text-emerald-300">{stats.ramUsage}%</span>
                 </div>
@@ -245,7 +245,7 @@ export function SystemHudWidget() {
                 </div>
                 <span className="text-[10px] text-[#8B90A0] font-mono mt-0.5">
                   {stats.memoryMode === "heap"
-                    ? `${stats.ramUsedMb} MB / ${(stats.ramTotalMb / 1024).toFixed(1)} GB Heap`
+                    ? `${stats.ramUsedMb} MB / ${(stats.ramTotalMb / 1024).toFixed(1)} GB ${isVi ? "Bộ nhớ" : "Heap"}`
                     : `${(stats.ramUsedMb / 1024).toFixed(1)} GB / ${(stats.ramTotalMb / 1024).toFixed(0)} GB`}
                 </span>
               </div>

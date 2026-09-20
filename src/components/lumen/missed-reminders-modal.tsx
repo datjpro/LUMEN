@@ -10,6 +10,9 @@ export function MissedRemindersModal() {
   const snoozeReminder = useLumen((s) => s.snoozeReminder);
   const hydrated = useLumen((s) => s.hydrated);
 
+  const lang = useLumen((s) => s.lang);
+  const isVi = lang === "vi";
+
   const [missed, setMissed] = useState<Reminder[]>([]);
   const [open, setOpen] = useState(false);
 
@@ -53,12 +56,12 @@ export function MissedRemindersModal() {
     const mins = Math.floor(elapsedMs / 60000);
     const hours = Math.floor(mins / 60);
     if (hours > 0) {
-      return `Đã kết thúc cách đây ${hours}h ${mins % 60}p`;
+      return isVi ? `Đã kết thúc cách đây ${hours} giờ ${mins % 60} phút` : `Expired ${hours}h ${mins % 60}m ago`;
     }
     if (mins > 0) {
-      return `Đã kết thúc cách đây ${mins} phút`;
+      return isVi ? `Đã kết thúc cách đây ${mins} phút` : `Expired ${mins} mins ago`;
     }
-    return "Vừa kết thúc";
+    return isVi ? "Vừa kết thúc" : "Just expired";
   };
 
   return (
