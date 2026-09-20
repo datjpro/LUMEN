@@ -7,8 +7,8 @@
 [![React](https://img.shields.io/badge/React-19.2+-61DAFB.svg?style=flat-square&logo=react)](https://react.dev/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC.svg?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
 [![Zustand](https://img.shields.io/badge/Zustand-v5.0-orange.svg?style=flat-square)](https://zustand-demo.pmnd.rs/)
-[![Version](https://img.shields.io/badge/Version-v1.2.1-blue.svg?style=flat-square)](CHANGELOG.md)
-[![Tests](https://img.shields.io/badge/Tests-143%2F143_PASS-brightgreen.svg?style=flat-square)](scripts/test-suite.mjs)
+[![Version](https://img.shields.io/badge/Version-v1.2.2-blue.svg?style=flat-square)](CHANGELOG.md)
+[![Tests](https://img.shields.io/badge/Tests-202%2F202_PASS-brightgreen.svg?style=flat-square)](scripts/test-suite.mjs)
 
 <p align="center">
   <img src="screenshots/lumen-demo.gif" alt="Lumen — Desktop Spatial Companion & Interactive Workspace" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);" />

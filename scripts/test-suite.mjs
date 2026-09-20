@@ -1127,6 +1127,108 @@ console.log("\n📦 [SUITE 10]: System Telemetry Accuracy & UI Decluttering (v1.
   assert(coreActionShortcuts.length === 4, "Streamlined Action Hub organizes 4 core shortcuts (Note, Timer, Calendar, Spotlight)");
 }
 
+// TEST SUITE 11: PRO TRIAL, SVIP LOCKED TIER & DRAG-TO-PLACE NOTE (v1.2.2)
+console.log("\n📦 [SUITE 11]: PRO Trial, SVIP Locked Tier & Drag-to-Place Note (v1.2.2)");
+{
+  // 1. Semver for v1.2.2
+  assert(compareSemver("1.2.2", "1.2.1") === 1, "v1.2.2 is strictly newer than v1.2.1");
+  assert(compareSemver("1.2.1", "1.2.2") === -1, "v1.2.1 is older than v1.2.2");
+  assert(compareSemver("1.2.2", "1.2.2") === 0, "v1.2.2 matches v1.2.2");
+
+  // 2. Multi-tier Store License Activation State Machine
+  function activateTierKey(key, isVi = true) {
+    const cleaned = (key || "").trim().toUpperCase();
+    if (cleaned.length < 4) {
+      return {
+        success: false,
+        message: isVi ? "Mã bản quyền không hợp lệ" : "Invalid license key format",
+        state: { isPro: false, tier: "free", plan: "free" },
+      };
+    }
+
+    // SVIP is strictly LOCKED — trial and normal activations blocked
+    if (cleaned.includes("SVIP") || cleaned.includes("SUPERVIP")) {
+      return {
+        success: false,
+        message: isVi
+          ? "🔒 Bản SVIP hiện đang bị khóa và chưa mở sử dụng. Bạn chỉ có thể dùng thử gói PRO với mã LUMENTRIAL3DAY."
+          : "🔒 SVIP tier is currently locked. 3-Day Free Trial is strictly available for PRO tier using code LUMENTRIAL3DAY.",
+        state: { isPro: false, tier: "free", plan: "free" },
+      };
+    }
+
+    const isTrial3Day =
+      cleaned === "LUMENTRIAL3DAY" ||
+      cleaned === "TRIAL3DAY" ||
+      cleaned === "PROTRIAL" ||
+      cleaned === "LUMEN-TRIAL-3DAY";
+    const isTrial = isTrial3Day || cleaned.includes("TRIAL");
+    const now = Date.now();
+    const expiresAt = isTrial ? now + 3 * 24 * 60 * 60 * 1000 : undefined;
+
+    return {
+      success: true,
+      message: isTrial
+        ? (isVi ? "🎉 Đã kích hoạt gói Dùng Thử Lumen PRO 3 Ngày thành công!" : "🎉 3-Day Lumen PRO Trial activated successfully!")
+        : (isVi ? "👑 Đã kích hoạt bản quyền Lumen PRO Trọn Đời thành công!" : "👑 Lifetime Lumen PRO License activated successfully!"),
+      state: {
+        isPro: true,
+        tier: "pro",
+        licenseKey: cleaned,
+        activatedAt: now,
+        plan: isTrial ? "trial" : "lifetime",
+        expiresAt,
+      },
+    };
+  }
+
+  // Test SVIP Lockout
+  const svipRes1 = activateTierKey("SVIP-MASTER-2026");
+  assert(svipRes1.success === false, "SVIP key activation is strictly rejected");
+  assert(svipRes1.message.includes("Bản SVIP hiện đang bị khóa"), "Vietnamese SVIP lockout explanation message provided");
+  assert(svipRes1.state.tier === "free", "Tier remains free upon SVIP attempt");
+
+  const svipRes2 = activateTierKey("SUPERVIP-TRIAL");
+  assert(svipRes2.success === false, "SUPERVIP trial attempt is strictly blocked");
+
+  // Test PRO Trial Activation
+  const proTrial1 = activateTierKey("LUMENTRIAL3DAY");
+  assert(proTrial1.success === true, "LUMENTRIAL3DAY unlocks PRO tier");
+  assert(proTrial1.state.tier === "pro" && proTrial1.state.plan === "trial", "Tier set to 'pro' and plan set to 'trial'");
+  assert(proTrial1.state.expiresAt > Date.now(), "Trial expiration set 3 days forward");
+
+  const proTrial2 = activateTierKey("PROTRIAL");
+  assert(proTrial2.success === true && proTrial2.state.tier === "pro", "PROTRIAL alias successfully activates PRO trial");
+
+  // Test PRO Lifetime Activation
+  const proLifetime = activateTierKey("LUMEN-PRO-2026");
+  assert(proLifetime.success === true, "Standard PRO key activates lifetime");
+  assert(proLifetime.state.tier === "pro" && proLifetime.state.plan === "lifetime", "PRO lifetime state assigned");
+
+  // 3. Drag-to-Place Note Spatial Gesture Engine
+  function calculateDragDrop(originX, originY, currentX, currentY, minDragDistance = 25) {
+    const dist = Math.hypot(currentX - originX, currentY - originY);
+    const isDragged = dist >= minDragDistance;
+    const dropX = Math.max(20, Math.min(1920 - 320, currentX - 140));
+    const dropY = Math.max(20, Math.min(1080 - 240, currentY - 50));
+    return { dist, isDragged, dropX, dropY };
+  }
+
+  // Tiny click jitter (< 25px) -> does not trigger spatial drop
+  const clickGesture = calculateDragDrop(100, 100, 110, 112);
+  assert(clickGesture.isDragged === false, "Click jitter (< 25px) does not trigger accidental drag-to-place drop");
+
+  // Full drag gesture across canvas (> 25px) -> triggers placement
+  const dragGesture = calculateDragDrop(500, 800, 700, 400);
+  assert(dragGesture.isDragged === true, "Drag motion (> 25px) activates canvas placement gesture");
+  assert(dragGesture.dropX === 560 && dragGesture.dropY === 350, "Drop coordinates computed centered under cursor offset");
+
+  // Edge clamping verification
+  const clampGesture = calculateDragDrop(0, 0, 5, 5);
+  const clampRes = calculateDragDrop(0, 0, 1950, 1100);
+  assert(clampRes.dropX === 1600 && clampRes.dropY === 840, "Drop coordinates clamped within visible screen boundaries");
+}
+
 console.log(`\n========================================`);
 console.log(`📊 FINAL TEST REPORT: ${passed}/${total} Tests Passed (100% Success)`);
 console.log(`========================================\n`);

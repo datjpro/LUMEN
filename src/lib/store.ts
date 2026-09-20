@@ -681,6 +681,7 @@ export const useLumen = create<LumenState>()(
 
       pro: {
         isPro: false,
+        tier: "free",
         plan: "free",
       },
       proModalOpen: false,
@@ -691,16 +692,29 @@ export const useLumen = create<LumenState>()(
       },
       activatePro: (licenseKey: string) => {
         const cleaned = licenseKey.trim().toUpperCase();
+        const isVi = get().lang === "vi";
+
         if (cleaned.length < 4) {
           return {
             success: false,
-            message: get().lang === "vi" ? "Mã bản quyền không hợp lệ" : "Invalid license key format",
+            message: isVi ? "Mã bản quyền không hợp lệ" : "Invalid license key format",
+          };
+        }
+
+        // Gói SVIP bị khóa - Không cho phép kích hoạt dùng thử hoặc kích hoạt thông thường
+        if (cleaned.includes("SVIP") || cleaned.includes("SUPERVIP")) {
+          return {
+            success: false,
+            message: isVi
+              ? "🔒 Bản SVIP hiện đang bị khóa và chưa mở sử dụng. Bạn chỉ có thể dùng thử gói PRO với mã LUMENTRIAL3DAY."
+              : "🔒 SVIP tier is currently locked. 3-Day Free Trial is strictly available for PRO tier using code LUMENTRIAL3DAY.",
           };
         }
 
         const isTrial3Day =
           cleaned === "LUMENTRIAL3DAY" ||
           cleaned === "TRIAL3DAY" ||
+          cleaned === "PROTRIAL" ||
           cleaned === "LUMEN-TRIAL-3DAY";
         const isTrial = isTrial3Day || cleaned.includes("TRIAL");
         const now = Date.now();
@@ -711,6 +725,7 @@ export const useLumen = create<LumenState>()(
         set({
           pro: {
             isPro: true,
+            tier: "pro",
             licenseKey: cleaned,
             activatedAt: now,
             plan: isTrial ? "trial" : "lifetime",
@@ -721,12 +736,12 @@ export const useLumen = create<LumenState>()(
         return {
           success: true,
           message: isTrial
-            ? get().lang === "vi"
-              ? "🎉 Đã kích hoạt gói Dùng Thử Lumen Pro 3 Ngày thành công!"
-              : "🎉 3-Day Lumen Pro Trial activated successfully!"
-            : get().lang === "vi"
-            ? "👑 Đã kích hoạt bản quyền Lumen Pro Trọn Đời thành công!"
-            : "👑 Lifetime Lumen Pro License activated successfully!",
+            ? isVi
+              ? "🎉 Đã kích hoạt gói Dùng Thử Lumen PRO 3 Ngày thành công!"
+              : "🎉 3-Day Lumen PRO Trial activated successfully!"
+            : isVi
+            ? "👑 Đã kích hoạt bản quyền Lumen PRO Trọn Đời thành công!"
+            : "👑 Lifetime Lumen PRO License activated successfully!",
         };
       },
       deactivatePro: () => {
@@ -734,6 +749,7 @@ export const useLumen = create<LumenState>()(
         set({
           pro: {
             isPro: false,
+            tier: "free",
             plan: "free",
           },
         });

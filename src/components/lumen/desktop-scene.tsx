@@ -34,9 +34,13 @@ import { PomodoroWidget } from "./widgets/pomodoro-widget";
 import { ScratchpadWidget } from "./widgets/scratchpad-widget";
 import { cn } from "@/lib/utils";
 
-// Clean, Streamlined Floating Action Hub (Minimalist & Uncluttered)
+// Clean, Streamlined Floating Action Hub with Spatial Drag-to-Place Note Well
 function FloatingTrayMenu() {
   const [open, setOpen] = useState(false);
+  const [isDraggingPaper, setIsDraggingPaper] = useState(false);
+  const [dragCursorPos, setDragCursorPos] = useState({ x: 0, y: 0 });
+  const dragStartPos = useRef({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
 
   const lang = useLumen((s) => s.lang);
   const layout = useLumen((s) => s.layout);
@@ -50,6 +54,7 @@ function FloatingTrayMenu() {
   const tidyNotes = useLumen((s) => s.tidyNotes);
   const pipEnabled = useLumen((s) => s.pip.enabled);
   const setPipEnabled = useLumen((s) => s.setPipEnabled);
+  const requestNoteFromPip = useLumen((s) => s.requestNoteFromPip);
   const pro = useLumen((s) => s.pro);
   const setProModalOpen = useLumen((s) => s.setProModalOpen);
   const toggleWidget = useLumen((s) => s.toggleWidget);
@@ -57,12 +62,97 @@ function FloatingTrayMenu() {
   const toggleScratchpad = useLumen((s) => s.toggleScratchpad);
   const activeWidgets = useLumen((s) => s.activeWidgets);
   const hudSettings = useLumen((s) => s.hudSettings);
+  const pushToast = useLumen((s) => s.pushToast);
 
   const isVi = lang === "vi";
 
+  // Drag-and-drop paper note mechanics
+  const handlePaperPointerDown = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    isDraggingRef.current = true;
+    dragStartPos.current = { x: e.clientX, y: e.clientY };
+    setDragCursorPos({ x: e.clientX, y: e.clientY });
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  const handlePaperPointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingRef.current) return;
+    const dx = e.clientX - dragStartPos.current.x;
+    const dy = e.clientY - dragStartPos.current.y;
+    if (Math.hypot(dx, dy) > 8) {
+      setIsDraggingPaper(true);
+      setDragCursorPos({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const handlePaperPointerUp = (e: React.PointerEvent) => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {}
+
+    const dx = e.clientX - dragStartPos.current.x;
+    const dy = e.clientY - dragStartPos.current.y;
+    const distMoved = Math.hypot(dx, dy);
+
+    if (distMoved > 25) {
+      // Dropped onto canvas -> spawn note directly at cursor coordinates!
+      const screenW = window.innerWidth || 1920;
+      const screenH = window.innerHeight || 1080;
+      const dropX = Math.max(4, Math.min(82, ((e.clientX - 120) / screenW) * 100));
+      const dropY = Math.max(4, Math.min(76, ((e.clientY - 40) / screenH) * 100));
+
+      sounds.playPop(640);
+      addNote({
+        x: dropX,
+        y: dropY,
+        body: "",
+        tint: "cream",
+      });
+      pushToast(isVi ? "Đã dán ghi chú mới" : "Note created on canvas", "");
+    } else {
+      // Quick tap on paper dock
+      sounds.playPop(620);
+      if (pipEnabled) {
+        requestNoteFromPip();
+      } else {
+        addNote({
+          x: Math.max(10, Math.min(80, 50 + (Math.random() - 0.5) * 30)),
+          y: Math.max(10, Math.min(75, 40 + (Math.random() - 0.5) * 25)),
+          body: "",
+          tint: "cream",
+        });
+      }
+    }
+
+    setIsDraggingPaper(false);
+  };
+
   return (
     <div className="interactive-el fixed right-6 bottom-5 z-[85] flex flex-col items-end gap-2 select-none">
-      {/* Streamlined Glassmorphism Quick Action Hub */}
+      {/* 1. Dragged Ghost Note Preview */}
+      {isDraggingPaper && (
+        <div
+          className="pointer-events-none fixed z-[99999] w-64 rounded-2xl bg-[#fef08a] p-4 text-stone-800 shadow-[0_24px_60px_rgba(0,0,0,0.5)] border border-amber-300 ring-2 ring-[#F5A623] rotate-[-2deg] opacity-90 backdrop-blur-sm animate-in zoom-in-95 duration-100"
+          style={{
+            left: `${dragCursorPos.x - 120}px`,
+            top: `${dragCursorPos.y - 40}px`,
+          }}
+        >
+          <div className="flex items-center justify-between pb-2 border-b border-amber-400/40 text-amber-900/70 text-[11px] font-semibold">
+            <span>📝 {isVi ? "Thả để dán ghi chú" : "Drop to place note"}</span>
+            <span className="text-[10px] uppercase font-mono">Lumen</span>
+          </div>
+          <p className="mt-2 text-xs text-amber-900/60 italic">
+            {isVi ? "Kéo đến vị trí bạn muốn đặt ghi chú..." : "Drag to your desired note position..."}
+          </p>
+        </div>
+      )}
+
+      {/* 2. Streamlined Glassmorphism Quick Action Hub */}
       {open ? (
         <div className="animate-in fade-in slide-in-from-bottom-2 w-72 rounded-2xl bg-[#181B22]/95 text-[#F4F5F7] p-3 shadow-[0_24px_60px_rgba(0,0,0,0.65)] border border-white/10 backdrop-blur-2xl">
           {/* Header */}
@@ -78,21 +168,26 @@ function FloatingTrayMenu() {
 
           {/* 1. Core Actions (2x2 Grid) */}
           <div className="grid grid-cols-2 gap-1.5 mb-2.5">
-            {/* New Note */}
+            {/* New Note (Click to open QuickCapture, or drag directly to place) */}
             <button
               type="button"
               onClick={() => {
                 setCaptureOpen(true);
                 setOpen(false);
               }}
-              className="flex flex-col items-start gap-1 p-2.5 rounded-xl bg-white/[0.04] hover:bg-[#F5A623]/15 border border-white/5 hover:border-[#F5A623]/30 transition-all text-left cursor-pointer group"
+              onPointerDown={handlePaperPointerDown}
+              onPointerMove={handlePaperPointerMove}
+              onPointerUp={handlePaperPointerUp}
+              onPointerCancel={handlePaperPointerUp}
+              className="flex flex-col items-start gap-1 p-2.5 rounded-xl bg-white/[0.04] hover:bg-[#F5A623]/15 border border-white/5 hover:border-[#F5A623]/30 transition-all text-left cursor-grab active:cursor-grabbing group touch-none"
+              title={isVi ? "Nhấp để nhập nhanh • Kéo ra màn hình để dán" : "Click for quick note • Drag to canvas"}
             >
               <div className="flex items-center justify-between w-full">
                 <Plus className="size-4 text-[#F5A623] group-hover:scale-110 transition-transform" />
                 <span className="text-[9px] text-[#8B90A0] font-mono">Alt+N</span>
               </div>
               <span className="text-xs font-medium text-white group-hover:text-[#F5A623] transition-colors">
-                {isVi ? "Ghi chú mới" : "New Note"}
+                {isVi ? "Ghi chú (Kéo)" : "New Note"}
               </span>
             </button>
 
@@ -284,7 +379,7 @@ function FloatingTrayMenu() {
               )}
             >
               <Crown className="size-3 text-amber-400" />
-              <span>{pro.isPro ? "PRO" : "Upgrade"}</span>
+              <span>{pro.isPro ? "PRO" : "Gói PRO"}</span>
             </button>
 
             <button
@@ -300,20 +395,46 @@ function FloatingTrayMenu() {
         </div>
       ) : null}
 
-      {/* Modern Floating Brand Trigger Button */}
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="flex size-11 items-center justify-center rounded-2xl bg-[#181B22]/95 hover:bg-[#262A35] text-white shadow-[0_12px_32px_rgba(0,0,0,0.55)] border border-white/10 backdrop-blur-2xl hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer overflow-hidden p-2 group"
-        title="Lumen Desk (Nhấp để mở menu điều khiển)"
-        aria-label="Lumen Menu"
-      >
-        <img
-          src="/logo.png"
-          alt="Lumen Logo"
-          className="size-full object-contain rounded-xl drop-shadow-md group-hover:scale-110 transition-transform duration-150 select-none pointer-events-none"
-        />
-      </button>
+      {/* 3. Bottom Dock Launcher with Spatial Paper Drag Well Tab */}
+      <div className="flex items-center gap-2">
+        {/* Paper Drag Tab (Always Accessible to drag new note instantly) */}
+        {!open && (
+          <div
+            onPointerDown={handlePaperPointerDown}
+            onPointerMove={handlePaperPointerMove}
+            onPointerUp={handlePaperPointerUp}
+            onPointerCancel={handlePaperPointerUp}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl bg-[#181B22]/95 hover:bg-[#262A35] text-[#F4F5F7] border border-white/10 shadow-[0_10px_25px_rgba(0,0,0,0.5)] cursor-grab active:cursor-grabbing hover:scale-105 active:scale-95 transition-all duration-150 backdrop-blur-2xl touch-none group"
+            title={isVi ? "Kéo ra màn hình để dán ghi chú mới • Hoặc nhấp để lấy nhanh" : "Drag to place note anywhere • Or click for quick note"}
+          >
+            <div className="relative size-5 flex items-center justify-center">
+              <span className="absolute inset-0 rotate-[-8deg] rounded-sm bg-[#bae6fd] opacity-70" />
+              <span className="absolute inset-0 rotate-[4deg] rounded-sm bg-[#bbf7d0] opacity-80" />
+              <span className="relative size-4 rounded-sm bg-[#fef08a] border border-amber-300 shadow-sm flex items-center justify-center text-[9px]">
+                📝
+              </span>
+            </div>
+            <span className="text-[11px] font-bold text-[#F5A623] tracking-tight">
+              {isVi ? "Kéo Note" : "Drag Note"}
+            </span>
+          </div>
+        )}
+
+        {/* Brand Logo Trigger Button */}
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          className="flex size-11 items-center justify-center rounded-2xl bg-[#181B22]/95 hover:bg-[#262A35] text-white shadow-[0_12px_32px_rgba(0,0,0,0.55)] border border-white/10 backdrop-blur-2xl hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer overflow-hidden p-2 group"
+          title="Lumen Desk (Nhấp để mở menu điều khiển)"
+          aria-label="Lumen Menu"
+        >
+          <img
+            src="/logo.png"
+            alt="Lumen Logo"
+            className="size-full object-contain rounded-xl drop-shadow-md group-hover:scale-110 transition-transform duration-150 select-none pointer-events-none"
+          />
+        </button>
+      </div>
     </div>
   );
 }

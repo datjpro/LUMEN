@@ -4,6 +4,23 @@
 
 ---
 
+## 🚀 [v1.2.2] — 2026-09-20 — PRO Trial Gating, SVIP Locked Tier & Drag-to-Place Note Restoration
+
+### ✨ Enhancements & Tier System Evolution:
+- **🔒 Strict SVIP Locked Tier Policy:**
+  - Transitioned tier naming model into **FREE**, **PRO**, and **SVIP** (retiring legacy VIP terminology).
+  - SVIP Master tier is strictly locked with disabled activation (`cursor-not-allowed`, `Lock` badge), preventing unreleased access.
+  - Store validator strictly blocks any SVIP trial or manual key attempts with clear guidance that trials are exclusively for the PRO tier.
+- **🎁 Exclusive 3-Day PRO Trial Gating:**
+  - Free 3-day trial pass (`LUMENTRIAL3DAY` / `PROTRIAL`) is restricted specifically to unlock the **PRO** tier.
+  - Clear countdown indicator and instant 1-click trial activation button in the license modal.
+- **📝 Restored & Refined Drag-to-Place Spatial Note Gesture:**
+  - Added a dedicated floating **Paper Drag Dock** (`📝 Kéo Note`) beside the main bottom launcher capsule.
+  - Live ghost note preview follows cursor during drag gesture and places a new sticky note at exact drop coordinates $(x, y)$ on canvas release ($>25\text{px}$).
+  - Fully supports both 1-click spawn and spatial drag-and-drop placement anywhere on screen.
+
+---
+
 ## 🚀 [v1.2.1] — 2026-09-20 — System Telemetry Accuracy & UI Decluttering Optimization
 
 ### 🔧 Fixes & Telemetry Inaccuracy Resolutions:

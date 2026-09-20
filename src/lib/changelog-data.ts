@@ -17,10 +17,38 @@ export interface VersionRelease {
 
 export const APP_RELEASES: VersionRelease[] = [
   {
+    version: "1.2.2",
+    releaseName: "Lumen v1.2.2 — PRO Trial Gating, SVIP Tier Lock & Drag-to-Place Note",
+    releaseDate: "2026-09-20",
+    isLatest: true,
+    highlights: [
+      {
+        icon: "🔒",
+        badge: "pro",
+        titleVi: "Chuẩn Hóa Phân Hạng: FREE / PRO / SVIP (Khóa Chặt Bản SVIP)",
+        titleEn: "Tier Modernization: FREE / PRO / SVIP (SVIP Strictly Locked)",
+        descriptionVi:
+          "Chuyển đổi hệ thống phân tầng sang chuẩn FREE, PRO, SVIP. Khóa hoàn toàn gói SVIP Master không cho phép sử dụng hay kích hoạt thử. Dùng thử 3 ngày chỉ áp dụng độc quyền cho gói PRO.",
+        descriptionEn:
+          "Modernized tier structure into FREE, PRO, and SVIP. SVIP is strictly locked and cannot be trialed. 3-day free trial is exclusively restricted to the PRO tier.",
+      },
+      {
+        icon: "📝",
+        badge: "ui",
+        titleVi: "Khôi Phục & Nâng Cấp Kéo Thả Ghi Chú Ra Màn Hình",
+        titleEn: "Restored & Upgraded Drag-to-Place Spatial Note",
+        descriptionVi:
+          "Tích hợp dock kéo giấy trực tiếp từ thanh launcher. Xem trước bóng ghi chú thời gian thực theo con trỏ chuột và đặt note chuẩn xác tại bất kỳ tọa độ nào trên không gian desktop.",
+        descriptionEn:
+          "Added dedicated paper drag dock beside launcher with live ghost preview and precise coordinate placement anywhere on the desktop spatial canvas.",
+      },
+    ],
+  },
+  {
     version: "1.2.1",
     releaseName: "Lumen v1.2.1 — System Telemetry Accuracy & UI Decluttering Optimization",
     releaseDate: "2026-09-20",
-    isLatest: true,
+    isLatest: false,
     highlights: [
       {
         icon: "🎯",

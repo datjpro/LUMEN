@@ -140,11 +140,14 @@ export type ProFeatureId =
   | "ai_cluster"
   | "pin_lock";
 
+export type LicenseTier = "free" | "pro" | "svip";
+
 export type ProLicense = {
   isPro: boolean;
+  tier?: LicenseTier;
   licenseKey?: string;
   activatedAt?: number;
-  plan?: "lifetime" | "annual" | "monthly" | "trial" | "free";
+  plan?: "lifetime" | "annual" | "monthly" | "trial" | "free" | "pro" | "svip";
   expiresAt?: number;
 };
 
