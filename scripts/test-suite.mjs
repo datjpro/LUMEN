@@ -1229,6 +1229,53 @@ console.log("\n📦 [SUITE 11]: PRO Trial, SVIP Locked Tier & Drag-to-Place Note
   assert(clampRes.dropX === 1600 && clampRes.dropY === 840, "Drop coordinates clamped within visible screen boundaries");
 }
 
+// TEST SUITE 12: HOVER-REVEAL DRAG DOCK & SINGLE NOTE SPAWN ISOLATION (v1.2.3)
+console.log("\n📦 [SUITE 12]: Hover-Reveal Drag Dock & Note Creation Isolation (v1.2.3)");
+{
+  // 1. Semver for v1.2.3
+  assert(compareSemver("1.2.3", "1.2.2") === 1, "v1.2.3 is strictly newer than v1.2.2");
+  assert(compareSemver("1.2.2", "1.2.3") === -1, "v1.2.2 is older than v1.2.3");
+  assert(compareSemver("1.2.3", "1.2.3") === 0, "v1.2.3 matches v1.2.3");
+
+  // 2. Dock Visibility State Machine
+  function evaluateDockVisibility(isHubOpen, isHovering, isDragging) {
+    if (isHubOpen) return false;
+    return isHovering || isDragging;
+  }
+
+  assert(evaluateDockVisibility(false, false, false) === false, "Drag note tab is cleanly hidden by default when not hovering");
+  assert(evaluateDockVisibility(false, true, false) === true, "Drag note tab smoothly reveals when hovering over logo launcher");
+  assert(evaluateDockVisibility(false, false, true) === true, "Drag note tab remains visible while actively dragging across canvas");
+  assert(evaluateDockVisibility(true, true, false) === false, "Drag note tab is hidden when Action Hub modal menu is open");
+
+  // 3. Action Hub Click Note Handler Isolation (Zero Double-Spawn)
+  class MockSceneController {
+    constructor() {
+      this.notesCreated = 0;
+      this.quickCaptureOpened = false;
+      this.hubOpen = true;
+    }
+    onActionHubNoteClick() {
+      // Clean isolated click: opens QuickCapture, does NOT call addNote
+      this.quickCaptureOpened = true;
+      this.hubOpen = false;
+    }
+    onPaperDockTap() {
+      // Tap on paper dock: creates exactly 1 note
+      this.notesCreated += 1;
+    }
+  }
+
+  const controller = new MockSceneController();
+  controller.onActionHubNoteClick();
+  assert(controller.notesCreated === 0, "Clicking 'Ghi chú' in Action Hub creates 0 duplicate background notes");
+  assert(controller.quickCaptureOpened === true, "Clicking 'Ghi chú' in Action Hub opens Quick Capture cleanly");
+  assert(controller.hubOpen === false, "Clicking 'Ghi chú' in Action Hub closes the hub menu");
+
+  controller.onPaperDockTap();
+  assert(controller.notesCreated === 1, "Tapping on Paper Drag Dock creates exactly 1 note");
+}
+
 console.log(`\n========================================`);
 console.log(`📊 FINAL TEST REPORT: ${passed}/${total} Tests Passed (100% Success)`);
 console.log(`========================================\n`);

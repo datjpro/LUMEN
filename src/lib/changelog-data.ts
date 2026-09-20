@@ -17,10 +17,38 @@ export interface VersionRelease {
 
 export const APP_RELEASES: VersionRelease[] = [
   {
+    version: "1.2.3",
+    releaseName: "Lumen v1.2.3 — Hover-Reveal Drag Dock & Note Creation Isolation",
+    releaseDate: "2026-09-20",
+    isLatest: true,
+    highlights: [
+      {
+        icon: "🎯",
+        badge: "ui",
+        titleVi: "Hiện Tab Kéo Note Khi Rê Chuột Qua Logo",
+        titleEn: "Hover-Reveal Drag Note Dock",
+        descriptionVi:
+          "Thẻ 'Kéo Note' chỉ xuất hiện mượt mà khi người dùng rê chuột qua biểu tượng logo Lumen, giữ giao diện luôn gọn gàng và không vướng tầm nhìn.",
+        descriptionEn:
+          "The 'Drag Note' pill smoothly reveals only upon hovering over the Lumen logo launcher dock, maintaining a pristine desktop aesthetic.",
+      },
+      {
+        icon: "✨",
+        badge: "fix",
+        titleVi: "Khắc Phục Hoàn Toàn Lỗi Tạo 2 Note Khi Nhấp Action Hub",
+        titleEn: "Zero Double-Spawn Note Fix",
+        descriptionVi:
+          "Tách biệt hoàn toàn sự kiện kéo thả con trỏ chuột khỏi nút Ghi chú nhanh trong Action Hub, triệt tiêu lỗi phát sinh 2 note khi mở Quick Capture.",
+        descriptionEn:
+          "Completely decoupled pointer drag capture from the Action Hub Quick Note tile, eliminating accidental duplicate note generation.",
+      },
+    ],
+  },
+  {
     version: "1.2.2",
     releaseName: "Lumen v1.2.2 — PRO Trial Gating, SVIP Tier Lock & Drag-to-Place Note",
     releaseDate: "2026-09-20",
-    isLatest: true,
+    isLatest: false,
     highlights: [
       {
         icon: "🔒",

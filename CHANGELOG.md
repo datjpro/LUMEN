@@ -4,6 +4,18 @@
 
 ---
 
+## 🚀 [v1.2.3] — 2026-09-20 — Hover-Reveal Paper Drag Dock & Note Creation Isolation
+
+### 🛠️ Bug Fixes & UX Ergonomics:
+- **🎯 Hover-Reveal Drag Dock (`📝 Kéo Note`):**
+  - Tinh chỉnh dock kéo note chỉ xuất hiện mượt mà khi người dùng di chuột (`hover`) vào khu vực logo launcher.
+  - Khi không trỏ chuột, giao diện giữ trạng thái tối giản, tinh gọn với duy nhất nút logo Lumen.
+- **✨ Khắc Phục Lỗi Tạo Trùng 2 Note (Zero Double-Spawn):**
+  - Tách biệt hoàn toàn thao tác click mở Quick Capture (`Alt+N`) trong Action Hub khỏi trình bắt sự kiện kéo thả con trỏ (`pointer capture`).
+  - Đảm bảo khi nhấp vào nút "Ghi chú", hệ thống chỉ mở giao diện nhập liệu nhanh duy nhất và không bị tạo ngầm ghi chú thứ hai trên desktop.
+
+---
+
 ## 🚀 [v1.2.2] — 2026-09-20 — PRO Trial Gating, SVIP Locked Tier & Drag-to-Place Note Restoration
 
 ### ✨ Enhancements & Tier System Evolution:

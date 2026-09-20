@@ -37,6 +37,7 @@ import { cn } from "@/lib/utils";
 // Clean, Streamlined Floating Action Hub with Spatial Drag-to-Place Note Well
 function FloatingTrayMenu() {
   const [open, setOpen] = useState(false);
+  const [isHoveringDock, setIsHoveringDock] = useState(false);
   const [isDraggingPaper, setIsDraggingPaper] = useState(false);
   const [dragCursorPos, setDragCursorPos] = useState({ x: 0, y: 0 });
   const dragStartPos = useRef({ x: 0, y: 0 });
@@ -168,26 +169,22 @@ function FloatingTrayMenu() {
 
           {/* 1. Core Actions (2x2 Grid) */}
           <div className="grid grid-cols-2 gap-1.5 mb-2.5">
-            {/* New Note (Click to open QuickCapture, or drag directly to place) */}
+            {/* New Note (Single click opens QuickCapture cleanly without duplicate note creation) */}
             <button
               type="button"
               onClick={() => {
                 setCaptureOpen(true);
                 setOpen(false);
               }}
-              onPointerDown={handlePaperPointerDown}
-              onPointerMove={handlePaperPointerMove}
-              onPointerUp={handlePaperPointerUp}
-              onPointerCancel={handlePaperPointerUp}
-              className="flex flex-col items-start gap-1 p-2.5 rounded-xl bg-white/[0.04] hover:bg-[#F5A623]/15 border border-white/5 hover:border-[#F5A623]/30 transition-all text-left cursor-grab active:cursor-grabbing group touch-none"
-              title={isVi ? "Nhấp để nhập nhanh • Kéo ra màn hình để dán" : "Click for quick note • Drag to canvas"}
+              className="flex flex-col items-start gap-1 p-2.5 rounded-xl bg-white/[0.04] hover:bg-[#F5A623]/15 border border-white/5 hover:border-[#F5A623]/30 transition-all text-left cursor-pointer group"
+              title={isVi ? "Tạo ghi chú nhanh (Alt+N)" : "Quick Note (Alt+N)"}
             >
               <div className="flex items-center justify-between w-full">
                 <Plus className="size-4 text-[#F5A623] group-hover:scale-110 transition-transform" />
                 <span className="text-[9px] text-[#8B90A0] font-mono">Alt+N</span>
               </div>
               <span className="text-xs font-medium text-white group-hover:text-[#F5A623] transition-colors">
-                {isVi ? "Ghi chú (Kéo)" : "New Note"}
+                {isVi ? "Ghi chú" : "New Note"}
               </span>
             </button>
 
@@ -395,26 +392,35 @@ function FloatingTrayMenu() {
         </div>
       ) : null}
 
-      {/* 3. Bottom Dock Launcher with Spatial Paper Drag Well Tab */}
-      <div className="flex items-center gap-2">
-        {/* Paper Drag Tab (Always Accessible to drag new note instantly) */}
+      {/* 3. Bottom Dock Launcher with Spatial Paper Drag Well Tab (Reveals on Hover) */}
+      <div
+        onPointerEnter={() => setIsHoveringDock(true)}
+        onPointerLeave={() => setIsHoveringDock(false)}
+        className="flex items-center gap-2"
+      >
+        {/* Paper Drag Tab (Only reveals when hovering over logo dock) */}
         {!open && (
           <div
             onPointerDown={handlePaperPointerDown}
             onPointerMove={handlePaperPointerMove}
             onPointerUp={handlePaperPointerUp}
             onPointerCancel={handlePaperPointerUp}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl bg-[#181B22]/95 hover:bg-[#262A35] text-[#F4F5F7] border border-white/10 shadow-[0_10px_25px_rgba(0,0,0,0.5)] cursor-grab active:cursor-grabbing hover:scale-105 active:scale-95 transition-all duration-150 backdrop-blur-2xl touch-none group"
+            className={cn(
+              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl bg-[#181B22]/95 hover:bg-[#262A35] text-[#F4F5F7] border border-white/10 shadow-[0_10px_25px_rgba(0,0,0,0.5)] cursor-grab active:cursor-grabbing hover:scale-105 active:scale-95 transition-all duration-200 backdrop-blur-2xl touch-none group select-none",
+              isHoveringDock || isDraggingPaper
+                ? "opacity-100 translate-x-0 scale-100 pointer-events-auto"
+                : "opacity-0 translate-x-4 scale-90 pointer-events-none w-0 px-0 overflow-hidden border-transparent"
+            )}
             title={isVi ? "Kéo ra màn hình để dán ghi chú mới • Hoặc nhấp để lấy nhanh" : "Drag to place note anywhere • Or click for quick note"}
           >
-            <div className="relative size-5 flex items-center justify-center">
+            <div className="relative size-5 flex items-center justify-center shrink-0">
               <span className="absolute inset-0 rotate-[-8deg] rounded-sm bg-[#bae6fd] opacity-70" />
               <span className="absolute inset-0 rotate-[4deg] rounded-sm bg-[#bbf7d0] opacity-80" />
               <span className="relative size-4 rounded-sm bg-[#fef08a] border border-amber-300 shadow-sm flex items-center justify-center text-[9px]">
                 📝
               </span>
             </div>
-            <span className="text-[11px] font-bold text-[#F5A623] tracking-tight">
+            <span className="text-[11px] font-bold text-[#F5A623] tracking-tight whitespace-nowrap">
               {isVi ? "Kéo Note" : "Drag Note"}
             </span>
           </div>
