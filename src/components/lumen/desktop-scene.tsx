@@ -26,7 +26,12 @@ import { SpotlightSearch } from "./spotlight-search";
 import { StickyNote } from "./sticky-note";
 import { SetupWizardModal } from "./installer-wizard";
 import { StandaloneCalendar } from "./standalone-calendar";
+import { SystemHudWidget } from "./system-hud";
 import { ToastStack } from "./toasts";
+import { AudioVisualizerWidget } from "./widgets/audio-visualizer";
+import { HabitTrackerWidget } from "./widgets/habit-widget";
+import { PomodoroWidget } from "./widgets/pomodoro-widget";
+import { ScratchpadWidget } from "./widgets/scratchpad-widget";
 import { cn } from "@/lib/utils";
 
 // Floating Quick Tray Menu & Hover-Revealed Paper Well Dock (Supports Direct Drag to Canvas)
@@ -54,6 +59,11 @@ function FloatingTrayMenu() {
   const requestNoteFromPip = useLumen((s) => s.requestNoteFromPip);
   const pro = useLumen((s) => s.pro);
   const setProModalOpen = useLumen((s) => s.setProModalOpen);
+  const toggleWidget = useLumen((s) => s.toggleWidget);
+  const toggleHud = useLumen((s) => s.toggleHud);
+  const toggleScratchpad = useLumen((s) => s.toggleScratchpad);
+  const activeWidgets = useLumen((s) => s.activeWidgets);
+  const hudSettings = useLumen((s) => s.hudSettings);
 
   const isVi = lang === "vi";
 
@@ -217,6 +227,86 @@ function FloatingTrayMenu() {
                 <span className="font-medium text-[#F4F5F7]">{isVi ? "Tìm kiếm nhanh" : "Spotlight"}</span>
               </div>
               <span className="text-[10px] text-[#8B90A0] font-mono">Alt+F</span>
+            </button>
+
+            {/* Pomodoro Matrix Toggle */}
+            <button
+              type="button"
+              onClick={() => {
+                toggleWidget("pomodoro");
+                setOpen(false);
+              }}
+              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer group"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="text-base group-hover:scale-110 transition-transform">🍅</span>
+                <span className="font-medium text-[#F4F5F7]">
+                  {isVi ? "Pomodoro Tập Trung" : "Pomodoro Matrix"}
+                </span>
+              </div>
+              <span className={cn("text-[10px] font-mono px-1.5 py-0.2 rounded font-semibold", activeWidgets.pomodoro ? "bg-red-500/20 text-red-400" : "text-[#8B90A0]")}>
+                {activeWidgets.pomodoro ? "ON" : "OFF"}
+              </span>
+            </button>
+
+            {/* System HUD Monitor Toggle */}
+            <button
+              type="button"
+              onClick={() => {
+                toggleHud();
+                setOpen(false);
+              }}
+              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer group"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="text-base group-hover:scale-110 transition-transform">📊</span>
+                <span className="font-medium text-[#F4F5F7]">
+                  {isVi ? "Giám Sát Phần Cứng" : "System HUD"}
+                </span>
+              </div>
+              <span className={cn("text-[10px] font-mono px-1.5 py-0.2 rounded font-semibold", hudSettings.enabled ? "bg-sky-500/20 text-sky-400" : "text-[#8B90A0]")}>
+                {hudSettings.enabled ? "ON" : "OFF"}
+              </span>
+            </button>
+
+            {/* Habit & Water Tracker Toggle */}
+            <button
+              type="button"
+              onClick={() => {
+                toggleWidget("habit");
+                setOpen(false);
+              }}
+              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer group"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="text-base group-hover:scale-110 transition-transform">💧</span>
+                <span className="font-medium text-[#F4F5F7]">
+                  {isVi ? "Uống Nước & Thói Quen" : "Habits & Water"}
+                </span>
+              </div>
+              <span className={cn("text-[10px] font-mono px-1.5 py-0.2 rounded font-semibold", activeWidgets.habit ? "bg-emerald-500/20 text-emerald-400" : "text-[#8B90A0]")}>
+                {activeWidgets.habit ? "ON" : "OFF"}
+              </span>
+            </button>
+
+            {/* Quick Scratchpad Toggle */}
+            <button
+              type="button"
+              onClick={() => {
+                toggleScratchpad();
+                setOpen(false);
+              }}
+              className="flex items-center justify-between px-2.5 h-9 rounded-xl hover:bg-[#262A35] transition-colors duration-120 text-left cursor-pointer group"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="text-base group-hover:scale-110 transition-transform">📝</span>
+                <span className="font-medium text-[#F4F5F7]">
+                  {isVi ? "Sổ Tay Code / Nháp" : "Quick Scratchpad"}
+                </span>
+              </div>
+              <span className={cn("text-[10px] font-mono px-1.5 py-0.2 rounded font-semibold", activeWidgets.scratchpad ? "bg-amber-500/20 text-amber-400" : "text-[#8B90A0]")}>
+                {activeWidgets.scratchpad ? "ON" : "OFF"}
+              </span>
             </button>
 
             {/* Toggle Pet Hide/Show */}
@@ -411,6 +501,8 @@ export function DesktopScene() {
   const setSearchOpen = useLumen((s) => s.setSearchOpen);
   const undoDeleteNote = useLumen((s) => s.undoDeleteNote);
   const fireReminder = useLumen((s) => s.fireReminder);
+  const isPomodoroActive = useLumen((s) => s.pomodoroState.active);
+  const isPomodoroDim = useLumen((s) => s.pomodoroSettings.dimBackground);
 
   useEffect(() => {
     void Promise.resolve(useLumen.persist.rehydrate()).then(() => {
@@ -756,6 +848,11 @@ export function DesktopScene() {
         </div>
       )}
 
+      {/* Pomodoro Focus Dim Overlay */}
+      {appLoaded && isPomodoroActive && isPomodoroDim && (
+        <div className="fixed inset-0 z-[7500] bg-black/40 backdrop-blur-[1px] pointer-events-none transition-opacity duration-500 animate-in fade-in" />
+      )}
+
       {appLoaded &&
         visibleNotes.map((n) => (
           <StickyNote key={n.id} note={n} />
@@ -763,6 +860,11 @@ export function DesktopScene() {
       {appLoaded && <FloatingTimers />}
       {appLoaded && <BallToy />}
       {appLoaded && <Companion />}
+      {appLoaded && <SystemHudWidget />}
+      {appLoaded && <PomodoroWidget />}
+      {appLoaded && <HabitTrackerWidget />}
+      {appLoaded && <ScratchpadWidget />}
+      {appLoaded && <AudioVisualizerWidget />}
       <ToastStack />
       <AlarmRingingModal />
       <MissedRemindersModal />

@@ -157,3 +157,104 @@ export type AppUpdateInfo = {
   downloadUrl?: string;
 };
 
+// ==========================================
+// Phase 5: Spatial Widget & System HUD Types
+// ==========================================
+
+export type SystemHudDockPosition =
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right"
+  | "top-center"
+  | "bottom-center";
+
+export type SystemHudSettings = {
+  enabled: boolean;
+  position: SystemHudDockPosition;
+  showCpu: boolean;
+  showRam: boolean;
+  showNetwork: boolean;
+  showBattery: boolean;
+  compact: boolean;
+  alertOnHighLoad: boolean; // Alert when CPU/RAM > 85%
+};
+
+export type SystemStats = {
+  cpuUsage: number; // 0 - 100
+  ramUsage: number; // 0 - 100
+  ramUsedMb: number;
+  ramTotalMb: number;
+  networkDownKbps: number;
+  networkUpKbps: number;
+  batteryLevel: number | null; // 0 - 100
+  batteryCharging: boolean | null;
+  cpuHistory: number[]; // Array of last 10 points
+  ramHistory: number[];
+};
+
+export type PomodoroMode = "work" | "short_break" | "long_break";
+
+export type PomodoroSettings = {
+  workMinutes: number; // default 25
+  shortBreakMinutes: number; // default 5
+  longBreakMinutes: number; // default 15
+  longBreakInterval: number; // default 4
+  dimBackground: boolean; // Dim canvas notes when focusing
+  tickingSound: boolean;
+};
+
+export type PomodoroState = {
+  enabled: boolean;
+  active: boolean;
+  mode: PomodoroMode;
+  remainingSeconds: number;
+  cycleCount: number;
+  totalFocusMinutes: number;
+  lastTickAt?: number;
+};
+
+export type HabitItem = {
+  id: string;
+  title: string;
+  targetPerDay: number;
+  currentCount: number;
+  unit: string;
+  icon: string;
+  completedDates: string[]; // YYYY-MM-DD
+  streak: number;
+};
+
+export type WaterTrackerState = {
+  enabled: boolean;
+  targetMl: number; // default 2000
+  currentMl: number;
+  glassSizeMl: number; // default 250
+  todayDate: string;
+};
+
+export type ScratchpadState = {
+  enabled: boolean;
+  content: string;
+  syntax: "text" | "javascript" | "python" | "json" | "markdown" | "sql";
+  pinned: boolean;
+  dockPosition?: "left" | "right" | "floating";
+};
+
+export type AudioVisualizerSettings = {
+  enabled: boolean;
+  sensitivity: number; // 1 - 5
+  style: "bars" | "wave" | "dots";
+};
+
+export type ActiveWidgetId = "hud" | "pomodoro" | "habit" | "scratchpad" | "visualizer";
+
+export type SnippetItem = {
+  id: string;
+  title: string;
+  prefix: string;
+  content: string;
+  category?: string;
+};
+
+

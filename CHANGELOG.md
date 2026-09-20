@@ -4,6 +4,31 @@
 
 ---
 
+## 🚀 [v1.2.0] — 2026-09-20 — Phase 5: Spatial Widget Ecosystem & System HUD Monitor
+
+### ✨ What's New:
+- **📊 System HUD Hardware Monitor Capsule:**
+  - Real-time CPU%, RAM%, Network Speed (KB/s), and Battery status monitoring with 60 FPS GPU-composited SVG Sparklines.
+  - Automatic High-Load alert badge when CPU or RAM exceeds 85%.
+  - Configurable 6-position screen dock (`top-left`, `top-center`, `top-right`, `bottom-left`, `bottom-center`, `bottom-right`).
+- **🍅 Pomodoro Matrix Deep Focus Widget:**
+  - Full Pomodoro cycles: 25m work, 5m short break, 15m long break with automated cycle counting.
+  - Optional Focus Dimming overlay that softly dims canvas background notes during focus sessions.
+  - Procedural soft woodblock ticking audio and completion chimes.
+- **💧 Daily Habits & Water Intake Tracker:**
+  - Interactive water glass intake tracker with droplet sound effects and daily goals.
+  - Daily habit streak tracking (🔥 streak counters) with inline habit creation and check-in.
+- **📝 Quick Scratchpad & Code Runner:**
+  - Multi-syntax code editor (JavaScript, Python, JSON, SQL, Markdown, Plain Text).
+  - 1-click clipboard copy and direct canvas sticker conversion ("Dán note ra desktop").
+- **⚡ Spotlight 2.0 Live Calculator & Unit Converter:**
+  - Live math evaluation (`(15 * 8) + 400`, `15% of 250`, `sqrt(144)`).
+  - Benchmark currency converter (`100 usd in vnd`, `50 eur to vnd`).
+  - Storage unit converter (`1024 mb in gb`) and length/temperature conversions.
+  - Snippets Vault integration and quick action shortcuts (`> pomodoro`, `> hud`, `> arrange`, `> habit`).
+
+---
+
 ## 🚀 [v1.1.1] — 2026-09-08 — Streamlined Today's Agenda, Collapsible Mini-Pill & Click-Through Fix
 
 ### 🛠️ Bug Fixes & UX Optimizations:

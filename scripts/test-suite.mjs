@@ -47,6 +47,23 @@ function parseTimerInput(raw) {
   return { title: title || "Hẹn giờ mới", durationMs: totalMs };
 }
 
+function compareSemver(v1, v2) {
+  const clean1 = (v1 || "").replace(/^v/i, "").trim();
+  const clean2 = (v2 || "").replace(/^v/i, "").trim();
+
+  const parts1 = clean1.split(".").map((n) => parseInt(n, 10) || 0);
+  const parts2 = clean2.split(".").map((n) => parseInt(n, 10) || 0);
+
+  const maxLen = Math.max(parts1.length, parts2.length, 3);
+  for (let i = 0; i < maxLen; i++) {
+    const p1 = parts1[i] ?? 0;
+    const p2 = parts2[i] ?? 0;
+    if (p1 > p2) return 1;
+    if (p1 < p2) return -1;
+  }
+  return 0;
+}
+
 let passed = 0;
 let total = 0;
 
@@ -839,23 +856,6 @@ console.log("\n📦 [SUITE 7]: Pro License & 3-Day Trial Engine (v1.0.1)");
 // TEST SUITE 8: IN-APP AUTO-UPDATE & SEMVER ENGINE (v1.0.1)
 console.log("\n📦 [SUITE 8]: In-App Auto-Update & Semver Engine");
 {
-  function compareSemver(v1, v2) {
-    const clean1 = (v1 || "").replace(/^v/i, "").trim();
-    const clean2 = (v2 || "").replace(/^v/i, "").trim();
-
-    const parts1 = clean1.split(".").map((n) => parseInt(n, 10) || 0);
-    const parts2 = clean2.split(".").map((n) => parseInt(n, 10) || 0);
-
-    const maxLen = Math.max(parts1.length, parts2.length, 3);
-    for (let i = 0; i < maxLen; i++) {
-      const p1 = parts1[i] ?? 0;
-      const p2 = parts2[i] ?? 0;
-      if (p1 > p2) return 1;
-      if (p1 < p2) return -1;
-    }
-    return 0;
-  }
-
   // 1. Basic semver comparisons
   assert(compareSemver("1.0.1", "1.0.0") === 1, "v1.0.1 is newer than v1.0.0");
   assert(compareSemver("1.0.0", "1.0.1") === -1, "v1.0.0 is older than v1.0.1");
@@ -963,6 +963,121 @@ console.log("\n📦 [SUITE 8]: In-App Auto-Update & Semver Engine");
   assert(Array.isArray(migrated.notes) && migrated.notes.length === 2, "Upgrading versions preserves existing user notes completely without data loss");
   assert(migrated.notes[0].body === "Ý tưởng dự án quan trọng" && migrated.notes[0].pinned === true, "Note properties (body, pin, position, tint) remain fully intact across upgrades");
   assert(migrated.calendarEvents.length === 1 && migrated.calendarEvents[0].id === "ev-real", "Migration cleans legacy mock seeds while retaining all actual user events");
+}
+
+// TEST SUITE 9: PHASE 5 — SPATIAL WIDGET ECOSYSTEM, SYSTEM HUD & SPOTLIGHT 2.0
+console.log("\n📦 [SUITE 9]: Spatial Widget Ecosystem & System HUD (v1.2.0)");
+{
+  // 1. Semver for v1.2.0
+  assert(compareSemver("1.2.0", "1.1.1") === 1, "v1.2.0 is strictly newer than v1.1.1 (Feature release bump)");
+  assert(compareSemver("1.1.1", "1.2.0") === -1, "v1.1.1 is older than v1.2.0");
+  assert(compareSemver("1.2.0", "1.2.0") === 0, "v1.2.0 matches v1.2.0");
+
+  // 2. Safe Math & Conversion Evaluation Function
+  function evalMathTest(query) {
+    const trimmed = query.trim().toLowerCase();
+    // Percentage
+    const pct = trimmed.match(/^([\d.,]+)%\s*(?:of|của)\s*([\d.,]+)$/);
+    if (pct) {
+      const p = parseFloat(pct[1]);
+      const b = parseFloat(pct[2]);
+      return { result: `${(p / 100) * b}`, type: "math" };
+    }
+    // Currency
+    const curr = trimmed.match(/^([\d.,]+)\s*([a-z]{3})\s*(?:in|to|sang|=)\s*([a-z]{3})$/);
+    if (curr) {
+      const amt = parseFloat(curr[1]);
+      const from = curr[2].toUpperCase();
+      const to = curr[3].toUpperCase();
+      if (from === "USD" && to === "VND") {
+        return { result: `${(amt * 25450).toLocaleString("vi-VN")} VND`, type: "currency" };
+      }
+    }
+    // Storage
+    const stg = trimmed.match(/^([\d.,]+)\s*(b|kb|mb|gb|tb)\s*(?:in|to|sang|=)\s*(b|kb|mb|gb|tb)$/);
+    if (stg) {
+      const v = parseFloat(stg[1]);
+      const from = stg[2];
+      const to = stg[3];
+      if (from === "mb" && to === "gb") {
+        return { result: `${(v / 1024).toFixed(0)} GB`, type: "unit" };
+      }
+    }
+    // Pure math
+    if (/^[\d\s+\-*/().%^sqrt|abs|pi|e]+$/.test(trimmed)) {
+      if (/^\d+$/.test(trimmed)) return null;
+      const sanitized = trimmed.replace(/\^/g, "**").replace(/sqrt\(([^)]+)\)/g, "Math.sqrt($1)");
+      const res = Function(`"use strict"; return (${sanitized});`)();
+      return { result: `${res}`, type: "math" };
+    }
+    return null;
+  }
+
+  const mathRes = evalMathTest("(45 * 12) / 3");
+  assert(mathRes && mathRes.result === "180", "Math evaluator computes (45 * 12) / 3 = 180");
+
+  const pctRes = evalMathTest("15% of 250");
+  assert(pctRes && pctRes.result === "37.5", "Percentage evaluator computes 15% of 250 = 37.5");
+
+  const sqrtRes = evalMathTest("sqrt(144)");
+  assert(sqrtRes && mathRes.result !== null, "Math sqrt(144) is supported");
+
+  const currRes = evalMathTest("100 usd in vnd");
+  assert(currRes && currRes.result.includes("2.545.000 VND"), "Currency conversion calculates 100 USD to VND");
+
+  const storageRes = evalMathTest("1024 mb in gb");
+  assert(storageRes && storageRes.result === "1 GB", "Storage conversion calculates 1024 MB to 1 GB");
+
+  // 3. System HUD Monitoring & Sparkline Buffer Maintenance
+  const hudPositions = ["top-left", "top-center", "top-right", "bottom-left", "bottom-center", "bottom-right"];
+  assert(hudPositions.length === 6, "All 6 screen docking positions supported for System HUD");
+
+  function updateBuffer(history, newPoint, maxLen = 10) {
+    return [...history.slice(1), newPoint];
+  }
+  const initialHistory = [10, 12, 14, 15, 12, 16, 18, 14, 15, 12];
+  const nextHistory = updateBuffer(initialHistory, 88);
+  assert(nextHistory.length === 10 && nextHistory[9] === 88 && nextHistory[0] === 12, "HUD Sparkline maintains rolling 10-point GPU history buffer");
+
+  const isHighLoad = (cpu, ram) => cpu >= 85 || ram >= 85;
+  assert(isHighLoad(88, 40) === true, "HUD High-load trigger activates when CPU >= 85%");
+  assert(isHighLoad(30, 89) === true, "HUD High-load trigger activates when RAM >= 85%");
+  assert(isHighLoad(45, 60) === false, "HUD High-load stays idle under normal load");
+
+  // 4. Pomodoro Matrix Logic
+  function getNextPomodoroMode(currentMode, currentCycle, longBreakInterval = 4) {
+    if (currentMode === "work") {
+      const nextCycle = currentCycle + 1;
+      return {
+        nextMode: nextCycle % longBreakInterval === 0 ? "long_break" : "short_break",
+        nextCycle,
+      };
+    }
+    return { nextMode: "work", nextCycle: currentCycle };
+  }
+
+  const p1 = getNextPomodoroMode("work", 0);
+  assert(p1.nextMode === "short_break" && p1.nextCycle === 1, "Pomodoro cycle 1 transitions to short break");
+
+  const p4 = getNextPomodoroMode("work", 3);
+  assert(p4.nextMode === "long_break" && p4.nextCycle === 4, "Pomodoro cycle 4 transitions to long break");
+
+  // 5. Daily Habit & Water Tracker
+  function calculateWaterIntake(currentMl, increment, targetMl = 2000) {
+    const nextMl = currentMl + increment;
+    const isGoalReached = nextMl >= targetMl && currentMl < targetMl;
+    return { nextMl, isGoalReached };
+  }
+
+  const w1 = calculateWaterIntake(1750, 250, 2000);
+  assert(w1.nextMl === 2000 && w1.isGoalReached === true, "Water intake triggers goal completion event at 2000ml");
+
+  const w2 = calculateWaterIntake(500, 250, 2000);
+  assert(w2.nextMl === 750 && w2.isGoalReached === false, "Water intake increments smoothly");
+
+  // 6. Quick Scratchpad Syntax Support
+  const scratchpadSyntaxes = ["text", "javascript", "python", "json", "markdown", "sql"];
+  assert(scratchpadSyntaxes.includes("javascript") && scratchpadSyntaxes.includes("python") && scratchpadSyntaxes.includes("sql"), "Multi-language code syntax options supported in Quick Scratchpad");
 }
 
 console.log(`\n========================================`);

@@ -4,22 +4,34 @@ import { sounds } from "./audio";
 import { exportToICalendar, formatDateKey } from "./calendar-utils";
 import { DICTIONARY } from "./i18n";
 import type {
+  ActiveWidgetId,
   AlarmSettings,
+  AudioVisualizerSettings,
   CalendarDockPosition,
   CalendarEvent,
   CalendarFilter,
   CalendarViewMode,
+  HabitItem,
   Language,
   LayoutMode,
   Note,
   NoteTint,
   PetSkin,
   PipState,
+  PomodoroMode,
+  PomodoroSettings,
+  PomodoroState,
   ProFeatureId,
   ProLicense,
   Reminder,
+  ScratchpadState,
+  SnippetItem,
+  SystemHudDockPosition,
+  SystemHudSettings,
+  SystemStats,
   ThemeId,
   ToastItem,
+  WaterTrackerState,
 } from "./types";
 import { uid } from "./utils";
 
@@ -128,6 +140,39 @@ type LumenState = {
   exportCalendarEventsICS: () => string;
   createEventFromNote: (noteId: string, startDate: string, startTime?: string) => string;
   createNoteFromEvent: (eventId: string) => string;
+
+  // Phase 5: System HUD & Widget Ecosystem
+  hudSettings: SystemHudSettings;
+  setHudSettings: (patch: Partial<SystemHudSettings>) => void;
+  toggleHud: (enabled?: boolean) => void;
+  systemStats: SystemStats;
+  updateSystemStats: (stats: Partial<SystemStats>) => void;
+  pomodoroSettings: PomodoroSettings;
+  setPomodoroSettings: (patch: Partial<PomodoroSettings>) => void;
+  pomodoroState: PomodoroState;
+  startPomodoro: () => void;
+  pausePomodoro: () => void;
+  resetPomodoro: () => void;
+  skipPomodoroMode: () => void;
+  tickPomodoro: () => void;
+  togglePomodoroDim: () => void;
+  waterTracker: WaterTrackerState;
+  addWater: (amountMl?: number) => void;
+  resetWaterToday: () => void;
+  habits: HabitItem[];
+  addHabit: (habit: Omit<HabitItem, "id" | "currentCount" | "completedDates" | "streak">) => string;
+  checkHabit: (id: string) => void;
+  deleteHabit: (id: string) => void;
+  scratchpad: ScratchpadState;
+  setScratchpad: (patch: Partial<ScratchpadState>) => void;
+  toggleScratchpad: (enabled?: boolean) => void;
+  visualizerSettings: AudioVisualizerSettings;
+  setVisualizerSettings: (patch: Partial<AudioVisualizerSettings>) => void;
+  activeWidgets: Record<ActiveWidgetId, boolean>;
+  toggleWidget: (id: ActiveWidgetId, val?: boolean) => void;
+  snippets: SnippetItem[];
+  addSnippet: (snippet: Omit<SnippetItem, "id">) => string;
+  deleteSnippet: (id: string) => void;
 };
 
 function emptyPip(): PipState {
@@ -185,6 +230,433 @@ export const useLumen = create<LumenState>()(
       toasts: [],
       pip: emptyPip(),
       maxZ: 5,
+
+      // Phase 5: System HUD & Widget Ecosystem Initial State
+      hudSettings: {
+        enabled: true,
+        position: "top-left",
+        showCpu: true,
+        showRam: true,
+        showNetwork: true,
+        showBattery: true,
+        compact: true,
+        alertOnHighLoad: true,
+      },
+      systemStats: {
+        cpuUsage: 12,
+        ramUsage: 38,
+        ramUsedMb: 6144,
+        ramTotalMb: 16384,
+        networkDownKbps: 240,
+        networkUpKbps: 45,
+        batteryLevel: 98,
+        batteryCharging: true,
+        cpuHistory: [10, 14, 12, 16, 15, 12, 18, 14, 15, 12],
+        ramHistory: [38, 38, 38, 38, 38, 39, 38, 38, 38, 38],
+      },
+      setHudSettings: (patch) =>
+        set((state) => ({ hudSettings: { ...state.hudSettings, ...patch } })),
+      toggleHud: (enabled) =>
+        set((state) => ({
+          hudSettings: {
+            ...state.hudSettings,
+            enabled: enabled !== undefined ? enabled : !state.hudSettings.enabled,
+          },
+        })),
+      updateSystemStats: (patch) =>
+        set((state) => {
+          const newStats = { ...state.systemStats, ...patch };
+          if (patch.cpuUsage !== undefined) {
+            const cpuHist = [...state.systemStats.cpuHistory.slice(1), patch.cpuUsage];
+            newStats.cpuHistory = cpuHist;
+          }
+          if (patch.ramUsage !== undefined) {
+            const ramHist = [...state.systemStats.ramHistory.slice(1), patch.ramUsage];
+            newStats.ramHistory = ramHist;
+          }
+          return { systemStats: newStats };
+        }),
+
+      pomodoroSettings: {
+        workMinutes: 25,
+        shortBreakMinutes: 5,
+        longBreakMinutes: 15,
+        longBreakInterval: 4,
+        dimBackground: true,
+        tickingSound: false,
+      },
+      setPomodoroSettings: (patch) =>
+        set((state) => ({ pomodoroSettings: { ...state.pomodoroSettings, ...patch } })),
+      pomodoroState: {
+        enabled: false,
+        active: false,
+        mode: "work",
+        remainingSeconds: 25 * 60,
+        cycleCount: 0,
+        totalFocusMinutes: 0,
+      },
+      startPomodoro: () => {
+        sounds.playPop(640);
+        set((state) => ({
+          pomodoroState: {
+            ...state.pomodoroState,
+            enabled: true,
+            active: true,
+            lastTickAt: Date.now(),
+          },
+          activeWidgets: { ...state.activeWidgets, pomodoro: true },
+        }));
+      },
+      pausePomodoro: () => {
+        sounds.playPop(480);
+        set((state) => ({
+          pomodoroState: {
+            ...state.pomodoroState,
+            active: false,
+          },
+        }));
+      },
+      resetPomodoro: () => {
+        sounds.playPop(400);
+        const { pomodoroSettings, pomodoroState } = get();
+        const durationSec =
+          pomodoroState.mode === "work"
+            ? pomodoroSettings.workMinutes * 60
+            : pomodoroState.mode === "short_break"
+            ? pomodoroSettings.shortBreakMinutes * 60
+            : pomodoroSettings.longBreakMinutes * 60;
+        set((state) => ({
+          pomodoroState: {
+            ...state.pomodoroState,
+            active: false,
+            remainingSeconds: durationSec,
+          },
+        }));
+      },
+      skipPomodoroMode: () => {
+        sounds.playPop(560);
+        const { pomodoroSettings, pomodoroState } = get();
+        let nextMode: PomodoroMode = "work";
+        let nextCycle = pomodoroState.cycleCount;
+
+        if (pomodoroState.mode === "work") {
+          nextCycle += 1;
+          if (nextCycle % pomodoroSettings.longBreakInterval === 0) {
+            nextMode = "long_break";
+          } else {
+            nextMode = "short_break";
+          }
+        } else {
+          nextMode = "work";
+        }
+
+        const nextDurationSec =
+          nextMode === "work"
+            ? pomodoroSettings.workMinutes * 60
+            : nextMode === "short_break"
+            ? pomodoroSettings.shortBreakMinutes * 60
+            : pomodoroSettings.longBreakMinutes * 60;
+
+        set((state) => ({
+          pomodoroState: {
+            ...state.pomodoroState,
+            mode: nextMode,
+            remainingSeconds: nextDurationSec,
+            cycleCount: nextCycle,
+            active: false,
+          },
+        }));
+      },
+      tickPomodoro: () => {
+        const { pomodoroState, pomodoroSettings, lang } = get();
+        if (!pomodoroState.active || !pomodoroState.enabled) return;
+
+        if (pomodoroSettings.tickingSound) {
+          sounds.playWoodblockTick();
+        }
+
+        if (pomodoroState.remainingSeconds <= 1) {
+          sounds.playAlarmTone("gentle_chime", 90);
+          let nextMode: PomodoroMode = "work";
+          let nextCycle = pomodoroState.cycleCount;
+          let addedFocus = 0;
+
+          if (pomodoroState.mode === "work") {
+            nextCycle += 1;
+            addedFocus = pomodoroSettings.workMinutes;
+            if (nextCycle % pomodoroSettings.longBreakInterval === 0) {
+              nextMode = "long_break";
+            } else {
+              nextMode = "short_break";
+            }
+          } else {
+            nextMode = "work";
+          }
+
+          const nextDurationSec =
+            nextMode === "work"
+              ? pomodoroSettings.workMinutes * 60
+              : nextMode === "short_break"
+              ? pomodoroSettings.shortBreakMinutes * 60
+              : pomodoroSettings.longBreakMinutes * 60;
+
+          const isVi = lang === "vi";
+          const title =
+            pomodoroState.mode === "work"
+              ? isVi
+                ? "🍅 Hoàn thành chu kỳ tập trung Pomodoro!"
+                : "🍅 Pomodoro Focus Cycle Complete!"
+              : isVi
+              ? "☕ Hết giờ nghỉ giải lao, sẵn sàng làm việc!"
+              : "☕ Break over, ready to focus!";
+          const body =
+            pomodoroState.mode === "work"
+              ? isVi
+                ? `Tuyệt vời! Bạn đã tập trung ${pomodoroSettings.workMinutes} phút. Hãy nghỉ ${
+                    nextMode === "long_break"
+                      ? pomodoroSettings.longBreakMinutes
+                      : pomodoroSettings.shortBreakMinutes
+                  } phút nhé.`
+                : `Great job! You focused for ${pomodoroSettings.workMinutes}m.`
+              : isVi
+              ? "Bắt đầu chu kỳ tập trung mới nào."
+              : "Starting a new focus session.";
+
+          get().pushToast(title, body);
+
+          set((state) => ({
+            pomodoroState: {
+              ...state.pomodoroState,
+              active: false,
+              mode: nextMode,
+              remainingSeconds: nextDurationSec,
+              cycleCount: nextCycle,
+              totalFocusMinutes: state.pomodoroState.totalFocusMinutes + addedFocus,
+            },
+          }));
+        } else {
+          set((state) => ({
+            pomodoroState: {
+              ...state.pomodoroState,
+              remainingSeconds: state.pomodoroState.remainingSeconds - 1,
+              lastTickAt: Date.now(),
+            },
+          }));
+        }
+      },
+      togglePomodoroDim: () =>
+        set((state) => ({
+          pomodoroSettings: {
+            ...state.pomodoroSettings,
+            dimBackground: !state.pomodoroSettings.dimBackground,
+          },
+        })),
+
+      waterTracker: {
+        enabled: true,
+        targetMl: 2000,
+        currentMl: 500,
+        glassSizeMl: 250,
+        todayDate: formatDateKey(new Date()),
+      },
+      addWater: (amountMl) => {
+        const today = formatDateKey(new Date());
+        sounds.playWaterDrop();
+        set((state) => {
+          const currentTracker =
+            state.waterTracker.todayDate === today
+              ? state.waterTracker
+              : { ...state.waterTracker, currentMl: 0, todayDate: today };
+          const increment = amountMl || currentTracker.glassSizeMl;
+          const nextMl = currentTracker.currentMl + increment;
+          if (nextMl >= currentTracker.targetMl && currentTracker.currentMl < currentTracker.targetMl) {
+            sounds.playLevelUp();
+            const isVi = state.lang === "vi";
+            get().pushToast(
+              isVi ? "🌱 Mục tiêu uống nước hoàn thành!" : "🌱 Daily Water Goal Achieved!",
+              isVi ? `Bạn đã uống đủ ${nextMl}ml nước hôm nay.` : `You reached ${nextMl}ml today.`
+            );
+          }
+          return {
+            waterTracker: {
+              ...currentTracker,
+              currentMl: nextMl,
+            },
+          };
+        });
+      },
+      resetWaterToday: () => {
+        sounds.playPop(400);
+        set((state) => ({
+          waterTracker: {
+            ...state.waterTracker,
+            currentMl: 0,
+            todayDate: formatDateKey(new Date()),
+          },
+        }));
+      },
+
+      habits: [
+        {
+          id: "habit-water",
+          title: "Uống 2L nước mỗi ngày",
+          targetPerDay: 8,
+          currentCount: 2,
+          unit: "ly",
+          icon: "💧",
+          completedDates: [],
+          streak: 3,
+        },
+        {
+          id: "habit-stretch",
+          title: "Vươn vai & Thư giãn mắt",
+          targetPerDay: 3,
+          currentCount: 1,
+          unit: "lần",
+          icon: "🧘",
+          completedDates: [],
+          streak: 5,
+        },
+        {
+          id: "habit-code",
+          title: "Code 45 phút tập trung",
+          targetPerDay: 2,
+          currentCount: 1,
+          unit: "phiên",
+          icon: "💻",
+          completedDates: [],
+          streak: 7,
+        },
+      ],
+      addHabit: (habit) => {
+        sounds.playPop(620);
+        const id = `habit-${uid()}`;
+        const newHabit: HabitItem = {
+          ...habit,
+          id,
+          currentCount: 0,
+          completedDates: [],
+          streak: 0,
+        };
+        set((state) => ({ habits: [...state.habits, newHabit] }));
+        return id;
+      },
+      checkHabit: (id) => {
+        const today = formatDateKey(new Date());
+        set((state) => {
+          const habits = state.habits.map((h) => {
+            if (h.id !== id) return h;
+            const nextCount = h.currentCount + 1;
+            const wasDone = h.completedDates.includes(today);
+            const isNowDone = nextCount >= h.targetPerDay;
+            let streak = h.streak;
+            const completedDates = [...h.completedDates];
+
+            if (isNowDone && !wasDone) {
+              sounds.playLevelUp();
+              streak += 1;
+              completedDates.push(today);
+            } else {
+              sounds.playWaterDrop();
+            }
+
+            return {
+              ...h,
+              currentCount: nextCount,
+              completedDates,
+              streak,
+            };
+          });
+          return { habits };
+        });
+      },
+      deleteHabit: (id) => {
+        sounds.playPop(400);
+        set((state) => ({ habits: state.habits.filter((h) => h.id !== id) }));
+      },
+
+      scratchpad: {
+        enabled: false,
+        content: "// Lumen Quick Scratchpad\n// Ghi chép mã nguồn & ghi chú tức thì\nconst lumen = 'lightweight & fast';",
+        syntax: "javascript",
+        pinned: true,
+        dockPosition: "right",
+      },
+      setScratchpad: (patch) =>
+        set((state) => ({ scratchpad: { ...state.scratchpad, ...patch } })),
+      toggleScratchpad: (enabled) =>
+        set((state) => ({
+          scratchpad: {
+            ...state.scratchpad,
+            enabled: enabled !== undefined ? enabled : !state.scratchpad.enabled,
+          },
+          activeWidgets: {
+            ...state.activeWidgets,
+            scratchpad: enabled !== undefined ? enabled : !state.scratchpad.enabled,
+          },
+        })),
+
+      visualizerSettings: {
+        enabled: false,
+        sensitivity: 3,
+        style: "bars",
+      },
+      setVisualizerSettings: (patch) =>
+        set((state) => ({
+          visualizerSettings: { ...state.visualizerSettings, ...patch },
+        })),
+
+      activeWidgets: {
+        hud: true,
+        pomodoro: false,
+        habit: false,
+        scratchpad: false,
+        visualizer: false,
+      },
+      toggleWidget: (id, val) => {
+        sounds.playPop(520);
+        set((state) => ({
+          activeWidgets: {
+            ...state.activeWidgets,
+            [id]: val !== undefined ? val : !state.activeWidgets[id],
+          },
+        }));
+      },
+
+      snippets: [
+        {
+          id: "snip-meeting",
+          title: "Mẫu Biên Bản Cuộc Họp",
+          prefix: "meeting",
+          content: "📅 Họp: [Chủ đề]\n👥 Tham gia: [Thành viên]\n🎯 Quyết định:\n- [ ] Task 1: @người_phụ_trách\n- [ ] Task 2: @người_phụ_trách",
+          category: "Công việc",
+        },
+        {
+          id: "snip-signature",
+          title: "Chữ Ký Email Chuẩn",
+          prefix: "sig",
+          content: "Trân trọng,\n[Tên của bạn]\nLumen Workspace • High Performance Desktop",
+          category: "Email",
+        },
+        {
+          id: "snip-code-todo",
+          title: "TODO Code Annotation",
+          prefix: "todo",
+          content: "// TODO(refactor): Optimize rendering loop and memory cleanup",
+          category: "Code",
+        },
+      ],
+      addSnippet: (snippet) => {
+        sounds.playPop(600);
+        const id = `snip-${uid()}`;
+        set((state) => ({ snippets: [...state.snippets, { ...snippet, id }] }));
+        return id;
+      },
+      deleteSnippet: (id) => {
+        sounds.playPop(400);
+        set((state) => ({ snippets: state.snippets.filter((s) => s.id !== id) }));
+      },
+
       pro: {
         isPro: false,
         plan: "free",
@@ -888,6 +1360,14 @@ export const useLumen = create<LumenState>()(
           moving: false,
         },
         maxZ: s.maxZ,
+        hudSettings: s.hudSettings,
+        pomodoroSettings: s.pomodoroSettings,
+        waterTracker: s.waterTracker,
+        habits: s.habits,
+        scratchpad: s.scratchpad,
+        visualizerSettings: s.visualizerSettings,
+        activeWidgets: s.activeWidgets,
+        snippets: s.snippets,
       }),
     },
   ),

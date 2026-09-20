@@ -103,6 +103,10 @@ export function Hub() {
   const calendarEvents = useLumen((s) => s.calendarEvents);
   const alarmSettings = useLumen((s) => s.alarmSettings || { volume: 100, tone: "bell_arpeggio", loopIntervalSec: 3 });
   const setAlarmSettings = useLumen((s) => s.setAlarmSettings);
+  const hudSettings = useLumen((s) => s.hudSettings);
+  const setHudSettings = useLumen((s) => s.setHudSettings);
+  const pomodoroSettings = useLumen((s) => s.pomodoroSettings);
+  const setPomodoroSettings = useLumen((s) => s.setPomodoroSettings);
   const resetDemo = useLumen((s) => s.resetDemo);
   const pushToast = useLumen((s) => s.pushToast);
 
@@ -661,6 +665,110 @@ export function Hub() {
                     </button>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* System HUD & Widget Ecosystem Configuration */}
+            <div className="rounded-2xl bg-[#262A35]/50 p-3 border border-white/6 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-[#F4F5F7]">
+                    {isVi ? "Giám Sát Phần Cứng (Lumen HUD)" : "System HUD Hardware Monitor"}
+                  </p>
+                  <p className="text-[10px] text-[#8B90A0]">
+                    {isVi ? "Hiển thị widget CPU, RAM, Tốc độ mạng & Pin siêu nhẹ" : "Ultra-low CPU/RAM hardware monitor widget"}
+                  </p>
+                </div>
+                <Switch
+                  checked={hudSettings.enabled}
+                  onCheckedChange={(val) => setHudSettings({ enabled: val })}
+                />
+              </div>
+
+              {hudSettings.enabled && (
+                <div className="space-y-2 pt-1 border-t border-white/5">
+                  <p className="text-[10px] text-[#8B90A0] font-semibold uppercase tracking-wider">
+                    {isVi ? "Vị trí gắn HUD trên màn hình" : "HUD Screen Dock Position"}
+                  </p>
+                  <div className="grid grid-cols-3 gap-1.5 text-[11px]">
+                    {[
+                      { id: "top-left", name: "Trái Trên", icon: "↖️" },
+                      { id: "top-center", name: "Giữa Trên", icon: "⬆️" },
+                      { id: "top-right", name: "Phải Trên", icon: "↗️" },
+                      { id: "bottom-left", name: "Trái Dưới", icon: "↙️" },
+                      { id: "bottom-center", name: "Giữa Dưới", icon: "⬇️" },
+                      { id: "bottom-right", name: "Phải Dưới", icon: "↘️" },
+                    ].map((posOpt) => (
+                      <button
+                        key={posOpt.id}
+                        type="button"
+                        onClick={() => {
+                          sounds.playPop(520);
+                          setHudSettings({ position: posOpt.id as any });
+                        }}
+                        className={cn(
+                          "p-2 rounded-xl border flex items-center justify-center gap-1 transition-colors cursor-pointer text-[10px] font-semibold",
+                          hudSettings.position === posOpt.id
+                            ? "bg-[#F5A623]/20 border-[#F5A623] text-[#F5A623]"
+                            : "bg-[#14161D]/70 border-white/5 text-[#8B90A0] hover:border-white/15"
+                        )}
+                      >
+                        <span>{posOpt.icon}</span>
+                        <span>{posOpt.name}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-[11px] text-[#F4F5F7]">
+                      {isVi ? "Cảnh báo khi CPU / RAM > 85%" : "Alert when CPU / RAM > 85%"}
+                    </span>
+                    <Switch
+                      checked={hudSettings.alertOnHighLoad}
+                      onCheckedChange={(val) => setHudSettings({ alertOnHighLoad: val })}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Pomodoro Focus Preferences */}
+            <div className="rounded-2xl bg-[#262A35]/50 p-3 border border-white/6 space-y-2.5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-[#F4F5F7]">
+                    {isVi ? "Pomodoro Matrix (Tập Trung Sâu)" : "Pomodoro Deep Focus Matrix"}
+                  </p>
+                  <p className="text-[10px] text-[#8B90A0]">
+                    {isVi ? "Cấu hình chu kỳ làm việc & làm mờ màn hình" : "Configure work cycles & focus dimming"}
+                  </p>
+                </div>
+                <span className="text-base">🍅</span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 bg-[#14161D] p-2.5 rounded-xl border border-white/5 text-[11px]">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] text-[#8B90A0]">{isVi ? "Làm việc" : "Work"}</span>
+                  <span className="font-mono font-bold text-amber-300">{pomodoroSettings.workMinutes}m</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] text-[#8B90A0]">{isVi ? "Nghỉ ngắn" : "Short Break"}</span>
+                  <span className="font-mono font-bold text-emerald-300">{pomodoroSettings.shortBreakMinutes}m</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] text-[#8B90A0]">{isVi ? "Nghỉ dài" : "Long Break"}</span>
+                  <span className="font-mono font-bold text-sky-300">{pomodoroSettings.longBreakMinutes}m</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-[11px] text-[#F4F5F7]">
+                  {isVi ? "Làm mờ màn hình khi tập trung" : "Dim screen background during focus"}
+                </span>
+                <Switch
+                  checked={pomodoroSettings.dimBackground}
+                  onCheckedChange={(val) => setPomodoroSettings({ dimBackground: val })}
+                />
               </div>
             </div>
 

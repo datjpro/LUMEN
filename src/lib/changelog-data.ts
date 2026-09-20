@@ -17,10 +17,68 @@ export interface VersionRelease {
 
 export const APP_RELEASES: VersionRelease[] = [
   {
+    version: "1.2.0",
+    releaseName: "Lumen v1.2.0 — Spatial Widget Ecosystem & System HUD Monitor",
+    releaseDate: "2026-09-20",
+    isLatest: true,
+    highlights: [
+      {
+        icon: "📊",
+        badge: "feat",
+        titleVi: "Giám Sát Phần Cứng Siêu Nhẹ (System HUD Hardware Monitor)",
+        titleEn: "System HUD Hardware Monitor Capsule",
+        descriptionVi:
+          "Theo dõi CPU, RAM, tốc độ mạng KB/s, tình trạng Pin với biểu đồ sóng Sparkline mini thời gian thực, tự động cảnh báo khi hệ thống quá tải >85%.",
+        descriptionEn:
+          "Real-time CPU, RAM, Network KB/s, and Battery monitoring capsule with GPU sparklines and high load warning (>85%).",
+      },
+      {
+        icon: "🍅",
+        badge: "feat",
+        titleVi: "Bộ Đếm Tập Trung Sâu Pomodoro Matrix",
+        titleEn: "Pomodoro Matrix Deep Focus Engine",
+        descriptionVi:
+          "Chu kỳ làm việc 25p / nghỉ ngắn 5p / nghỉ dài 15p với tính năng tự động làm mờ các ghi chú không liên quan khi vào chu kỳ tập trung.",
+        descriptionEn:
+          "Pomodoro 25m work / 5m short break / 15m long break cycles with automatic focus background dimming over desktop notes.",
+      },
+      {
+        icon: "💧",
+        badge: "feat",
+        titleVi: "Theo Dõi Uống Nước & Thói Quen Hàng Ngày (Habit Tracker)",
+        titleEn: "Daily Habits & Water Intake Tracker",
+        descriptionVi:
+          "Viên nang theo dõi nước uống hàng ngày với hiệu ứng giọt nước sống động, tính điểm chuỗi ngày hoàn thành (Streak) và điểm danh thói quen.",
+        descriptionEn:
+          "Interactive water glass tracker with droplet audio feedback, daily habit check-in, and streak flame counters.",
+      },
+      {
+        icon: "📝",
+        badge: "feat",
+        titleVi: "Sổ Tay Code & Nháp Nhanh (Quick Scratchpad)",
+        titleEn: "Quick Scratchpad & Code Runner",
+        descriptionVi:
+          "Bảng ghi chép mã nguồn nhanh hỗ trợ chọn cú pháp (JS, Python, JSON, SQL, Markdown), sao chép 1 chạm và dán trực tiếp thành Sticky Note.",
+        descriptionEn:
+          "Instant code snippet editor with syntax selector (JS, Python, JSON, SQL, Markdown), 1-click clipboard copy, and desktop note sticker.",
+      },
+      {
+        icon: "⚡",
+        badge: "feat",
+        titleVi: "Spotlight 2.0: Máy Tính Trực Tiếp, Đổi Tiền & Lệnh Nhanh",
+        titleEn: "Spotlight 2.0 Live Calculator, Currency Converter & Actions",
+        descriptionVi:
+          "Tính toán biểu thức toán tức thì (15% of 250), đổi ngoại tệ (100 usd in vnd), đổi đơn vị bộ nhớ, nhiệt độ và thực thi lệnh nhanh (>).",
+        descriptionEn:
+          "Instant inline math evaluation, currency conversion, storage unit scaling, and quick command execution (>).",
+      },
+    ],
+  },
+  {
     version: "1.1.0",
     releaseName: "Lumen v1.1.0 — In-App Update Engine & Spatial Calendar Evolution",
     releaseDate: "2026-09-07",
-    isLatest: true,
+    isLatest: false,
     highlights: [
       {
         icon: "🔄",
