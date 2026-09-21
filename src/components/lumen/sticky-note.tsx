@@ -1114,8 +1114,6 @@ export function StickyNote({ note, stacked }: Props) {
         onClick={(e) => {
           const tag = (e.target as HTMLElement).tagName;
           if (tag !== "TEXTAREA" && tag !== "INPUT" && tag !== "BUTTON" && !(e.target as HTMLElement).closest("button,input,form")) {
-            // Ensure the Electron window is focused first so the text cursor (caret) becomes visible
-            void focusDesktopWindow();
             textareaRef.current?.focus();
           }
         }}
@@ -1232,8 +1230,6 @@ export function StickyNote({ note, stacked }: Props) {
           onChange={(e) => updateNote(note.id, { body: e.target.value })}
           onFocus={() => {
             bringNote(note.id);
-            // Ensure the Electron window is focused so the blinking text cursor (caret) is visible
-            void focusDesktopWindow();
           }}
           placeholder={isVi ? "Viết ghi chú của bạn..." : "Write your note..."}
           suppressHydrationWarning

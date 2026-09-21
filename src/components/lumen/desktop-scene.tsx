@@ -566,19 +566,9 @@ export function DesktopScene() {
     syncRects();
     const interval = setInterval(syncRects, 200);
 
-    // Global pointerdown focus helper ensuring Windows HWND & WebView2 focus on interaction
-    const handleGlobalPointerDown = (e: globalThis.PointerEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (target && target.closest(INTERACTIVE_SELECTOR)) {
-        void focusDesktopWindow();
-      }
-    };
-    window.addEventListener("pointerdown", handleGlobalPointerDown, { capture: true });
-
     return () => {
       window.removeEventListener("mousemove", throttledHandler);
       document.documentElement.removeEventListener("mouseleave", handleMouseLeave);
-      window.removeEventListener("pointerdown", handleGlobalPointerDown, { capture: true });
       clearInterval(interval);
       // Restore to fully interactive mode on cleanup (component unmount)
       setIgnoreMouseEvents(false);
@@ -703,6 +693,11 @@ export function DesktopScene() {
           setHubOpen(true);
         }),
       );
+      unlisteners.push(
+        listenToDesktopEvent("open-check-updates", () => {
+          setHubOpen(true, "about");
+        }),
+      );
     }
 
     return () => {
@@ -716,6 +711,26 @@ export function DesktopScene() {
       }
     };
   }, [setCaptureOpen, setQuickTimerOpen, setCalendarOpen, setHubOpen, addNote, tidyNotes, setLayout, setPipEnabled]);
+
+  // Startup silent update check (non-blocking, checks GitHub release 4 seconds after mount)
+  useEffect(() => {
+    const timer = window.setTimeout(async () => {
+      try {
+        const { checkForAppUpdates, CURRENT_APP_VERSION } = await import("@/lib/updater");
+        const res = await checkForAppUpdates(CURRENT_APP_VERSION, 5000);
+        if (res.hasUpdate && res.updateInfo) {
+          const isVi = useLumen.getState().lang === "vi";
+          useLumen.getState().pushToast(
+            isVi ? "Đã có bản cập nhật mới!" : "Update Available!",
+            isVi
+              ? `Lumen v${res.updateInfo.version} đã sẵn sàng. Mở Cài Đặt (Alt+S) để xem chi tiết.`
+              : `Lumen v${res.updateInfo.version} is available. Open Settings (Alt+S) to check.`,
+          );
+        }
+      } catch {}
+    }, 4000);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   // Reminder scheduler
   useEffect(() => {

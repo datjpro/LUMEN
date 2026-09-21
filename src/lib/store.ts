@@ -46,6 +46,7 @@ type LumenState = {
   alwaysOnTop: boolean;
   transparentOverlay: boolean;
   hubOpen: boolean;
+  hubTab: string;
   captureOpen: boolean;
   quickTimerOpen: boolean;
   calendarOpen: boolean;
@@ -63,7 +64,8 @@ type LumenState = {
   setLayout: (layout: LayoutMode) => void;
   setAlwaysOnTop: (val: boolean) => void;
   setTransparentOverlay: (val: boolean) => void;
-  setHubOpen: (open: boolean) => void;
+  setHubOpen: (open: boolean, tab?: string) => void;
+  setHubTab: (tab: string) => void;
   setCaptureOpen: (open: boolean) => void;
   setQuickTimerOpen: (open: boolean) => void;
   setCalendarOpen: (open: boolean) => void;
@@ -214,6 +216,7 @@ export const useLumen = create<LumenState>()(
       alwaysOnTop: true,
       transparentOverlay: true,
       hubOpen: false,
+      hubTab: "look",
       captureOpen: false,
       quickTimerOpen: false,
       calendarOpen: false,
@@ -775,14 +778,18 @@ export const useLumen = create<LumenState>()(
         sounds.playPop(520);
         set({ transparentOverlay });
       },
-      setHubOpen: (hubOpen) => {
+      setHubOpen: (hubOpen, tab) => {
         sounds.playPop(480);
         set({
           hubOpen,
+          hubTab: tab ?? (hubOpen ? get().hubTab : "look"),
           captureOpen: hubOpen ? false : get().captureOpen,
           quickTimerOpen: hubOpen ? false : get().quickTimerOpen,
           calendarOpen: hubOpen ? false : get().calendarOpen,
         });
+      },
+      setHubTab: (hubTab) => {
+        set({ hubTab });
       },
       setCaptureOpen: (captureOpen) => {
         sounds.playPop(550);

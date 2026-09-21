@@ -202,7 +202,9 @@ fn focus_window<R: Runtime>(
     if window.is_minimized().unwrap_or(false) {
         let _ = window.unminimize();
     }
-    window.show().map_err(|e| e.to_string())?;
+    if !window.is_visible().unwrap_or(true) {
+        window.show().map_err(|e| e.to_string())?;
+    }
     window.set_focus().map_err(|e| e.to_string())
 }
 
@@ -241,6 +243,15 @@ fn quit_app(app: tauri::AppHandle) {
 }
 
 pub fn run() {
+    #[cfg(windows)]
+    {
+        // Disable Chromium hardware media key handling, media session service, and audio ducking so background videos/audio in browser or player are never paused on interaction
+        std::env::set_var(
+            "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS",
+            "--disable-features=HardwareMediaKeyHandling,MediaSessionService,VolumeNotification,AudioDuckScreenReader --autoplay-policy=no-user-gesture-required",
+        );
+    }
+
     let app_state = Arc::new(AppState::default());
 
     tauri::Builder::default()
@@ -320,8 +331,9 @@ pub fn run() {
             let timer_i = MenuItem::with_id(app, "timer", "⏰ Quick Timer (Alt+T)", true, None::<&str>)?;
             let calendar_i = MenuItem::with_id(app, "calendar", "📅 Calendar & Agenda (Alt+C)", true, None::<&str>)?;
             let hub_i = MenuItem::with_id(app, "hub", "⚙️ Settings Hub (Alt+S)", true, None::<&str>)?;
+            let update_i = MenuItem::with_id(app, "update", "🔄 Check for Updates... (Kiểm tra cập nhật)", true, None::<&str>)?;
             let quit_i = MenuItem::with_id(app, "quit", "✕ Quit Lumen", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&show_i, &capture_i, &timer_i, &calendar_i, &hub_i, &quit_i])?;
+            let menu = Menu::with_items(app, &[&show_i, &capture_i, &timer_i, &calendar_i, &hub_i, &update_i, &quit_i])?;
 
             let mut tray_builder = TrayIconBuilder::with_id("lumen-tray-icon")
                 .menu(&menu)
@@ -343,7 +355,9 @@ pub fn run() {
                             if window.is_minimized().unwrap_or(false) {
                                 let _ = window.unminimize();
                             }
-                            let _ = window.show();
+                            if !window.is_visible().unwrap_or(true) {
+                                let _ = window.show();
+                            }
                             let _ = window.set_focus();
                             let _ = window.emit("open-quick-capture", ());
                         }
@@ -353,7 +367,9 @@ pub fn run() {
                             if window.is_minimized().unwrap_or(false) {
                                 let _ = window.unminimize();
                             }
-                            let _ = window.show();
+                            if !window.is_visible().unwrap_or(true) {
+                                let _ = window.show();
+                            }
                             let _ = window.set_focus();
                             let _ = window.emit("open-quick-timer", ());
                         }
@@ -363,7 +379,9 @@ pub fn run() {
                             if window.is_minimized().unwrap_or(false) {
                                 let _ = window.unminimize();
                             }
-                            let _ = window.show();
+                            if !window.is_visible().unwrap_or(true) {
+                                let _ = window.show();
+                            }
                             let _ = window.set_focus();
                             let _ = window.emit("open-calendar", ());
                         }
@@ -373,9 +391,23 @@ pub fn run() {
                             if window.is_minimized().unwrap_or(false) {
                                 let _ = window.unminimize();
                             }
-                            let _ = window.show();
+                            if !window.is_visible().unwrap_or(true) {
+                                let _ = window.show();
+                            }
                             let _ = window.set_focus();
                             let _ = window.emit("open-app-settings", ());
+                        }
+                    }
+                    "update" => {
+                        if let Some(window) = app.get_webview_window("main") {
+                            if window.is_minimized().unwrap_or(false) {
+                                let _ = window.unminimize();
+                            }
+                            if !window.is_visible().unwrap_or(true) {
+                                let _ = window.show();
+                            }
+                            let _ = window.set_focus();
+                            let _ = window.emit("open-check-updates", ());
                         }
                     }
                     "quit" => {

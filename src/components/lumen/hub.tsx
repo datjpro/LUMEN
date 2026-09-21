@@ -115,7 +115,8 @@ export function Hub() {
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef<{ startX: number; startY: number; initX: number; initY: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [activeTab, setActiveTab] = useState<string>("look");
+  const activeTab = useLumen((s) => s.hubTab);
+  const setActiveTab = useLumen((s) => s.setHubTab);
 
   // In-App Update Checker state
   const [checkingUpdate, setCheckingUpdate] = useState(false);
@@ -339,9 +340,20 @@ export function Hub() {
           </div>
           <div className="flex items-center gap-1.5 min-w-0">
             <img src="/icon.png" alt="Lumen Logo" className="size-4 object-contain rounded-sm" />
-            <p className="font-semibold text-xs tracking-tight text-[#F4F5F7]">
+            <p className="font-semibold text-xs tracking-tight text-[#F4F5F7] truncate">
               {isVi ? "Cài Đặt Hệ Thống & Tùy Biến" : "System Preferences & Settings"}
             </p>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("about");
+                void handleCheckUpdateManual();
+              }}
+              className="cursor-pointer text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-md bg-[#F5A623]/15 text-[#F5A623] hover:bg-[#F5A623]/25 border border-[#F5A623]/30 transition-colors shrink-0"
+              title={isVi ? "Bấm để kiểm tra cập nhật (Tab Hệ Thống)" : "Click to check updates (About Tab)"}
+            >
+              v{CURRENT_APP_VERSION}
+            </button>
           </div>
         </div>
 
@@ -772,69 +784,6 @@ export function Hub() {
               </div>
             </div>
 
-            {/* App Version & Auto-Update Card */}
-            <div className="rounded-2xl bg-[#262A35]/50 p-3 border border-white/6 space-y-2.5 shadow-xs">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-xs font-semibold text-[#F4F5F7]">
-                      {isVi ? "Phiên bản ứng dụng" : "Application Version"}
-                    </p>
-                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-md bg-[#F5A623]/15 text-[#F5A623] border border-[#F5A623]/30">
-                      v{CURRENT_APP_VERSION}
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-[#8B90A0]">
-                    {isVi ? "Tự động phát hiện phiên bản mới từ GitHub Releases" : "Check for latest release on GitHub"}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      sounds.playPop(500);
-                      setUpdateModalInfo({
-                        version: CURRENT_APP_VERSION,
-                        name: `Lumen v${CURRENT_APP_VERSION}`,
-                        body: "",
-                        downloadUrl: `https://github.com/datjpro/cliff-clover-moon-tundra/releases/tag/v${CURRENT_APP_VERSION}`,
-                      });
-                      setShowUpdateModal(true);
-                    }}
-                    className="h-7 text-xs font-medium border-white/10 bg-[#14161D] text-[#8B90A0] hover:text-[#F4F5F7] hover:border-white/20 rounded-xl cursor-pointer gap-1 px-2 shadow-xs"
-                  >
-                    <Sparkles className="size-3 text-[#F5A623]" />
-                    <span>{isVi ? "Tính năng mới" : "What's New"}</span>
-                  </Button>
-
-                  <Button
-                    size="sm"
-                    onClick={handleCheckUpdateManual}
-                    disabled={checkingUpdate}
-                    className="h-7 text-xs font-semibold bg-[#F5A623] hover:bg-[#D6871A] text-[#14161D] rounded-xl cursor-pointer gap-1 px-2.5 shadow-xs"
-                  >
-                    <RefreshCw className={cn("size-3", checkingUpdate && "animate-spin")} />
-                    <span>
-                      {checkingUpdate
-                        ? isVi
-                          ? "Đang kiểm tra..."
-                          : "Checking..."
-                        : isVi
-                        ? "Kiểm tra cập nhật"
-                        : "Check Update"}
-                    </span>
-                  </Button>
-                </div>
-              </div>
-
-              {updateResultText && (
-                <p className="text-[11px] text-amber-300 font-medium pt-1 border-t border-white/5 animate-in fade-in">
-                  ✨ {updateResultText}
-                </p>
-              )}
-            </div>
           </TabsContent>
 
           {/* TAB 3: VIRTUAL PET STUDIO & WARDROBE */}
@@ -1020,8 +969,72 @@ export function Hub() {
             )}
           </TabsContent>
 
-          {/* TAB 4: SYSTEM & TELEMETRY */}
+          {/* TAB 4: SYSTEM, UPDATES & ABOUT */}
           <TabsContent value="about" className="space-y-3 text-xs text-[#8B90A0] mt-0">
+            {/* App Version & Auto-Update Card (Prominently featured) */}
+            <div className="rounded-2xl bg-[#262A35]/50 p-3 border border-white/6 space-y-2.5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-xs font-semibold text-[#F4F5F7]">
+                      {isVi ? "Phiên bản ứng dụng & Cập nhật" : "Application Version & Updates"}
+                    </p>
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-md bg-[#F5A623]/15 text-[#F5A623] border border-[#F5A623]/30">
+                      v{CURRENT_APP_VERSION}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-[#8B90A0]">
+                    {isVi ? "Tự động phát hiện phiên bản mới từ GitHub Releases" : "Check for latest release on GitHub"}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      sounds.playPop(500);
+                      setUpdateModalInfo({
+                        version: CURRENT_APP_VERSION,
+                        name: `Lumen v${CURRENT_APP_VERSION}`,
+                        body: "",
+                        downloadUrl: `https://github.com/datjpro/LUMEN/releases/tag/v${CURRENT_APP_VERSION}`,
+                      });
+                      setShowUpdateModal(true);
+                    }}
+                    className="h-7 text-xs font-medium border-white/10 bg-[#14161D] text-[#8B90A0] hover:text-[#F4F5F7] hover:border-white/20 rounded-xl cursor-pointer gap-1 px-2 shadow-xs"
+                  >
+                    <Sparkles className="size-3 text-[#F5A623]" />
+                    <span>{isVi ? "Tính năng mới" : "What's New"}</span>
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    onClick={handleCheckUpdateManual}
+                    disabled={checkingUpdate}
+                    className="h-7 text-xs font-semibold bg-[#F5A623] hover:bg-[#D6871A] text-[#14161D] rounded-xl cursor-pointer gap-1 px-2.5 shadow-xs"
+                  >
+                    <RefreshCw className={cn("size-3", checkingUpdate && "animate-spin")} />
+                    <span>
+                      {checkingUpdate
+                        ? isVi
+                          ? "Đang kiểm tra..."
+                          : "Checking..."
+                        : isVi
+                        ? "Kiểm tra cập nhật"
+                        : "Check Update"}
+                    </span>
+                  </Button>
+                </div>
+              </div>
+
+              {updateResultText && (
+                <p className="text-[11px] text-amber-300 font-medium pt-1 border-t border-white/5 animate-in fade-in">
+                  ✨ {updateResultText}
+                </p>
+              )}
+            </div>
+
             {/* Live Performance Telemetry */}
             <div className="rounded-2xl bg-[#262A35]/50 p-3 space-y-2 border border-white/6">
               <div className="flex items-center justify-between">

@@ -23,10 +23,16 @@ class SoundEngine {
         const AudioCtx =
           window.AudioContext ||
           (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-        this.ctx = new AudioCtx();
+        this.ctx = new AudioCtx({ latencyHint: "interactive" });
       }
       if (this.ctx.state === "suspended") {
         void this.ctx.resume();
+      }
+      // Ensure Web Audio does not claim OS Media Transport Controls or pause background media
+      if (typeof navigator !== "undefined" && "mediaSession" in navigator && navigator.mediaSession) {
+        try {
+          navigator.mediaSession.playbackState = "none";
+        } catch {}
       }
       return this.ctx;
     } catch {

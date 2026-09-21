@@ -49,7 +49,7 @@ export function UpdateNotificationModal({
     const url =
       updateInfo.downloadUrl ||
       updateInfo.htmlUrl ||
-      `https://github.com/datjpro/cliff-clover-moon-tundra/releases/tag/v${updateInfo.version}`;
+      `https://github.com/datjpro/LUMEN/releases/tag/v${updateInfo.version}`;
     window.open(url, "_blank", "noopener,noreferrer");
     onClose();
   };

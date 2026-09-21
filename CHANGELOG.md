@@ -2,6 +2,23 @@
 
 > **Version Control & Release Tracker:** All notable changes, spatial features, performance optimizations, and bug fixes across Lumen releases.
 
+## 🚀 [v1.2.6] — 2026-09-21 — Background Video Playback Fix & Update Checker UI Prominence
+
+### 🛠️ Bug Fixes & Desktop Shell Audio Hardening:
+- **🎬 Khắc Phục Hoàn Toàn Lỗi Tạm Dừng Video Nền (YouTube/Browser/Media Player):**
+  - Vô hiệu hóa các cờ Chromium Media Session & Hardware Media Keys (`HardwareMediaKeyHandling`, `MediaSessionService`, `VolumeNotification`, `AudioDuckScreenReader`) trong WebView2 thông qua biến môi trường `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` trong [`main.rs`](file:///D:/Demo/cliff-clover-moon-tundra/src-tauri/src/main.rs#L5) và [`lib.rs`](file:///D:/Demo/cliff-clover-moon-tundra/src-tauri/src/lib.rs#L245).
+  - Khởi tạo Web Audio Synthesizer với `latencyHint: "interactive"` và thiết lập `navigator.mediaSession.playbackState = "none"` trong [`audio.ts`](file:///D:/Demo/cliff-clover-moon-tundra/src/lib/audio.ts#L23), ngăn triệt để Web Audio chiếm quyền điều khiển SMTC của hệ điều hành Windows.
+  - Loại bỏ các lệnh gọi `focus_window` / `window.show()` lặp đi lặp lại trên mỗi sự kiện `pointerdown` trong [`desktop-scene.tsx`](file:///D:/Demo/cliff-clover-moon-tundra/src/components/lumen/desktop-scene.tsx) và [`sticky-note.tsx`](file:///D:/Demo/cliff-clover-moon-tundra/src/components/lumen/sticky-note.tsx), bảo đảm Windows DWM không gửi tín hiệu hủy tiêu điểm (deactivate/kill-focus) làm đứng hình video của các ứng dụng chạy ngầm.
+
+### 🔄 Trải Nghiệm Kiểm Tra & Quản Lý Cập Nhật (Update Checker UI Prominence):
+- **🌟 Đưa Thẻ Kiểm Tra Cập Nhật Lên Đầu Tab Hệ Thống (Tab 4 — System & About):**
+  - Chuyển toàn bộ khối "Phiên bản ứng dụng & Cập nhật" từ cuối Tab 2 (Tùy chọn) lên vị trí đầu tiên, nổi bật nhất của Tab 4 (Hệ thống & Thông tin) trong [`hub.tsx`](file:///D:/Demo/cliff-clover-moon-tundra/src/components/lumen/hub.tsx).
+- **📋 Bổ Sung Mục "Kiểm Tra Cập Nhật" Vào Menu Khay Hệ Thống (System Tray):**
+  - Thêm `🔄 Check for Updates... (Kiểm tra cập nhật)` trực tiếp vào menu chuột phải của biểu tượng Lumen dưới thanh Taskbar (`src-tauri/src/lib.rs`), cho phép kiểm tra phiên bản mới nhanh chóng mà không cần mở cài đặt.
+- **⚡ Phím Tắt Tiêu Đề & Tự Động Kiểm Tra Khởi Động:**
+  - Bổ sung huy hiệu phiên bản `v1.2.6` có thể nhấp trực tiếp trên thanh tiêu đề của bảng Cài Đặt để kiểm tra cập nhật tức thì.
+  - Tích hợp trình quét cập nhật âm thầm sau 4 giây khởi động app và gửi thông báo nếu có bản phát hành mới trên GitHub `datjpro/LUMEN`.
+
 ---
 
 ## 🚀 [v1.2.5] — 2026-09-21 — Tauri Desktop Standalone Offline Fix & Native Click-Through Safeguard

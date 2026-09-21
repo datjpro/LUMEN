@@ -17,10 +17,66 @@ export interface VersionRelease {
 
 export const APP_RELEASES: VersionRelease[] = [
   {
+    version: "1.2.6",
+    releaseName: "Lumen v1.2.6 — Background Video Playback Fix & Update Checker UI Prominence",
+    releaseDate: "2026-09-21",
+    isLatest: true,
+    highlights: [
+      {
+        icon: "🎬",
+        badge: "fix",
+        titleVi: "Khắc Phục Hoàn Toàn Lỗi Tạm Dừng Video Nền Khi Tương Tác",
+        titleEn: "Fix Background Video Pause / Audio Ducking on Interaction",
+        descriptionVi:
+          "Tắt tính năng HardwareMediaKeyHandling & MediaSessionService trong WebView2, đồng thời loại bỏ các lệnh kích hoạt cửa sổ thừa, đảm bảo video YouTube/trình duyệt hoặc nhạc nền chạy liên tục không bị gián đoạn khi nhấp chuột vào Lumen.",
+        descriptionEn:
+          "Disabled WebView2 Chromium MediaSessionService & HardwareMediaKeyHandling flags and removed redundant focus activation hooks, preventing background video/audio playback from pausing during desktop interactions.",
+      },
+      {
+        icon: "🔄",
+        badge: "ui",
+        titleVi: "Đưa Tính Năng Kiểm Tra Cập Nhật Lên Vị Trí Nổi Bật & Khay Hệ Thống",
+        titleEn: "Prominent Update Checker in About Hub & System Tray",
+        descriptionVi:
+          "Chuyển thẻ Kiểm tra cập nhật lên đầu Tab Hệ Thống (Alt+S), thêm nút kiểm tra nhanh trên khay hệ thống (System Tray) và huy hiệu phiên bản trên thanh tiêu đề, giúp người dùng dễ dàng cập nhật bất kỳ lúc nào.",
+        descriptionEn:
+          "Moved the update checker card to the top of System & About tab (Alt+S), added a dedicated tray menu item, header version shortcut, and background startup update detector.",
+      },
+    ],
+  },
+  {
+    version: "1.2.5",
+    releaseName: "Lumen v1.2.5 — Tauri Desktop Standalone Offline Fix & Native Click-Through Safeguard",
+    releaseDate: "2026-09-21",
+    isLatest: false,
+    highlights: [
+      {
+        icon: "📦",
+        badge: "fix",
+        titleVi: "Hoàn Thiện Cơ Chế Standalone Offline Cho File .exe (Tauri v2)",
+        titleEn: "Standalone Offline Bundle Packaging for Tauri .exe",
+        descriptionVi:
+          "Khai báo rõ ràng url index.html trong tauri.conf.json và đóng gói toàn bộ tài nguyên tĩnh trực tiếp vào binary .exe, không phụ thuộc dev server.",
+        descriptionEn:
+          "Packaged all static assets into offline bundle without localhost dev server dependency.",
+      },
+      {
+        icon: "🛡️",
+        badge: "perf",
+        titleVi: "Khắc Phục Lỗi Khóa Chuột Khởi Động (Click-Through Safeguard)",
+        titleEn: "Click-Through Initial Startup Safeguard",
+        descriptionVi:
+          "Bảo vệ trạng thái chuột tương tác trước khi webview tải xong tọa độ, ngăn ngừa đơ chuột khi mới mở ứng dụng.",
+        descriptionEn:
+          "Maintained mouse interactivity safeguard before webview completes first rect sync.",
+      },
+    ],
+  },
+  {
     version: "1.2.4",
     releaseName: "Lumen v1.2.4 — Comprehensive Vietnamese Localization & Natural Phrasing",
     releaseDate: "2026-09-20",
-    isLatest: true,
+    isLatest: false,
     highlights: [
       {
         icon: "🇻🇳",
