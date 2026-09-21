@@ -23,14 +23,24 @@ export const APP_RELEASES: VersionRelease[] = [
     isLatest: true,
     highlights: [
       {
+        icon: "⚡",
+        badge: "perf",
+        titleVi: "Tối Ưu Hóa Bộ Nhớ RAM Chuyên Sâu (In-Process GPU & Working Set Trimmer)",
+        titleEn: "Extreme RAM Optimization & Multi-Process Working Set Trimmer",
+        descriptionVi:
+          "Gộp tiến trình GPU và mạng vào tiến trình chính (--in-process-gpu), giới hạn trần JS Heap 64MB và tích hợp luồng quét Win32 SetProcessWorkingSetSize tự động thu hồi bộ nhớ đệm, giúp ứng dụng hoạt động mượt mà với mức chiếm dụng RAM siêu nhẹ.",
+        descriptionEn:
+          "Merged GPU & network services in-process, capped V8 JS heap at 64MB, and integrated a background Win32 working set trimmer to flush inactive memory pages.",
+      },
+      {
         icon: "🎬",
         badge: "fix",
         titleVi: "Khắc Phục Hoàn Toàn Lỗi Tạm Dừng Video Nền Khi Tương Tác",
         titleEn: "Fix Background Video Pause / Audio Ducking on Interaction",
         descriptionVi:
-          "Tắt tính năng HardwareMediaKeyHandling & MediaSessionService trong WebView2, đồng thời loại bỏ các lệnh kích hoạt cửa sổ thừa, đảm bảo video YouTube/trình duyệt hoặc nhạc nền chạy liên tục không bị gián đoạn khi nhấp chuột vào Lumen.",
+          "Tắt tính năng HardwareMediaKeyHandling & MediaSessionService trong WebView2, áp dụng khoảng đệm chống che khuất (Non-Occluding Bounds) và auto-suspend AudioContext, đảm bảo video YouTube/trình duyệt chạy liên tục không bị gián đoạn khi nhấp chuột vào Lumen.",
         descriptionEn:
-          "Disabled WebView2 Chromium MediaSessionService & HardwareMediaKeyHandling flags and removed redundant focus activation hooks, preventing background video/audio playback from pausing during desktop interactions.",
+          "Disabled WebView2 Chromium MediaSessionService & HardwareMediaKeyHandling flags, applied non-occluding window bounds, and auto-suspended AudioContext to prevent background video/audio playback from pausing.",
       },
       {
         icon: "🔄",

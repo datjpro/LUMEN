@@ -1,5 +1,6 @@
 // Procedural Web Audio synthesizer for tactile UI, Pet companion interactions, and Alarm timers
 // Zero external assets needed, ultra-lightweight and deterministic
+// Automatically releases WASAPI audio endpoints & suspends context when idle to prevent background media ducking/pausing
 
 import type { AlarmSoundTone } from "./types";
 
@@ -7,32 +8,75 @@ class SoundEngine {
   private ctx: AudioContext | null = null;
   private enabled = true;
   private loopTimer: number | null = null;
+  private suspendTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private activeSoundCount = 0;
 
   public setEnabled(val: boolean) {
     this.enabled = val;
+    if (!val && this.ctx && this.ctx.state === "running") {
+      void this.ctx.suspend().catch(() => {});
+    }
   }
 
   public isEnabled(): boolean {
     return this.enabled;
   }
 
+  private cancelScheduledSuspend() {
+    if (this.suspendTimeoutId !== null) {
+      clearTimeout(this.suspendTimeoutId);
+      this.suspendTimeoutId = null;
+    }
+  }
+
+  private scheduleSuspend(delayMs = 120) {
+    this.cancelScheduledSuspend();
+    if (this.loopTimer !== null) return; // Never suspend during active alarm loop
+    this.suspendTimeoutId = setTimeout(() => {
+      this.suspendTimeoutId = null;
+      if (this.activeSoundCount <= 0 && this.loopTimer === null && this.ctx && this.ctx.state === "running") {
+        void this.ctx.suspend().catch(() => {});
+      }
+    }, delayMs);
+  }
+
+  private neutralizeMediaSession() {
+    if (typeof navigator !== "undefined" && "mediaSession" in navigator && navigator.mediaSession) {
+      try {
+        navigator.mediaSession.playbackState = "none";
+        navigator.mediaSession.metadata = null;
+        const actions: MediaSessionAction[] = [
+          "play",
+          "pause",
+          "seekbackward",
+          "seekforward",
+          "previoustrack",
+          "nexttrack",
+          "stop",
+          "seekto",
+        ];
+        actions.forEach((action) => {
+          try {
+            navigator.mediaSession.setActionHandler(action, null);
+          } catch {}
+        });
+      } catch {}
+    }
+  }
+
   private getContext(): AudioContext | null {
     if (!this.enabled) return null;
     try {
+      this.neutralizeMediaSession();
       if (!this.ctx || this.ctx.state === "closed") {
         const AudioCtx =
           window.AudioContext ||
           (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         this.ctx = new AudioCtx({ latencyHint: "interactive" });
       }
+      this.cancelScheduledSuspend();
       if (this.ctx.state === "suspended") {
-        void this.ctx.resume();
-      }
-      // Ensure Web Audio does not claim OS Media Transport Controls or pause background media
-      if (typeof navigator !== "undefined" && "mediaSession" in navigator && navigator.mediaSession) {
-        try {
-          navigator.mediaSession.playbackState = "none";
-        } catch {}
+        void this.ctx.resume().catch(() => {});
       }
       return this.ctx;
     } catch {
@@ -40,11 +84,26 @@ class SoundEngine {
     }
   }
 
+  private onSoundStart() {
+    this.activeSoundCount++;
+    this.cancelScheduledSuspend();
+  }
+
+  private onSoundEnd(durationMs: number) {
+    setTimeout(() => {
+      this.activeSoundCount = Math.max(0, this.activeSoundCount - 1);
+      if (this.activeSoundCount === 0) {
+        this.scheduleSuspend(100);
+      }
+    }, durationMs);
+  }
+
   // Soft tactile pop when grabbing/clicking a note
   public playPop(frequency = 520) {
     const ctx = this.getContext();
     if (!ctx) return;
     try {
+      this.onSoundStart();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sine";
@@ -59,8 +118,9 @@ class SoundEngine {
 
       osc.start();
       osc.stop(ctx.currentTime + 0.08);
+      this.onSoundEnd(90);
     } catch {
-      // AudioContext might be blocked before first gesture
+      this.onSoundEnd(0);
     }
   }
 
@@ -69,6 +129,7 @@ class SoundEngine {
     const ctx = this.getContext();
     if (!ctx) return;
     try {
+      this.onSoundStart();
       const now = ctx.currentTime;
       // High-precision metallic transient click
       const osc = ctx.createOscillator();
@@ -92,8 +153,9 @@ class SoundEngine {
 
       osc.start(now);
       osc.stop(now + 0.02);
+      this.onSoundEnd(30);
     } catch {
-      // AudioContext might be blocked
+      this.onSoundEnd(0);
     }
   }
 
@@ -102,6 +164,7 @@ class SoundEngine {
     const ctx = this.getContext();
     if (!ctx) return;
     try {
+      this.onSoundStart();
       const now = ctx.currentTime;
       [0, 0.05].forEach((offset, idx) => {
         const osc = ctx.createOscillator();
@@ -115,8 +178,9 @@ class SoundEngine {
         osc.start(now + offset);
         osc.stop(now + offset + 0.07);
       });
+      this.onSoundEnd(130);
     } catch {
-      // Ignored
+      this.onSoundEnd(0);
     }
   }
 
@@ -125,6 +189,7 @@ class SoundEngine {
     const ctx = this.getContext();
     if (!ctx) return;
     try {
+      this.onSoundStart();
       const notes = [587.33, 739.99, 880.0]; // D5, F#5, A5
       notes.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
@@ -141,8 +206,9 @@ class SoundEngine {
         osc.start(ctx.currentTime + idx * 0.07);
         osc.stop(ctx.currentTime + idx * 0.07 + 0.25);
       });
+      this.onSoundEnd(400);
     } catch {
-      // Ignored
+      this.onSoundEnd(0);
     }
   }
 
@@ -151,6 +217,7 @@ class SoundEngine {
     const ctx = this.getContext();
     if (!ctx) return;
     try {
+      this.onSoundStart();
       const masterGainVal = Math.max(0.05, Math.min(1.0, (volumePercent / 100) * 0.45));
 
       if (tone === "digital_alarm") {
@@ -170,6 +237,7 @@ class SoundEngine {
           osc.start(ctx.currentTime + timeOffset);
           osc.stop(ctx.currentTime + timeOffset + 0.09);
         });
+        this.onSoundEnd(550);
       } else if (tone === "vintage_clock") {
         // Resonant deep pendulum clock bell
         [0, 0.45].forEach((offset) => {
@@ -194,6 +262,7 @@ class SoundEngine {
           osc.stop(ctx.currentTime + offset + 0.4);
           oscHarmonic.stop(ctx.currentTime + offset + 0.4);
         });
+        this.onSoundEnd(900);
       } else if (tone === "gentle_chime") {
         // Soft melodic chord
         const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
@@ -212,6 +281,7 @@ class SoundEngine {
           osc.start(ctx.currentTime + idx * 0.09);
           osc.stop(ctx.currentTime + idx * 0.09 + 0.5);
         });
+        this.onSoundEnd(900);
       } else {
         // Default: Loud Bell Arpeggio (Ngân vang, sôi nổi)
         const notes = [659.25, 783.99, 987.77, 1318.51]; // E5, G5, B5, E6
@@ -232,9 +302,10 @@ class SoundEngine {
             osc.stop(ctx.currentTime + burstOffset + idx * 0.04 + 0.24);
           });
         });
+        this.onSoundEnd(1100);
       }
     } catch {
-      // Ignored
+      this.onSoundEnd(0);
     }
   }
 
@@ -251,6 +322,7 @@ class SoundEngine {
     if (this.loopTimer !== null) {
       clearInterval(this.loopTimer);
       this.loopTimer = null;
+      this.scheduleSuspend(100);
     }
   }
 
@@ -263,6 +335,7 @@ class SoundEngine {
     const ctx = this.getContext();
     if (!ctx) return;
     try {
+      this.onSoundStart();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sine";
@@ -278,8 +351,9 @@ class SoundEngine {
 
       osc.start();
       osc.stop(ctx.currentTime + 0.24);
+      this.onSoundEnd(260);
     } catch {
-      // Ignored
+      this.onSoundEnd(0);
     }
   }
 
@@ -288,6 +362,7 @@ class SoundEngine {
     const ctx = this.getContext();
     if (!ctx) return;
     try {
+      this.onSoundStart();
       [0, 0.09, 0.18].forEach((timeOffset, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -304,8 +379,9 @@ class SoundEngine {
         osc.start(ctx.currentTime + timeOffset);
         osc.stop(ctx.currentTime + timeOffset + 0.05);
       });
+      this.onSoundEnd(260);
     } catch {
-      // Ignored
+      this.onSoundEnd(0);
     }
   }
 
@@ -314,6 +390,7 @@ class SoundEngine {
     const ctx = this.getContext();
     if (!ctx) return;
     try {
+      this.onSoundStart();
       const now = ctx.currentTime;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -329,8 +406,9 @@ class SoundEngine {
 
       osc.start(now);
       osc.stop(now + 0.016);
+      this.onSoundEnd(30);
     } catch {
-      // Ignored
+      this.onSoundEnd(0);
     }
   }
 
@@ -339,6 +417,7 @@ class SoundEngine {
     const ctx = this.getContext();
     if (!ctx) return;
     try {
+      this.onSoundStart();
       const now = ctx.currentTime;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -355,8 +434,9 @@ class SoundEngine {
 
       osc.start(now);
       osc.stop(now + 0.12);
+      this.onSoundEnd(140);
     } catch {
-      // Ignored
+      this.onSoundEnd(0);
     }
   }
 
@@ -365,6 +445,7 @@ class SoundEngine {
     const ctx = this.getContext();
     if (!ctx) return;
     try {
+      this.onSoundStart();
       const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
       const now = ctx.currentTime;
       notes.forEach((freq, idx) => {
@@ -382,11 +463,11 @@ class SoundEngine {
         osc.start(now + idx * 0.06);
         osc.stop(now + idx * 0.06 + 0.2);
       });
+      this.onSoundEnd(300);
     } catch {
-      // Ignored
+      this.onSoundEnd(0);
     }
   }
 }
 
 export const sounds = new SoundEngine();
-

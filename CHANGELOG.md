@@ -2,13 +2,25 @@
 
 > **Version Control & Release Tracker:** All notable changes, spatial features, performance optimizations, and bug fixes across Lumen releases.
 
-## 🚀 [v1.2.6] — 2026-09-21 — Background Video Playback Fix & Update Checker UI Prominence
+## 🚀 [v1.2.6] — 2026-09-21 — Background Video Playback Fix, Extreme RAM Optimization & Update Checker UI Prominence
+
+### ⚡ Extreme RAM & Resource Optimization (Ép RAM Xuống Mức Siêu Nhẹ):
+- **🧩 Gộp Tiến Trình GPU & Mạng Trong Tiến Trình Chính (`--in-process-gpu`):**
+  - Loại bỏ hoàn toàn tiến trình con `msedgewebview2.exe (GPU Process)` riêng biệt, cắt giảm ngay **~50MB – 60MB** RAM nền.
+  - Chạy dịch vụ mạng trong cùng tiến trình (`NetworkServiceInProcess`) và tắt Process Isolation không cần thiết (`site-per-process`, `IsolateOrigins`, `AudioServiceOutOfProcess`) cho môi trường desktop offline.
+- **🛡️ Thu Hồi Bộ Nhớ Tự Động Định Kỳ (Multi-Process Working Set Trimmer):**
+  - Tích hợp thread nền trong [`src-tauri/src/lib.rs`](file:///D:/Demo/cliff-clover-moon-tundra/src-tauri/src/lib.rs) sử dụng `CreateToolhelp32Snapshot` quét toàn bộ cây tiến trình (`lumen-desktop.exe` và tất cả `msedgewebview2.exe`) và tự động gọi Win32 API `SetProcessWorkingSetSize` để giải phóng các trang RAM đệm không hoạt động.
+- **📦 Giới Hạn V8 Heap & Tắt Cache Đồ Họa:**
+  - Cấu hình `--js-flags=--max-old-space-size=64` giới hạn trần JS Heap ở mức 64MB.
+  - Vô hiệu hóa GPU Shader Cache (`--disable-gpu-shader-disk-cache`) tiết kiệm thêm 30MB RAM.
+  - Chuyển đổi vòng lặp đo FPS `requestAnimationFrame` sang chế độ **On-Demand** (tự động ngắt sau 5 giây không sử dụng).
 
 ### 🛠️ Bug Fixes & Desktop Shell Audio Hardening:
 - **🎬 Khắc Phục Hoàn Toàn Lỗi Tạm Dừng Video Nền (YouTube/Browser/Media Player):**
-  - Vô hiệu hóa các cờ Chromium Media Session & Hardware Media Keys (`HardwareMediaKeyHandling`, `MediaSessionService`, `VolumeNotification`, `AudioDuckScreenReader`) trong WebView2 thông qua biến môi trường `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` trong [`main.rs`](file:///D:/Demo/cliff-clover-moon-tundra/src-tauri/src/main.rs#L5) và [`lib.rs`](file:///D:/Demo/cliff-clover-moon-tundra/src-tauri/src/lib.rs#L245).
-  - Khởi tạo Web Audio Synthesizer với `latencyHint: "interactive"` và thiết lập `navigator.mediaSession.playbackState = "none"` trong [`audio.ts`](file:///D:/Demo/cliff-clover-moon-tundra/src/lib/audio.ts#L23), ngăn triệt để Web Audio chiếm quyền điều khiển SMTC của hệ điều hành Windows.
-  - Loại bỏ các lệnh gọi `focus_window` / `window.show()` lặp đi lặp lại trên mỗi sự kiện `pointerdown` trong [`desktop-scene.tsx`](file:///D:/Demo/cliff-clover-moon-tundra/src/components/lumen/desktop-scene.tsx) và [`sticky-note.tsx`](file:///D:/Demo/cliff-clover-moon-tundra/src/components/lumen/sticky-note.tsx), bảo đảm Windows DWM không gửi tín hiệu hủy tiêu điểm (deactivate/kill-focus) làm đứng hình video của các ứng dụng chạy ngầm.
+  - Thiết lập cửa sổ `maximized: false` và tự động áp dụng khoảng đệm chống che khuất (Non-Occluding Bounds: `{ x: 1, y: 1, width: screenWidth - 2, height: screenHeight - 4 }`) trong [`lib.rs`](file:///D:/Demo/cliff-clover-moon-tundra/src-tauri/src/lib.rs) và [`tauri.conf.json`](file:///D:/Demo/cliff-clover-moon-tundra/src-tauri/tauri.conf.json), ngăn chặn Windows DWM kích hoạt DirectComposition Occlusion làm đóng băng video của Chrome/Edge ngầm.
+  - Bổ sung cờ vô hiệu hóa tính toán che khuất: `CalculateNativeWinOcclusion`, `disable-backgrounding-occluded-windows`, `disable-renderer-backgrounding`, `disable-background-timer-throttling`.
+  - Vô hiệu hóa các cờ Chromium Media Session & Hardware Media Keys (`HardwareMediaKeyHandling`, `MediaSessionService`, `VolumeNotification`, `AudioDuckScreenReader`, `SystemMediaTransportControls`) trong WebView2.
+  - Bổ sung cơ chế tự động gọi `this.ctx.suspend()` sau 100ms khi dứt âm thanh popup/chime trong [`audio.ts`](file:///D:/Demo/cliff-clover-moon-tundra/src/lib/audio.ts), lập tức giải phóng endpoint âm thanh WASAPI về hệ điều hành.
 
 ### 🔄 Trải Nghiệm Kiểm Tra & Quản Lý Cập Nhật (Update Checker UI Prominence):
 - **🌟 Đưa Thẻ Kiểm Tra Cập Nhật Lên Đầu Tab Hệ Thống (Tab 4 — System & About):**

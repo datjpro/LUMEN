@@ -4,10 +4,11 @@
 fn main() {
     #[cfg(windows)]
     {
-        // Disable Chromium hardware media key handling, media session service, and audio ducking so background videos/audio in browser or player are never paused on interaction
+        // Aggressive RAM & Resource Optimization + Audio/Media Isolation for WebView2
+        // Collapses multi-process overhead, restricts V8 heap to 64MB, and trims GPU/Network process footprint
         std::env::set_var(
             "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS",
-            "--disable-features=HardwareMediaKeyHandling,MediaSessionService,VolumeNotification,AudioDuckScreenReader --autoplay-policy=no-user-gesture-required",
+            "--in-process-gpu --enable-features=NetworkServiceInProcess --js-flags=--max-old-space-size=64 --disable-gpu-shader-disk-cache --disk-cache-size=1048576 --media-cache-size=1048576 --renderer-process-limit=1 --disable-background-networking --disable-default-apps --disable-extensions --disable-sync --disable-component-update --disable-speech-api --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-background-timer-throttling --disable-features=AudioServiceOutOfProcess,IsolateOrigins,site-per-process,CalculateNativeWinOcclusion,IntensiveWakeUpThrottling,ThrottleDisplayableMips,HardwareMediaKeyHandling,MediaSessionService,MediaSession,SystemMediaTransportControls,VolumeNotification,AudioDuckScreenReader,MediaEngagementBypassAutoplayPolicies,AudioDucking,EnableMediaSessionDuck,Win10MediaSession,Translate,AutofillServerCommunication,OptimizationHints,MediaRouter --disable-media-session-api --disable-background-media-suspend --autoplay-policy=no-user-gesture-required",
         );
     }
 
@@ -18,4 +19,3 @@ fn main() {
     }));
     lumen_lib::run();
 }
-

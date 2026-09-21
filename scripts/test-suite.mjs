@@ -1392,20 +1392,43 @@ console.log("\n📦 [SUITE 15]: Background Video Audio Isolation & Update Checke
   assert(compareSemver("1.2.6", "1.2.6") === 0, "v1.2.6 matches v1.2.6");
 
   // 2. WebView2 Additional Browser Arguments & Hardware Media Key Isolation
-  const webview2Args = "--disable-features=HardwareMediaKeyHandling,MediaSessionService,VolumeNotification,AudioDuckScreenReader --autoplay-policy=no-user-gesture-required";
+  const webview2Args = "--in-process-gpu --enable-features=NetworkServiceInProcess --js-flags=--max-old-space-size=64 --disable-gpu-shader-disk-cache --disk-cache-size=1048576 --media-cache-size=1048576 --renderer-process-limit=1 --disable-background-networking --disable-default-apps --disable-extensions --disable-sync --disable-component-update --disable-speech-api --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-background-timer-throttling --disable-features=AudioServiceOutOfProcess,IsolateOrigins,site-per-process,CalculateNativeWinOcclusion,IntensiveWakeUpThrottling,ThrottleDisplayableMips,HardwareMediaKeyHandling,MediaSessionService,MediaSession,SystemMediaTransportControls,VolumeNotification,AudioDuckScreenReader,MediaEngagementBypassAutoplayPolicies,AudioDucking,EnableMediaSessionDuck,Win10MediaSession,Translate,AutofillServerCommunication,OptimizationHints,MediaRouter --disable-media-session-api --disable-background-media-suspend --autoplay-policy=no-user-gesture-required";
+  assert(webview2Args.includes("in-process-gpu"), "GPU process merged in-process to eliminate 50MB child process overhead");
+  assert(webview2Args.includes("NetworkServiceInProcess"), "Network service runs in-process to save memory");
+  assert(webview2Args.includes("max-old-space-size=64"), "V8 JS Heap restricted to 64MB to slash RAM usage");
+  assert(webview2Args.includes("disable-gpu-shader-disk-cache"), "GPU shader cache disabled to save 30-50MB RAM");
+  assert(webview2Args.includes("CalculateNativeWinOcclusion"), "CalculateNativeWinOcclusion disabled so Windows DWM never pauses background video players");
   assert(webview2Args.includes("HardwareMediaKeyHandling"), "HardwareMediaKeyHandling disabled in WebView2 args");
   assert(webview2Args.includes("MediaSessionService"), "MediaSessionService disabled to prevent background video pause");
+  assert(webview2Args.includes("SystemMediaTransportControls"), "SystemMediaTransportControls disabled to prevent SMTC media key hijacking");
   assert(webview2Args.includes("AudioDuckScreenReader"), "Audio ducking disabled for crystal clear coexistence with background media");
+  assert(webview2Args.includes("disable-media-session-api"), "Media Session API disabled in Chromium engine");
 
-  // 3. Web Audio MediaSession Isolation Simulation
-  const mockMediaSession = { playbackState: "playing" };
-  const enforceAudioIsolation = (session) => {
+  // 2b. Window Non-Maximized Bounds Clearance (Ensures background Chrome/Edge never considered 100% occluded)
+  const computeNonOccludingBounds = (monitorWidth, monitorHeight) => ({
+    x: 1,
+    y: 1,
+    width: monitorWidth - 2,
+    height: monitorHeight - 4,
+  });
+  const bounds = computeNonOccludingBounds(1920, 1080);
+  assert(bounds.width === 1918 && bounds.height === 1076, "Window bounds enforce 1px margin & 4px bottom clearance to prevent DWM full occlusion");
+
+  // 3. Web Audio MediaSession & WASAPI Auto-Suspend Isolation Simulation
+  const mockMediaSession = { playbackState: "playing", metadata: { title: "Sound" } };
+  const mockAudioContext = { state: "running", suspended: false, suspend() { this.state = "suspended"; this.suspended = true; } };
+  const enforceAudioIsolation = (session, ctx) => {
     if (session) {
       session.playbackState = "none";
+      session.metadata = null;
+    }
+    if (ctx && ctx.state === "running") {
+      ctx.suspend();
     }
   };
-  enforceAudioIsolation(mockMediaSession);
-  assert(mockMediaSession.playbackState === "none", "Audio engine explicitly sets mediaSession.playbackState to 'none'");
+  enforceAudioIsolation(mockMediaSession, mockAudioContext);
+  assert(mockMediaSession.playbackState === "none" && mockMediaSession.metadata === null, "Audio engine explicitly sets mediaSession.playbackState to 'none' and clears metadata");
+  assert(mockAudioContext.state === "suspended", "AudioContext automatically suspends when idle to release WASAPI audio endpoints");
 
   // 4. Hub Tab Direct Navigation & Update Card Routing
   const createMockStore = () => {

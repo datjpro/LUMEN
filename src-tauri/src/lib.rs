@@ -245,10 +245,11 @@ fn quit_app(app: tauri::AppHandle) {
 pub fn run() {
     #[cfg(windows)]
     {
-        // Disable Chromium hardware media key handling, media session service, and audio ducking so background videos/audio in browser or player are never paused on interaction
+        // Aggressive RAM & Resource Optimization + Audio/Media Isolation for WebView2
+        // Collapses multi-process overhead, restricts V8 heap to 64MB, and trims GPU/Network process footprint
         std::env::set_var(
             "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS",
-            "--disable-features=HardwareMediaKeyHandling,MediaSessionService,VolumeNotification,AudioDuckScreenReader --autoplay-policy=no-user-gesture-required",
+            "--in-process-gpu --enable-features=NetworkServiceInProcess --js-flags=--max-old-space-size=64 --disable-gpu-shader-disk-cache --disk-cache-size=1048576 --media-cache-size=1048576 --renderer-process-limit=1 --disable-background-networking --disable-default-apps --disable-extensions --disable-sync --disable-component-update --disable-speech-api --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-background-timer-throttling --disable-features=AudioServiceOutOfProcess,IsolateOrigins,site-per-process,CalculateNativeWinOcclusion,IntensiveWakeUpThrottling,ThrottleDisplayableMips,HardwareMediaKeyHandling,MediaSessionService,MediaSession,SystemMediaTransportControls,VolumeNotification,AudioDuckScreenReader,MediaEngagementBypassAutoplayPolicies,AudioDucking,EnableMediaSessionDuck,Win10MediaSession,Translate,AutofillServerCommunication,OptimizationHints,MediaRouter --disable-media-session-api --disable-background-media-suspend --autoplay-policy=no-user-gesture-required",
         );
     }
 
@@ -272,6 +273,74 @@ pub fn run() {
         .setup(move |app| {
             let app_state_thread = app_state.clone();
             let main_window = app.get_webview_window("main");
+
+            #[cfg(windows)]
+            {
+                // Comprehensive Background Working Set Memory Trimmer:
+                // Periodically trims physical RAM pages for the host process AND all child msedgewebview2 processes.
+                std::thread::spawn(|| {
+                    use windows_sys::Win32::Foundation::{CloseHandle, INVALID_HANDLE_VALUE};
+                    use windows_sys::Win32::System::Diagnostics::ToolHelp::{
+                        CreateToolhelp32Snapshot, Process32First, Process32Next, PROCESSENTRY32, TH32CS_SNAPPROCESS,
+                    };
+                    use windows_sys::Win32::System::Threading::{
+                        GetCurrentProcess, GetCurrentProcessId, OpenProcess, SetProcessWorkingSetSize,
+                        PROCESS_QUERY_INFORMATION, PROCESS_SET_QUOTA,
+                    };
+
+                    loop {
+                        std::thread::sleep(std::time::Duration::from_secs(12));
+                        unsafe {
+                            let current_pid = GetCurrentProcessId();
+                            let current_proc = GetCurrentProcess();
+                            SetProcessWorkingSetSize(current_proc, usize::MAX, usize::MAX);
+
+                            let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+                            if snapshot != INVALID_HANDLE_VALUE {
+                                let mut entry: PROCESSENTRY32 = std::mem::zeroed();
+                                entry.dwSize = std::mem::size_of::<PROCESSENTRY32>() as u32;
+
+                                if Process32First(snapshot, &mut entry) != 0 {
+                                    loop {
+                                        if entry.th32ParentProcessID == current_pid {
+                                            let child_handle = OpenProcess(
+                                                PROCESS_SET_QUOTA | PROCESS_QUERY_INFORMATION,
+                                                0,
+                                                entry.th32ProcessID,
+                                            );
+                                            if !child_handle.is_null() {
+                                                SetProcessWorkingSetSize(child_handle, usize::MAX, usize::MAX);
+                                                CloseHandle(child_handle);
+                                            }
+                                        }
+                                        if Process32Next(snapshot, &mut entry) == 0 {
+                                            break;
+                                        }
+                                    }
+                                }
+                                CloseHandle(snapshot);
+                            }
+                        }
+                    }
+                });
+            }
+
+            #[cfg(windows)]
+            if let Some(ref win) = main_window {
+                // Ensure window is sized to non-occluding monitor bounds (1px offset, 4px clearance)
+                // so Windows DWM & Chromium never consider background Chrome/Edge as 100% occluded.
+                if let Ok(Some(monitor)) = win.primary_monitor() {
+                    let size = monitor.size();
+                    let scale = monitor.scale_factor();
+                    let logical_w = (size.width as f64 / scale).round();
+                    let logical_h = (size.height as f64 / scale).round();
+                    let _ = win.set_position(tauri::Position::Logical(tauri::LogicalPosition { x: 1.0, y: 1.0 }));
+                    let _ = win.set_size(tauri::Size::Logical(tauri::LogicalSize {
+                        width: (logical_w - 2.0).max(800.0),
+                        height: (logical_h - 4.0).max(600.0),
+                    }));
+                }
+            }
 
             #[cfg(windows)]
             if let Some(win) = main_window.clone() {

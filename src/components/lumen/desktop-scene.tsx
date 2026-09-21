@@ -489,6 +489,7 @@ export function DesktopScene() {
           useLumen.setState({ calendarEvents: cleaned });
         }
       }
+      sounds.setEnabled(useLumen.getState().pip.soundEnabled ?? true);
       markHydrated();
     });
   }, [markHydrated]);

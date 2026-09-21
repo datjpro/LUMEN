@@ -1,13 +1,20 @@
 import { getNativeSystemMetrics } from "./desktop-bridge";
 import type { SystemStats } from "./types";
 
-let lastFrameTime = performance.now();
 let currentFps = 60;
 let frameCount = 0;
-let fpsTimer = performance.now();
+let fpsTimer = 0;
+let isFpsTracking = false;
+let rafId: number | null = null;
+let lastFpsRequestTime = 0;
 
-// Smooth 60 FPS Tracker without layout thrashing
-if (typeof window !== "undefined") {
+function ensureFpsTracker() {
+  lastFpsRequestTime = performance.now();
+  if (isFpsTracking || typeof window === "undefined") return;
+  isFpsTracking = true;
+  fpsTimer = performance.now();
+  frameCount = 0;
+
   const updateFpsLoop = (now: number) => {
     frameCount++;
     if (now - fpsTimer >= 1000) {
@@ -15,10 +22,15 @@ if (typeof window !== "undefined") {
       frameCount = 0;
       fpsTimer = now;
     }
-    lastFrameTime = now;
-    requestAnimationFrame(updateFpsLoop);
+    // Auto-stop FPS loop if not requested for > 5 seconds to conserve CPU/RAM
+    if (now - lastFpsRequestTime > 5000) {
+      isFpsTracking = false;
+      rafId = null;
+      return;
+    }
+    rafId = requestAnimationFrame(updateFpsLoop);
   };
-  requestAnimationFrame(updateFpsLoop);
+  rafId = requestAnimationFrame(updateFpsLoop);
 }
 
 // Battery caching
@@ -45,6 +57,8 @@ if (typeof navigator !== "undefined" && "getBattery" in navigator) {
  * Guarantees zero fake random spikes or false-alarm high load alerts.
  */
 export async function sampleSystemMetrics(prevStats: SystemStats): Promise<Partial<SystemStats>> {
+  ensureFpsTracker();
+
   // 1. Try Native Tauri Shell Bridge first (Genuine Win32 Hardware Telemetry)
   try {
     const native = await getNativeSystemMetrics();
