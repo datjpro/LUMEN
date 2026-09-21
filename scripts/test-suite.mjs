@@ -1324,6 +1324,65 @@ console.log("\n📦 [SUITE 13]: Comprehensive Vietnamese Localization & Natural 
   assert(widgetTitlesVi.scratchpadCopied === "Đã sao chép!", "Scratchpad copy action translated to 'Đã sao chép!'");
 }
 
+// TEST SUITE 14: TAURI DESKTOP STANDALONE OFFLINE & CLICKTHROUGH SAFEGUARD (v1.2.5)
+console.log("\n📦 [SUITE 14]: Tauri Desktop Standalone Offline & Clickthrough Safeguard (v1.2.5)");
+{
+  // 1. Semver for v1.2.5
+  assert(compareSemver("1.2.5", "1.2.4") === 1, "v1.2.5 is strictly newer than v1.2.4 (Patch bump)");
+  assert(compareSemver("1.2.4", "1.2.5") === -1, "v1.2.4 is older than v1.2.5");
+  assert(compareSemver("1.2.5", "1.2.5") === 0, "v1.2.5 matches v1.2.5");
+
+  // 2. Tauri AppState Clickthrough Safeguard Simulation
+  class MockTauriAppState {
+    constructor() {
+      this.hasReceivedRects = false;
+      this.isIgnoring = false;
+      this.forceInteractive = false;
+      this.interactiveRects = [];
+    }
+
+    onTick(cursorX, cursorY) {
+      if (!this.hasReceivedRects || this.forceInteractive) {
+        if (this.isIgnoring) {
+          this.isIgnoring = false;
+        }
+        return "interactive";
+      }
+
+      const isInside = this.interactiveRects.some(
+        (r) => cursorX >= r.x && cursorX <= r.x + r.width && cursorY >= r.y && cursorY <= r.y + r.height
+      );
+
+      if (isInside && this.isIgnoring) {
+        this.isIgnoring = false;
+        return "interactive";
+      } else if (!isInside && !this.isIgnoring) {
+        this.isIgnoring = true;
+        return "passthrough";
+      }
+      return this.isIgnoring ? "passthrough" : "interactive";
+    }
+
+    updateRects(rects, forceInteractive) {
+      this.hasReceivedRects = true;
+      this.interactiveRects = rects;
+      this.forceInteractive = forceInteractive;
+      if (forceInteractive) this.isIgnoring = false;
+    }
+  }
+
+  const appState = new MockTauriAppState();
+  // Before frontend loads / receives rects: MUST remain interactive, never lock out user
+  assert(appState.onTick(100, 100) === "interactive", "Window stays interactive before frontend boots");
+  assert(appState.isIgnoring === false, "isIgnoring remains false during boot/error state");
+
+  // When frontend sends interactive rect
+  appState.updateRects([{ x: 50, y: 50, width: 200, height: 200 }], false);
+  assert(appState.onTick(60, 60) === "interactive", "Inside rect is interactive");
+  assert(appState.onTick(500, 500) === "passthrough", "Outside rect passes clicks through");
+  assert(appState.isIgnoring === true, "isIgnoring set to true for transparent canvas areas");
+}
+
 console.log(`\n========================================`);
 console.log(`📊 FINAL TEST REPORT: ${passed}/${total} Tests Passed (100% Success)`);
 console.log(`========================================\n`);

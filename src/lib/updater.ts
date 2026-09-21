@@ -1,7 +1,7 @@
 import type { AppUpdateInfo } from "./types";
 
-export const CURRENT_APP_VERSION = "1.2.4";
-export const GITHUB_REPO = "datjpro/cliff-clover-moon-tundra";
+export const CURRENT_APP_VERSION = "1.2.5";
+export const GITHUB_REPO = "datjpro/LUMEN";
 
 /**
  * Compare two semver version strings (e.g., "1.0.1" vs "1.0.0" or "v1.0.1" vs "v1.0.0").

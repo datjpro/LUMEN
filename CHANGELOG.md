@@ -4,6 +4,20 @@
 
 ---
 
+## 🚀 [v1.2.5] — 2026-09-21 — Tauri Desktop Standalone Offline Fix & Native Click-Through Safeguard
+
+### 🛠️ Tauri Desktop & Native Engine Hardening:
+- **📦 Hoàn Thiện Cơ Chế Standalone Offline Cho File `.exe` (Tauri v2):**
+  - Khai báo rõ ràng `"url": "index.html"` trong cấu hình cửa sổ chính của [`tauri.conf.json`](file:///D:/Demo/cliff-clover-moon-tundra/src-tauri/tauri.conf.json#L17), loại bỏ phụ thuộc ngầm vào `http://localhost:8080`.
+  - Đóng gói toàn bộ tài nguyên tĩnh (`frontendDist: ../.vercel/output/static`) trực tiếp vào binary `.exe`, cho phép khởi chạy ngay mà không cần bật trước dev server.
+- **🛡️ Khắc Phục Triệt Để Lỗi Khóa Chuột Khởi Động (Click-Through Lockout Safeguard):**
+  - Thêm cờ đồng bộ `has_received_rects` vào [`AppState`](file:///D:/Demo/cliff-clover-moon-tundra/src-tauri/src/lib.rs#L146) trong Rust.
+  - Ngăn chặn native thread tự động kích hoạt `set_ignore_cursor_events(true)` trước khi giao diện webview nạp hoàn tất và gửi tọa độ tương tác đầu tiên, đảm bảo người dùng không bao giờ bị đơ hay mất tương tác chuột.
+- **⚡ Đồng Bộ Kho Lưu Trữ GitHub:**
+  - Cập nhật định tuyến `GITHUB_REPO` chính thức về `datjpro/LUMEN` trong module cập nhật tự động.
+
+---
+
 ## 🚀 [v1.2.4] — 2026-09-20 — Comprehensive Vietnamese Localization & Natural Phrasing
 
 ### 🌐 Ngôn Ngữ & Bản Địa Hóa Chuẩn Mực (Comprehensive Vietnamese Localization):
