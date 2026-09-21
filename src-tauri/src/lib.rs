@@ -147,6 +147,7 @@ pub struct AppState {
     pub interactive_rects: Mutex<Vec<HitRect>>,
     pub is_ignoring: AtomicBool,
     pub force_interactive: AtomicBool,
+    pub has_received_rects: AtomicBool,
 }
 
 impl Default for AppState {
@@ -155,6 +156,7 @@ impl Default for AppState {
             interactive_rects: Mutex::new(Vec::new()),
             is_ignoring: AtomicBool::new(false),
             force_interactive: AtomicBool::new(false),
+            has_received_rects: AtomicBool::new(false),
         }
     }
 }
@@ -166,6 +168,7 @@ fn update_interactive_rects(
     rects: Vec<HitRect>,
     force_interactive: bool,
 ) -> Result<(), String> {
+    state.has_received_rects.store(true, Ordering::SeqCst);
     if let Ok(mut r) = state.interactive_rects.lock() {
         *r = rects;
     }
@@ -268,8 +271,12 @@ pub fn run() {
                     loop {
                         std::thread::sleep(std::time::Duration::from_millis(20));
 
+                        let has_received = app_state_thread.has_received_rects.load(Ordering::SeqCst);
                         let force = app_state_thread.force_interactive.load(Ordering::SeqCst);
-                        if force {
+
+                        // If frontend hasn't initialized yet or force interactive is active:
+                        // NEVER lock out mouse input. Keep window responsive so user can interact/close.
+                        if !has_received || force {
                             if app_state_thread.is_ignoring.load(Ordering::SeqCst) {
                                 let _ = win.set_ignore_cursor_events(false);
                                 app_state_thread.is_ignoring.store(false, Ordering::SeqCst);
