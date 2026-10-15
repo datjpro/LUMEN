@@ -51,6 +51,44 @@ const NOTE_PALETTE: { id: NoteTint; name: string; nameEn: string; bg: string; do
   { id: "mist", name: "Cam cáo lửa", nameEn: "Fox Orange", bg: "#F3DCC7", dot: "#C9793B" },
 ];
 
+export function markdownToHtml(md: string): string {
+  if (!md) return "";
+  let html = md;
+  // Convert markdown tokens to rich HTML tags
+  html = html.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+  html = html.replace(/(?<!\*)\*([^*]+?)\*(?!\*)/g, "<i>$1</i>");
+  html = html.replace(/~~(.+?)~~/g, "<s>$1</s>");
+  html = html.replace(/==(.+?)==/g, "<mark class='note-highlight'>$1</mark>");
+  html = html.replace(/`([^`]+?)`/g, "<code class='note-code'>$1</code>");
+  html = html.replace(/\n/g, "<br>");
+  return html;
+}
+
+export function htmlToMarkdown(html: string): string {
+  if (!html) return "";
+  let md = html;
+  md = md.replace(/<br\s*[\/]?>/gi, "\n");
+  md = md.replace(/<\/div><div>/gi, "\n");
+  md = md.replace(/<div>/gi, "\n").replace(/<\/div>/gi, "");
+  md = md.replace(/<p>/gi, "").replace(/<\/p>/gi, "\n");
+
+  md = md.replace(/<(b|strong)>(.*?)<\/(b|strong)>/gi, "**$2**");
+  md = md.replace(/<(i|em)>(.*?)<\/(i|em)>/gi, "*$2*");
+  md = md.replace(/<(s|strike|del)>(.*?)<\/(s|strike|del)>/gi, "~~$2~~");
+  md = md.replace(/<u>(.*?)<\/u>/gi, "<u>$1</u>");
+  md = md.replace(/<mark[^>]*>(.*?)<\/mark>/gi, "==$1==");
+  md = md.replace(/<code[^>]*>(.*?)<\/code>/gi, "`$1`");
+
+  md = md
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"');
+
+  return md;
+}
+
 export function StickyNote({ note, stacked }: Props) {
   const lang = useLumen((s) => s.lang);
   const isVi = lang === "vi";
@@ -83,7 +121,8 @@ export function StickyNote({ note, stacked }: Props) {
   } | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const colorPickerRef = useRef<HTMLDivElement | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const isInternalChangeRef = useRef(false);
 
   const allNotes = useLumen((s) => s.notes);
   const existingClusters = Array.from(
@@ -102,7 +141,7 @@ export function StickyNote({ note, stacked }: Props) {
   const [newCheckText, setNewCheckText] = useState("");
   const [exitingItemId, setExitingItemId] = useState<string | null>(null);
   const [lastDeletedItem, setLastDeletedItem] = useState<{ id: string; text: string; done: boolean; index: number } | null>(null);
-  const [selectionRange, setSelectionRange] = useState<{ start: number; end: number; text: string } | null>(null);
+  const [selectionRange, setSelectionRange] = useState<{ text: string } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -111,152 +150,157 @@ export function StickyNote({ note, stacked }: Props) {
   const cardRef = useRef<HTMLElement | null>(null);
   const resizeDrag = useRef<{ startX: number; startY: number; startW: number; startH: number } | null>(null);
 
-  const handleTextareaSelect = () => {
-    const el = textareaRef.current;
-    if (!el) return;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    if (start !== end && end > start) {
-      const selected = el.value.substring(start, end).trim();
-      if (selected.length > 0) {
-        setSelectionRange({ start, end, text: selected });
-        return;
-      }
-    }
-    setSelectionRange(null);
-  };
-
-  const applyMarkdownFormat = (prefix: string, suffix: string = prefix) => {
-    const el = textareaRef.current;
-    if (!el) return;
-
-    let start = el.selectionStart;
-    let end = el.selectionEnd;
-
-    if (start === end && selectionRange) {
-      start = selectionRange.start;
-      end = selectionRange.end;
-    }
-
-    const fullText = el.value;
-
-    // Zero-length selection: insert wrapper and place cursor inside: e.g. **|**
-    if (start === end) {
-      const newText = fullText.substring(0, start) + prefix + suffix + fullText.substring(end);
-      const newPos = start + prefix.length;
-      el.value = newText;
-      el.focus();
-      el.setSelectionRange(newPos, newPos);
-      updateNote(note.id, { body: newText });
-      sounds.playPop(620);
+  // Synchronize initial content and external changes (e.g. undo, note switch) into editor DOM
+  useEffect(() => {
+    if (!editorRef.current) return;
+    if (isInternalChangeRef.current) {
+      isInternalChangeRef.current = false;
       return;
     }
-
-    const selected = fullText.substring(start, end);
-    let newText = "";
-    let newStart = start;
-    let newEnd = end;
-
-    // Smart Toggle:
-    // Case 1: selection itself starts and ends with prefix/suffix (e.g. user selected `**text**`)
-    if (
-      selected.length >= prefix.length + suffix.length &&
-      selected.startsWith(prefix) &&
-      selected.endsWith(suffix)
-    ) {
-      const unwrapped = selected.slice(prefix.length, selected.length - suffix.length);
-      newText = fullText.substring(0, start) + unwrapped + fullText.substring(end);
-      newStart = start;
-      newEnd = start + unwrapped.length;
+    const targetHtml = markdownToHtml(note.body);
+    if (editorRef.current.innerHTML !== targetHtml) {
+      editorRef.current.innerHTML = targetHtml;
     }
-    // Case 2: surrounding text has prefix/suffix (e.g. user selected `text` inside `**text**`)
-    else if (
-      start >= prefix.length &&
-      fullText.substring(start - prefix.length, start) === prefix &&
-      fullText.substring(end, end + suffix.length) === suffix
-    ) {
-      newText =
-        fullText.substring(0, start - prefix.length) +
-        selected +
-        fullText.substring(end + suffix.length);
-      newStart = start - prefix.length;
-      newEnd = end - prefix.length;
-    }
-    // Case 3: Wrap text with formatting
-    else {
-      newText =
-        fullText.substring(0, start) +
-        prefix +
-        selected +
-        suffix +
-        fullText.substring(end);
-      newStart = start + prefix.length;
-      newEnd = end + prefix.length;
-    }
+  }, [note.id, note.body]);
 
-    // Direct synchronous DOM update for zero flicker/caret jump
-    el.value = newText;
-    el.focus();
-    el.setSelectionRange(newStart, newEnd);
-
-    updateNote(note.id, { body: newText });
-    sounds.playPop(620);
-
-    setSelectionRange({
-      start: newStart,
-      end: newEnd,
-      text: selected,
-    });
+  const handleEditorInput = () => {
+    if (!editorRef.current) return;
+    const html = editorRef.current.innerHTML;
+    const md = htmlToMarkdown(html);
+    isInternalChangeRef.current = true;
+    updateNote(note.id, { body: md });
   };
 
-  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Keyboard Shortcuts for Instant Formatting
+  const handleSelection = () => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !editorRef.current) {
+      setSelectionRange(null);
+      return;
+    }
+    if (!editorRef.current.contains(sel.anchorNode)) {
+      setSelectionRange(null);
+      return;
+    }
+    const text = sel.toString().trim();
+    if (text.length > 0) {
+      setSelectionRange({ text });
+    } else {
+      setSelectionRange(null);
+    }
+  };
+
+  const executeFormat = (cmd: string, val: string | undefined = undefined) => {
+    focusDesktopWindow();
+    editorRef.current?.focus();
+    document.execCommand(cmd, false, val);
+    handleEditorInput();
+    sounds.playPop(620);
+  };
+
+  const executeHighlight = () => {
+    focusDesktopWindow();
+    editorRef.current?.focus();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+    const range = sel.getRangeAt(0);
+
+    const parentMark = (sel.anchorNode?.parentElement?.closest("mark") || null) as HTMLElement | null;
+    if (parentMark && editorRef.current?.contains(parentMark)) {
+      const textNode = document.createTextNode(parentMark.textContent || "");
+      parentMark.parentNode?.replaceChild(textNode, parentMark);
+    } else {
+      const mark = document.createElement("mark");
+      mark.className = "note-highlight";
+      try {
+        mark.appendChild(range.extractContents());
+        range.insertNode(mark);
+      } catch {
+        document.execCommand("hiliteColor", false, "#F5A623");
+      }
+    }
+    handleEditorInput();
+    sounds.playPop(620);
+  };
+
+  const executeCode = () => {
+    focusDesktopWindow();
+    editorRef.current?.focus();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+    const range = sel.getRangeAt(0);
+
+    const parentCode = (sel.anchorNode?.parentElement?.closest("code") || null) as HTMLElement | null;
+    if (parentCode && editorRef.current?.contains(parentCode)) {
+      const textNode = document.createTextNode(parentCode.textContent || "");
+      parentCode.parentNode?.replaceChild(textNode, parentCode);
+    } else {
+      const code = document.createElement("code");
+      code.className = "note-code";
+      try {
+        code.appendChild(range.extractContents());
+        range.insertNode(code);
+      } catch {}
+    }
+    handleEditorInput();
+    sounds.playPop(620);
+  };
+
+  const convertSelectionToChecklist = () => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !editorRef.current) return;
+    const selectedText = sel.toString().trim();
+    if (!selectedText) return;
+
+    document.execCommand("delete", false);
+    handleEditorInput();
+
+    const newItems = [{ id: uid(), text: selectedText, done: false }];
+    updateNote(note.id, {
+      checkItems: [...(note.checkItems || []), ...newItems],
+    });
+    setSelectionRange(null);
+    sounds.playPop(620);
+  };
+
+  const handleEditorKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      document.execCommand("insertText", false, "  ");
+      handleEditorInput();
+      return;
+    }
     if (e.ctrlKey || e.metaKey) {
       const key = e.key.toLowerCase();
       if (key === "b") {
         e.preventDefault();
-        applyMarkdownFormat("**");
+        executeFormat("bold");
         return;
       }
       if (key === "i") {
         e.preventDefault();
-        applyMarkdownFormat("*");
+        executeFormat("italic");
         return;
       }
       if (key === "u") {
         e.preventDefault();
-        applyMarkdownFormat("<u>", "</u>");
-        return;
-      }
-      if (key === "h") {
-        e.preventDefault();
-        applyMarkdownFormat("==", "==");
-        return;
-      }
-      if (key === "`") {
-        e.preventDefault();
-        applyMarkdownFormat("`");
+        executeFormat("underline");
         return;
       }
       if (e.shiftKey && key === "x") {
         e.preventDefault();
-        applyMarkdownFormat("~~");
+        executeFormat("strikeThrough");
         return;
       }
-    }
-
-    // Tab key indents with 2 spaces instead of losing focus
-    if (e.key === "Tab" && !e.ctrlKey && !e.metaKey && !e.altKey) {
-      e.preventDefault();
-      const el = textareaRef.current;
-      if (!el) return;
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      const val = el.value;
-      const next = val.substring(0, start) + "  " + val.substring(end);
-      el.value = next;
-      el.setSelectionRange(start + 2, start + 2);
-      updateNote(note.id, { body: next });
+      if (key === "h") {
+        e.preventDefault();
+        executeHighlight();
+        return;
+      }
+      if (key === "`") {
+        e.preventDefault();
+        executeCode();
+        return;
+      }
     }
   };
 
@@ -323,7 +367,7 @@ export function StickyNote({ note, stacked }: Props) {
   };
 
   const handleCopyNote = () => {
-    let content = note.body.trim();
+    let content = note.body.replace(/<[^>]*>/g, "").trim();
     if (note.checkItems && note.checkItems.length > 0) {
       if (content) content += "\n\n";
       content += note.checkItems.map((i) => `${i.done ? "[x]" : "[ ]"} ${i.text}`).join("\n");
@@ -621,10 +665,16 @@ export function StickyNote({ note, stacked }: Props) {
       return;
     }
     const newItems = lines.map((line) => {
-      const cleanText = line.replace(/^[-*•]\s*(\[[ xX]\])?\s*/, "").trim();
+      const cleanText = line
+        .replace(/<[^>]*>/g, "")
+        .replace(/^[-*•]\s*(\[[ xX]\])?\s*/, "")
+        .trim();
       const isDone = /^[-*•]?\s*\[[xX]\]/.test(line);
       return { id: uid(), text: cleanText || line, done: isDone };
     });
+    if (editorRef.current) {
+      editorRef.current.innerHTML = "";
+    }
     updateNote(note.id, {
       body: "",
       checkItems: [...(note.checkItems || []), ...newItems],
@@ -654,7 +704,8 @@ export function StickyNote({ note, stacked }: Props) {
   const handleExportTxtAndDelete = () => {
     let content = `=== GHI CHÚ LUMEN ===\nNgày tạo: ${new Date(note.createdAt).toLocaleString()}\n\n`;
     if (note.body.trim()) {
-      content += `Nội dung:\n${note.body.trim()}\n\n`;
+      const plainText = note.body.replace(/<[^>]*>/g, "").replace(/[*_~=`]/g, "").trim();
+      content += `Nội dung:\n${plainText}\n\n`;
     }
     if (note.checkItems && note.checkItems.length > 0) {
       content += `${isVi ? "Danh sách công việc:" : "Checklist:"}\n`;
@@ -768,9 +819,13 @@ export function StickyNote({ note, stacked }: Props) {
         highlightNoteId === note.id && "ring-4 ring-[#F5A623] shadow-[0_0_35px_rgba(245,166,35,0.75)] animate-pulse",
       )}
       style={style}
+      onPointerDown={() => {
+        focusDesktopWindow();
+      }}
       onMouseDown={(e) => {
+        focusDesktopWindow();
         const target = e.target as HTMLElement | null;
-        if (target && (target.tagName === "TEXTAREA" || target.tagName === "INPUT" || target.closest("button,input,textarea,form,.no-drag"))) {
+        if (target && (target.tagName === "TEXTAREA" || target.tagName === "INPUT" || target.hasAttribute("contenteditable") || target.closest("button,input,textarea,[contenteditable],form,.no-drag"))) {
           return;
         }
         bringNote(note.id);
@@ -1405,10 +1460,14 @@ export function StickyNote({ note, stacked }: Props) {
       {/* Note Body Area (Pastel Background + #23262F Text) - relative z-0 keeps content below header popovers */}
       <div
         className="no-drag note-body-area relative z-0 p-3.5 pb-6 flex flex-1 flex-col text-[#23262F] rounded-b-2xl cursor-text select-text min-h-0 pointer-events-auto"
+        onMouseDown={() => {
+          focusDesktopWindow();
+        }}
         onClick={(e) => {
           const tag = (e.target as HTMLElement).tagName;
-          if (tag !== "TEXTAREA" && tag !== "INPUT" && tag !== "BUTTON" && !(e.target as HTMLElement).closest("button,input,form")) {
-            textareaRef.current?.focus();
+          if (tag !== "BUTTON" && tag !== "INPUT" && !(e.target as HTMLElement).closest("button,input,form,.no-click-focus")) {
+            focusDesktopWindow();
+            editorRef.current?.focus();
           }
         }}
       >
@@ -1533,7 +1592,7 @@ export function StickyNote({ note, stacked }: Props) {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              onClick={() => applyMarkdownFormat("**")}
+              onClick={() => executeFormat("bold")}
               className="p-1 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
               title={isVi ? "In đậm (Ctrl+B)" : "Bold (Ctrl+B)"}
             >
@@ -1545,7 +1604,7 @@ export function StickyNote({ note, stacked }: Props) {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              onClick={() => applyMarkdownFormat("*")}
+              onClick={() => executeFormat("italic")}
               className="p-1 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
               title={isVi ? "In nghiêng (Ctrl+I)" : "Italic (Ctrl+I)"}
             >
@@ -1557,7 +1616,7 @@ export function StickyNote({ note, stacked }: Props) {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              onClick={() => applyMarkdownFormat("<u>", "</u>")}
+              onClick={() => executeFormat("underline")}
               className="p-1 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
               title={isVi ? "Gạch chân (Ctrl+U)" : "Underline (Ctrl+U)"}
             >
@@ -1569,7 +1628,7 @@ export function StickyNote({ note, stacked }: Props) {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              onClick={() => applyMarkdownFormat("~~")}
+              onClick={() => executeFormat("strikeThrough")}
               className="p-1 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
               title={isVi ? "Gạch ngang (Ctrl+Shift+X)" : "Strikethrough (Ctrl+Shift+X)"}
             >
@@ -1581,7 +1640,7 @@ export function StickyNote({ note, stacked }: Props) {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              onClick={() => applyMarkdownFormat("`")}
+              onClick={executeCode}
               className="p-1 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
               title={isVi ? "Đoạn mã (Code: `code`)" : "Inline Code (`code`)"}
             >
@@ -1593,9 +1652,9 @@ export function StickyNote({ note, stacked }: Props) {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              onClick={() => applyMarkdownFormat("==", "==")}
+              onClick={executeHighlight}
               className="p-1 rounded-full hover:bg-white/15 text-[#F5A623] hover:text-[#D6871A] transition-colors cursor-pointer"
-              title={isVi ? "Tô sáng (Ctrl+H: ==chữ==)" : "Highlight (Ctrl+H)"}
+              title={isVi ? "Tô sáng (Ctrl+H)" : "Highlight (Ctrl+H)"}
             >
               <Highlighter className="size-3.5" />
             </button>
@@ -1606,21 +1665,7 @@ export function StickyNote({ note, stacked }: Props) {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              onClick={() => {
-                if (selectionRange) {
-                  const selected = selectionRange.text;
-                  const newItems = [{ id: uid(), text: selected, done: false }];
-                  const updatedBody =
-                    note.body.substring(0, selectionRange.start) +
-                    note.body.substring(selectionRange.end);
-                  updateNote(note.id, {
-                    body: updatedBody.trim(),
-                    checkItems: [...(note.checkItems || []), ...newItems],
-                  });
-                  setSelectionRange(null);
-                  sounds.playPop(620);
-                }
-              }}
+              onClick={convertSelectionToChecklist}
               className="flex items-center gap-1 px-1.5 py-0.5 rounded-full hover:bg-white/15 text-xs font-medium text-emerald-400 cursor-pointer transition-colors"
               title={isVi ? "Chuyển đoạn chọn thành mục việc checklist" : "Convert selection to checklist item"}
             >
@@ -1630,26 +1675,37 @@ export function StickyNote({ note, stacked }: Props) {
           </div>
         )}
 
-        {/* Main Textarea: Expands flex-1 to fill the note when resized */}
-        <textarea
-          ref={textareaRef}
-          value={note.body}
-          onChange={(e) => updateNote(note.id, { body: e.target.value })}
-          onKeyDown={handleTextareaKeyDown}
-          onSelect={handleTextareaSelect}
-          onKeyUp={handleTextareaSelect}
-          onMouseUp={handleTextareaSelect}
+        {/* Main Rich Live Editor: Expands flex-1 to fill the note when resized */}
+        <div
+          ref={editorRef}
+          contentEditable
+          suppressContentEditableWarning
+          data-placeholder={isVi ? "Viết ghi chú của bạn..." : "Write your note..."}
+          onInput={handleEditorInput}
+          onKeyDown={handleEditorKeyDown}
+          onMouseUp={handleSelection}
+          onKeyUp={handleSelection}
+          onSelect={handleSelection}
+          onPaste={(e) => {
+            e.preventDefault();
+            const text = e.clipboardData.getData("text/plain");
+            document.execCommand("insertText", false, text);
+            handleEditorInput();
+          }}
+          onMouseDown={() => {
+            focusDesktopWindow();
+          }}
           onFocus={() => {
+            focusDesktopWindow();
             bringNote(note.id);
           }}
-          placeholder={isVi ? "Viết ghi chú của bạn..." : "Write your note..."}
-          suppressHydrationWarning
           style={{
             fontSize: typeof note.fontSize === "number" ? `${note.fontSize}px` : note.fontSize === "sm" ? "11px" : note.fontSize === "lg" ? "16px" : "13.5px",
             caretColor: isDarkNote ? "#F5A623" : "#14161D",
           }}
           className={cn(
-            "no-drag w-full flex-1 min-h-[64px] resize-none bg-transparent font-normal leading-relaxed text-[#23262F] outline-none placeholder:text-[#23262F]/40 select-text cursor-text touch-auto sticky-note-textarea pointer-events-auto selection:bg-[#1D2029] selection:text-white note-scrollbar",
+            "no-drag w-full flex-1 min-h-[72px] bg-transparent font-normal leading-relaxed text-[#23262F] outline-none select-text cursor-text sticky-note-editor pointer-events-auto selection:bg-[#1D2029] selection:text-white note-scrollbar",
+            isDarkNote && "text-[#F4F5F7]",
             note.fontFamily === "handwriting" && "font-handwriting leading-snug",
             note.fontFamily === "mono" && "font-mono leading-normal",
           )}

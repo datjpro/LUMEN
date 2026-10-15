@@ -515,7 +515,7 @@ export function DesktopScene() {
     // Only send IPC when the interactive state actually changes (no spamming on every pixel)
     let lastIsInteractive: boolean | null = null;
     const INTERACTIVE_SELECTOR =
-      "article, .interactive-el, button, input, textarea, " +
+      "article, [contenteditable], .sticky-note-editor, .interactive-el, button, input, textarea, " +
       "section[role='dialog'], [role='dialog'], [role='region'], aside, form, select, [data-interactive], a";
 
     const throttledHandler = (e: MouseEvent) => {
@@ -531,6 +531,16 @@ export function DesktopScene() {
     };
 
     window.addEventListener("mousemove", throttledHandler, { passive: true });
+
+    // Instantly focus window and disable click-through whenever clicking any interactive element
+    const handlePointerDownCapture = (e: Event) => {
+      const target = e.target as HTMLElement | null;
+      if (target && target.closest(INTERACTIVE_SELECTOR)) {
+        setIgnoreMouseEvents(false);
+        focusDesktopWindow();
+      }
+    };
+    window.addEventListener("pointerdown", handlePointerDownCapture, { capture: true, passive: true });
 
     // When mouse leaves the window entirely, restore click-through so OS stays responsive
     const handleMouseLeave = () => {
@@ -571,6 +581,7 @@ export function DesktopScene() {
 
     return () => {
       window.removeEventListener("mousemove", throttledHandler);
+      window.removeEventListener("pointerdown", handlePointerDownCapture, { capture: true } as EventListenerOptions);
       document.documentElement.removeEventListener("mouseleave", handleMouseLeave);
       clearInterval(interval);
       // Restore to fully interactive mode on cleanup (component unmount)

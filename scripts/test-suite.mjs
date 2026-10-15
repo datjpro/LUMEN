@@ -1547,6 +1547,41 @@ console.log("\n📦 [SUITE 15]: Background Video Audio Isolation & Update Checke
   }
   assert(testBringNote("n2") === false, "bringNote skips redundant store mutation when note is already on top");
   assert(testBringNote("n1") === true && testNotes[0].z === 11, "bringNote elevates background note to new maxZ");
+
+  // Rich Live Formatting Bidirectional Conversion (Eliminate raw **tttt** symbols)
+  function testMarkdownToHtml(md) {
+    if (!md) return "";
+    let html = md;
+    html = html.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+    html = html.replace(/(?<!\*)\*([^*]+?)\*(?!\*)/g, "<i>$1</i>");
+    html = html.replace(/~~(.+?)~~/g, "<s>$1</s>");
+    html = html.replace(/==(.+?)==/g, "<mark class='note-highlight'>$1</mark>");
+    html = html.replace(/`([^`]+?)`/g, "<code class='note-code'>$1</code>");
+    html = html.replace(/\n/g, "<br>");
+    return html;
+  }
+
+  function testHtmlToMarkdown(html) {
+    if (!html) return "";
+    let md = html;
+    md = md.replace(/<br\s*[\/]?>/gi, "\n");
+    md = md.replace(/<\/div><div>/gi, "\n");
+    md = md.replace(/<div>/gi, "\n").replace(/<\/div>/gi, "");
+    md = md.replace(/<p>/gi, "").replace(/<\/p>/gi, "\n");
+    md = md.replace(/<(b|strong)>(.*?)<\/(b|strong)>/gi, "**$2**");
+    md = md.replace(/<(i|em)>(.*?)<\/(i|em)>/gi, "*$2*");
+    md = md.replace(/<(s|strike|del)>(.*?)<\/(s|strike|del)>/gi, "~~$2~~");
+    md = md.replace(/<u>(.*?)<\/u>/gi, "<u>$1</u>");
+    md = md.replace(/<mark[^>]*>(.*?)<\/mark>/gi, "==$1==");
+    md = md.replace(/<code[^>]*>(.*?)<\/code>/gi, "`$1`");
+    return md;
+  }
+
+  assert(testMarkdownToHtml("**tttt**") === "<b>tttt</b>", "Converts raw **tttt** to rich <b>tttt</b> without visible asterisks");
+  assert(testMarkdownToHtml("*nghiêng*") === "<i>nghiêng</i>", "Converts raw *nghiêng* to rich <i>nghiêng</i>");
+  assert(testHtmlToMarkdown("<b>tttt</b>") === "**tttt**", "Serializes rich <b>tttt</b> back to clean standard markdown");
+  assert(testHtmlToMarkdown("<i>nghiêng</i>") === "*nghiêng*", "Serializes rich <i>nghiêng</i> back to clean standard markdown");
+  assert(testHtmlToMarkdown("<mark class='note-highlight'>lưu ý</mark>") === "==lưu ý==", "Serializes rich highlight mark to markdown");
 }
 
 console.log(`\n========================================`);

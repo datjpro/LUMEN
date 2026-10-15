@@ -771,7 +771,9 @@ section[role="dialog"] input,
 
 /* Sticky notes on pastel backgrounds: Rich Charcoal Caret with distinct presence */
 .sticky-note-textarea,
+.sticky-note-editor,
 article textarea,
+article [contenteditable],
 article input[type="text"],
 .note-body-area {
   caret-color: #14161D !important;
@@ -781,7 +783,9 @@ article input[type="text"],
 }
 
 .sticky-note-textarea:focus,
+.sticky-note-editor:focus,
 article textarea:focus,
+article [contenteditable]:focus,
 article input[type="text"]:focus {
   caret-color: #14161D !important;
   cursor: text !important;
@@ -789,16 +793,106 @@ article input[type="text"]:focus {
 
 /* Dark sticky notes: Luminous Amber Caret */
 .note-charcoal textarea,
+.note-charcoal [contenteditable],
 .note-charcoal input,
 .note-dark textarea,
+.note-dark [contenteditable],
 .note-dark input,
-.note-dark .sticky-note-textarea {
+.note-dark .sticky-note-textarea,
+.note-dark .sticky-note-editor {
   caret-color: #F5A623 !important;
+}
+
+/* Contenteditable Sticky Note Editor: Rich Live Formatting */
+.sticky-note-editor {
+  min-height: 72px;
+  width: 100%;
+  flex: 1 1 0%;
+  outline: none !important;
+  border: none;
+  background: transparent;
+  word-break: break-word;
+  white-space: pre-wrap;
+  cursor: text !important;
+  caret-color: #14161D !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  line-height: 1.6;
+}
+
+.sticky-note-editor:empty:before {
+  content: attr(data-placeholder);
+  color: rgba(35, 38, 47, 0.4);
+  pointer-events: none;
+  display: block;
+  user-select: none;
+}
+
+.note-dark .sticky-note-editor {
+  caret-color: #F5A623 !important;
+  color: #F4F5F7 !important;
+}
+
+.note-dark .sticky-note-editor:empty:before {
+  color: rgba(244, 245, 247, 0.4);
+}
+
+.sticky-note-editor b,
+.sticky-note-editor strong {
+  font-weight: 700 !important;
+}
+
+.sticky-note-editor i,
+.sticky-note-editor em {
+  font-style: italic !important;
+}
+
+.sticky-note-editor u {
+  text-decoration: underline !important;
+}
+
+.sticky-note-editor s,
+.sticky-note-editor strike,
+.sticky-note-editor del {
+  text-decoration: line-through !important;
+  opacity: 0.75;
+}
+
+.sticky-note-editor mark,
+.note-highlight {
+  background-color: rgba(245, 166, 35, 0.38) !important;
+  color: inherit !important;
+  border-radius: 3px;
+  padding: 1px 3px;
+}
+
+.note-dark .sticky-note-editor mark,
+.note-dark .note-highlight {
+  background-color: rgba(245, 166, 35, 0.45) !important;
+  color: #FFFFFF !important;
+}
+
+.sticky-note-editor code,
+.note-code {
+  font-family: var(--font-mono, monospace);
+  background-color: rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.9em;
+}
+
+.note-dark .sticky-note-editor code,
+.note-dark .note-code {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #F5A623;
 }
 
 /* High-Contrast Crisp Text Selection (Bôi đen sắc nét chuẩn mực trên giấy) */
 .sticky-note-textarea::selection,
+.sticky-note-editor::selection,
+.sticky-note-editor *::selection,
 article textarea::selection,
+article [contenteditable]::selection,
 article input[type="text"]::selection {
   background-color: #1D2029 !important;
   color: #FFFFFF !important;
@@ -806,9 +900,13 @@ article input[type="text"]::selection {
 
 /* Dark note selection */
 .note-dark .sticky-note-textarea::selection,
+.note-dark .sticky-note-editor::selection,
+.note-dark .sticky-note-editor *::selection,
 .note-dark textarea::selection,
+.note-dark [contenteditable]::selection,
 .note-dark input[type="text"]::selection {
   background-color: #F5A623 !important;
   color: #14161D !important;
 }
+
 
