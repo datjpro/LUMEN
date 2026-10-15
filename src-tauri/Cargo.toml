@@ -35,8 +35,8 @@ windows-sys = { version = "0.59", features = [
 incremental = true
 
 [profile.release]
-codegen-units = 1
-lto = true
+codegen-units = 16
+lto = false
 opt-level = "s"
 panic = "abort"
 strip = true

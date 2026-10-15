@@ -26,6 +26,12 @@
 - **↩️ Thanh Thông Báo Hoàn Tác Tức Thì (Instant Undo Restoration):**
   - Xuất hiện thanh thông báo viền mờ tinh xảo hiển thị tên mục vừa xóa cùng nút **[Hoàn tác]** giúp người dùng khôi phục ngay lập tức mục xóa nhầm về đúng vị trí chỉ mục ban đầu.
 
+### 🔤 Live Rich ContentEditable & Desktop Shell Blinking Caret:
+- **📝 Bộ Soạn Thảo Live Rich WYSIWYG Thay Thế Textarea Thuần:**
+  - Loại bỏ hoàn toàn lỗi hiển thị mã thô `**tttt**` khi bôi đen in đậm. Chữ được định dạng trực quan (`<b>tttt</b>`, `<i>...</i>`, `<u>...</u>`, `<s>...</s>`, `<mark>...`, `<code>...`) với khả năng chuyển đổi hai chiều sang Markdown chuẩn.
+- **🎯 Khôi Phục Con Trỏ Soạn Thảo Nhấp Nháy (Caret Cursor) Trong Desktop Shell:**
+  - Tự động kích hoạt native OS focus (`focusDesktopWindow`) khi click vào note trong chế độ overlay trong suốt, bảo toàn con trỏ nhấp nháy sắc nét và vùng chọn văn bản tương phản cao.
+
 ---
 
 ## 🚀 [v1.2.6] — 2026-09-21 — Background Video Playback Fix, Extreme RAM Optimization & Update Checker UI Prominence
