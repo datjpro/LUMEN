@@ -1,0 +1,256 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-15T17:46:30Z",
+  "title": "Design System: Lumen",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Solar Amber Gold",
+        "canonical": "oklch(76% 0.17 68)",
+        "tonalRamp": [
+          "#FFF4E0",
+          "#FDE2AE",
+          "#F9C76E",
+          "#F5A623",
+          "#D6871A",
+          "#A8610C",
+          "#7B4105"
+        ]
+      },
+      "primary-deep": {
+        "role": "primary",
+        "displayName": "Deep Amber",
+        "canonical": "oklch(66% 0.16 64)",
+        "tonalRamp": ["#FDE2AE", "#F5A623", "#D6871A", "#A8610C"]
+      },
+      "primary-glow": {
+        "role": "accent",
+        "displayName": "Solar Amber Glow",
+        "canonical": "rgba(245, 166, 35, 0.22)"
+      },
+      "neutral-base": {
+        "role": "neutral",
+        "displayName": "Obsidian Deep Base",
+        "canonical": "oklch(18% 0.015 260)",
+        "tonalRamp": [
+          "#0A0C10",
+          "#14161D",
+          "#1D2029",
+          "#262A35",
+          "#343946",
+          "#A2A8BC",
+          "#F4F5F7"
+        ]
+      },
+      "surface-container": {
+        "role": "neutral",
+        "displayName": "Surface Container",
+        "canonical": "oklch(22% 0.015 260)",
+        "tonalRamp": ["#14161D", "#1D2029", "#262A35"]
+      },
+      "surface-elevated": {
+        "role": "neutral",
+        "displayName": "Surface Elevated",
+        "canonical": "oklch(26% 0.018 260)",
+        "tonalRamp": ["#1D2029", "#262A35", "#343946"]
+      },
+      "text-primary": {
+        "role": "neutral",
+        "displayName": "Text Primary",
+        "canonical": "#F4F5F7"
+      },
+      "text-secondary": {
+        "role": "neutral",
+        "displayName": "Text Secondary Muted (WCAG AA)",
+        "canonical": "#A2A8BC"
+      },
+      "border-subtle": {
+        "role": "neutral",
+        "displayName": "Subtle Border",
+        "canonical": "rgba(255, 255, 255, 0.08)"
+      },
+      "note-cream-bg": {
+        "role": "secondary",
+        "displayName": "Amber Cream Note Paper",
+        "canonical": "#FCEFD3",
+        "tonalRamp": ["#FFF9EE", "#FCEFD3", "#F3DCAC", "#E5C27F"]
+      },
+      "note-mint-bg": {
+        "role": "secondary",
+        "displayName": "Mint Sage Note Paper",
+        "canonical": "#E4F5EA",
+        "tonalRamp": ["#F1FAF4", "#E4F5EA", "#C4E9CE", "#96D3A8"]
+      },
+      "note-rose-bg": {
+        "role": "secondary",
+        "displayName": "Rose Blush Note Paper",
+        "canonical": "#F8E1E7",
+        "tonalRamp": ["#FDF0F3", "#F8E1E7", "#EEC2CD", "#DDA0B0"]
+      },
+      "note-fox-bg": {
+        "role": "secondary",
+        "displayName": "Fox Mist Note Paper",
+        "canonical": "#F3DCC7",
+        "tonalRamp": ["#FAF0E5", "#F3DCC7", "#E4BC98", "#CF9866"]
+      },
+      "danger": {
+        "role": "danger",
+        "displayName": "Crimson Danger",
+        "canonical": "#EF4444"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display Hero",
+        "purpose": "Hero moments, spatial welcomes, and empty workspace states."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Modal headers and major spatial section divides."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Note card titles, widget heads, and panel titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "General note text, chat bubbles, and settings labels."
+      },
+      "label": {
+        "displayName": "Label Monospace",
+        "purpose": "Timers, coordinates, keyboard shortcuts, and metadata tags."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambient-low",
+        "value": "0 1px 2px rgba(0, 0, 0, 0.08), 0 6px 20px rgba(0, 0, 0, 0.16)",
+        "purpose": "Resting sticky notes, widgets, and quiet dock elements."
+      },
+      {
+        "name": "lifted-drag",
+        "value": "0 4px 8px rgba(0, 0, 0, 0.12), 0 16px 40px rgba(0, 0, 0, 0.28)",
+        "purpose": "Active drag feedback, lifted cards, and focused interactions."
+      },
+      {
+        "name": "modal-floating",
+        "value": "0 24px 60px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08)",
+        "purpose": "Full-focus overlays, quick capture hub, and dialogs."
+      },
+      {
+        "name": "solar-glow",
+        "value": "0 0 20px rgba(245, 166, 35, 0.22)",
+        "purpose": "Pip celebration halo, active focus borders, and golden sparks."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-glide",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Natural decelerated motion for window transitions and modal entry."
+      },
+      {
+        "name": "ease-snap",
+        "value": "cubic-bezier(0.2, 0, 0, 1)",
+        "purpose": "Snappy UI toggles and instant button presses."
+      },
+      {
+        "name": "ease-spring",
+        "value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "purpose": "Pip procedural kinematics, squash-and-stretch celebration bounces."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Tactile amber button for affirmative primary actions.",
+      "html": "<button class=\"ds-btn-primary\"><svg class=\"ds-btn-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 5v14M5 12h14\"/></svg><span>Tạo Ghi Chú</span></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #F5A623; color: #0F1117; font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-size: 14px; font-weight: 600; padding: 8px 16px; border-radius: 10px; border: none; cursor: pointer; transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.15); } .ds-btn-primary:hover { background: #D6871A; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245, 166, 35, 0.28); } .ds-btn-primary:focus-visible { outline: 2px solid #F5A623; outline-offset: 2px; } .ds-btn-icon { width: 16px; height: 16px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Subtle button that blends into the obsidian canvas until hover.",
+      "html": "<button class=\"ds-btn-ghost\"><span>Đóng</span></button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; background: transparent; color: #F4F5F7; font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-size: 14px; font-weight: 500; padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease; } .ds-btn-ghost:hover { background: #262A35; border-color: rgba(255,255,255,0.16); } .ds-btn-ghost:focus-visible { outline: 2px solid #F5A623; outline-offset: 2px; }"
+    },
+    {
+      "name": "Paper Sticky Note Card",
+      "kind": "card",
+      "refersTo": "sticky-note-card",
+      "description": "Tactile Amber Cream sticky note with clean header and progressive hover disclosure.",
+      "html": "<div class=\"ds-note-card\"><div class=\"ds-note-header\"><span class=\"ds-note-title\">Hôm nay cần làm</span><div class=\"ds-note-actions\"><button class=\"ds-note-btn\" aria-label=\"Ghim\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"12\" y1=\"17\" x2=\"12\" y2=\"22\"/><path d=\"M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z\"/></svg></button></div></div><div class=\"ds-note-body\">Hoàn thiện hồ sơ thiết kế DESIGN.md và đồng bộ hệ thống màu tactile paper.</div></div>",
+      "css": ".ds-note-card { background: #FCEFD3; color: #23262F; font-family: 'Be Vietnam Pro', system-ui, sans-serif; border-radius: 24px; padding: 16px 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 6px 20px rgba(0,0,0,0.16); width: 280px; position: relative; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1); } .ds-note-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 16px 36px rgba(0,0,0,0.22); } .ds-note-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; } .ds-note-title { font-weight: 600; font-size: 15px; color: #23262F; } .ds-note-actions { display: flex; gap: 4px; opacity: 0.6; transition: opacity 0.15s ease; } .ds-note-card:hover .ds-note-actions { opacity: 1; } .ds-note-btn { background: rgba(0,0,0,0.05); border: none; border-radius: 6px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #23262F; } .ds-note-btn:hover { background: rgba(0,0,0,0.12); } .ds-note-btn svg { width: 14px; height: 14px; } .ds-note-body { font-size: 13px; line-height: 1.5; color: #353840; }"
+    },
+    {
+      "name": "Quick Capture Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "High-contrast dark spatial input field with Solar Amber focus ring.",
+      "html": "<div class=\"ds-input-wrapper\"><input type=\"text\" class=\"ds-input\" placeholder=\"Ghi nhanh ý tưởng (Ctrl+Shift+N)...\" /></div>",
+      "css": ".ds-input-wrapper { width: 100%; max-width: 360px; } .ds-input { width: 100%; background: #1D2029; color: #F4F5F7; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 14px; font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-size: 14px; transition: border-color 0.15s ease, box-shadow 0.15s ease; box-sizing: border-box; } .ds-input::placeholder { color: #A2A8BC; } .ds-input:focus { outline: none; border-color: #F5A623; box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.22); }"
+    },
+    {
+      "name": "Companion Status Pill",
+      "kind": "chip",
+      "description": "Monospaced status pill indicating companion Pip state and mood.",
+      "html": "<div class=\"ds-pill\"><span class=\"ds-pill-dot\"></span><span class=\"ds-pill-text\">PIP: VUI VẺ</span></div>",
+      "css": ".ds-pill { display: inline-flex; align-items: center; gap: 6px; background: #262A35; color: #F4F5F7; border: 1px solid rgba(255,255,255,0.08); border-radius: 9999px; padding: 4px 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.04em; } .ds-pill-dot { width: 6px; height: 6px; border-radius: 50%; background: #F5A623; box-shadow: 0 0 8px #F5A623; } .ds-pill-text { text-transform: uppercase; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Tactile Digital Desk Sanctuary",
+    "overview": "Lumen is an intimate spatial workspace designed as a digital counterpart to an artisanal wooden workbench. Rather than cold, sterile toolbars and rigid nested hierarchies, Lumen pairs a clean dark obsidian desktop with tangible, warm paper sticky notes and Pip—a living, expressive desktop companion. Every visual element is calibrated to evoke the tactile comfort of premium physical stationery while delivering seamless 60/120 FPS desktop fluidity.",
+    "keyCharacteristics": [
+      "Tactile Paper Warmth with organic pastel note tints (Cream, Mint, Rose, Fox)",
+      "Deep Obsidian Spatial Atmosphere (14161D base, distraction-free)",
+      "Living Companion Kinetic Rhythm with procedural GPU squash-and-stretch",
+      "Rigorous WCAG AA Contrast Hierarchy with 4.72:1 secondary text"
+    ],
+    "rules": [
+      {
+        "name": "The Paper Contrast Rule",
+        "body": "Text placed on paper note tints must always use deep pigmented ink values rather than white UI text.",
+        "section": "colors"
+      },
+      {
+        "name": "The Accent Rarity Rule",
+        "body": "Solar Amber Gold must occupy no more than 10% of any given viewport.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Stability Rule",
+        "body": "All dynamic numeric data must render using JetBrains Mono or tabular nums to prevent twitching.",
+        "section": "typography"
+      },
+      {
+        "name": "The Physical Lift Rule",
+        "body": "When a note is grabbed, its elevation shifts immediately to Lifted Drag with a 2-degree organic tilt.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use translate3d and GPU transforms for sub-16ms 60/120 FPS rendering.",
+      "Do maintain at least 4.5:1 contrast against dark and light backgrounds (WCAG AA).",
+      "Do keep sticky note headers clean at rest, revealing action icons progressively on hover.",
+      "Do use deep ink pigments for notes and tactile stationery surfaces."
+    ],
+    "donts": [
+      "Don't animate layout properties (top, left, width, height) in continuous animation loops.",
+      "Don't use generic animate-bounce for companion kinematics.",
+      "Don't render low-contrast white or light gray text on pastel paper notes.",
+      "Don't block the UI thread with synchronous storage operations."
+    ]
+  }
+}
