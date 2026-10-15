@@ -56,6 +56,7 @@ export function StickyNote({ note, stacked }: Props) {
   const toggleNoteLock = useLumen((s) => s.toggleNoteLock);
   const highlightNoteId = useLumen((s) => s.highlightNoteId);
   const createEventFromNote = useLumen((s) => s.createEventFromNote);
+  const dancePip = useLumen((s) => s.dancePip);
   const drag = useRef<{
     dx: number;
     dy: number;
@@ -390,19 +391,63 @@ export function StickyNote({ note, stacked }: Props) {
       checkItems: [...items, { id: uid(), text: newCheckText.trim(), done: false }],
     });
     setNewCheckText("");
+    sounds.playPop(620);
   };
 
   const toggleCheckItem = (itemId: string) => {
-    sounds.playPop(600);
-    const items = (note.checkItems || []).map((item) =>
+    const currentItems = note.checkItems || [];
+    const targetItem = currentItems.find((i) => i.id === itemId);
+    const willBeDone = targetItem ? !targetItem.done : false;
+
+    if (willBeDone) {
+      sounds.playPop(720);
+    } else {
+      sounds.playPop(480);
+    }
+
+    const items = currentItems.map((item) =>
       item.id === itemId ? { ...item, done: !item.done } : item,
     );
     updateNote(note.id, { checkItems: items });
+
+    // Celebration: If all checklist items are now checked (100%), celebrate with Pip dance & chime
+    const total = items.length;
+    const completed = items.filter((i) => i.done).length;
+    if (total > 0 && completed === total && willBeDone) {
+      setTimeout(() => {
+        sounds.playChime();
+        dancePip();
+      }, 100);
+    }
   };
 
   const removeCheckItem = (itemId: string) => {
     const items = (note.checkItems || []).filter((item) => item.id !== itemId);
     updateNote(note.id, { checkItems: items });
+    sounds.playPop(420);
+  };
+
+  const convertBodyToChecklist = () => {
+    const lines = note.body
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+    if (lines.length === 0) {
+      const newItems = [{ id: uid(), text: isVi ? "Công việc mới" : "New todo task", done: false }];
+      updateNote(note.id, { checkItems: [...(note.checkItems || []), ...newItems] });
+      sounds.playPop(600);
+      return;
+    }
+    const newItems = lines.map((line) => {
+      const cleanText = line.replace(/^[-*•]\s*(\[[ xX]\])?\s*/, "").trim();
+      const isDone = /^[-*•]?\s*\[[xX]\]/.test(line);
+      return { id: uid(), text: cleanText || line, done: isDone };
+    });
+    updateNote(note.id, {
+      body: "",
+      checkItems: [...(note.checkItems || []), ...newItems],
+    });
+    sounds.playPop(650);
   };
 
   const triggerDeleteWithMotion = () => {
@@ -543,6 +588,15 @@ export function StickyNote({ note, stacked }: Props) {
       style={style}
       onMouseDown={() => bringNote(note.id)}
     >
+      {/* Tactile Stationery: Washi Tape Pin (Top Center when pinned) */}
+      {note.pinned && (
+        <div
+          className="note-washi-tape"
+          aria-hidden="true"
+          title={isVi ? "Đang ghim bằng băng dính washi thủ công" : "Pinned with handcrafted washi tape"}
+        />
+      )}
+
       {/* Dark Integrated Header Bar (~34px height) - acts as smooth drag handle & double click to minimize */}
       <header
         onPointerDown={onPointerDown}
@@ -821,6 +875,21 @@ export function StickyNote({ note, stacked }: Props) {
                       <span>Khóa vị trí ghi chú</span>
                     </>
                   )}
+                </button>
+
+                {/* 2.5 Convert or Add Checklist */}
+                <button
+                  type="button"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    convertBodyToChecklist();
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-[#F4F5F7] hover:bg-[#262A35] hover:text-white transition-colors text-left cursor-pointer"
+                >
+                  <CheckSquare className="size-3.5 text-[#3FAE6C]" />
+                  <span>{isVi ? "Tạo danh sách Checklist" : "Convert to Checklist"}</span>
                 </button>
 
                 {/* 3. Schedule / Due Date */}
@@ -1281,62 +1350,115 @@ export function StickyNote({ note, stacked }: Props) {
           )}
         />
 
-        {/* Checklist / Todo Items: Anchored at bottom with scrollable area if long */}
-        {note.checkItems && note.checkItems.length > 0 && (
-          <div className="no-drag mt-auto pt-2.5 space-y-1 border-t border-black/10 shrink-0 max-h-40 overflow-y-auto note-scrollbar pr-1">
-            {note.checkItems.map((item) => (
-              <div key={item.id} className="flex items-center justify-between gap-1 text-xs group/todo">
-                <button
-                  type="button"
-                  onClick={() => toggleCheckItem(item.id)}
-                  className="flex items-center gap-1.5 text-left cursor-pointer flex-1 min-w-0"
-                >
-                  {item.done ? (
-                    <CheckSquare className="size-3.5 text-[#3FAE6C] shrink-0" />
-                  ) : (
-                    <Square className="size-3.5 text-[#23262F]/50 shrink-0" />
-                  )}
-                  <span className={cn("leading-tight truncate text-xs text-[#23262F]", item.done && "line-through opacity-45")}>
-                    {item.text}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => removeCheckItem(item.id)}
-                  className="opacity-0 group-hover/todo:opacity-100 text-[#EF4444] px-1 cursor-pointer transition-opacity text-xs"
-                  title={isVi ? "Xóa mục việc" : "Delete todo item"}
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Checklist / Todo Items: Anchored at bottom with Tactile Progress Tracker */}
+        {note.checkItems && note.checkItems.length > 0 && (() => {
+          const checkItems = note.checkItems;
+          const totalItems = checkItems.length;
+          const completedItems = checkItems.filter((i) => i.done).length;
+          const completionPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+          const isAllCompleted = totalItems > 0 && completedItems === totalItems;
 
-        {/* Add Checkbox Item Form: Offset with clearance from bottom-right corner actions */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            addCheckItem();
-          }}
-          className="no-drag mt-2 flex items-center gap-1 opacity-65 hover:opacity-100 transition-opacity shrink-0 mr-14"
-        >
-          <input
-            type="text"
-            value={newCheckText}
-            onChange={(e) => setNewCheckText(e.target.value)}
-            placeholder={isVi ? "+ Thêm mục việc..." : "+ Add todo item..."}
-            className="flex-1 bg-black/5 px-2.5 py-1 rounded-lg text-xs text-[#23262F] outline-none placeholder:text-[#23262F]/40 focus:bg-black/10 transition-colors select-text cursor-text touch-auto caret-[#000000]"
-          />
-          {newCheckText.trim() && (
+          return (
+            <div className="no-drag mt-auto pt-2 space-y-2 border-t border-black/10 shrink-0 pr-1">
+              {/* Progress Tracker Pill & Bar */}
+              <div className="flex flex-col gap-1 px-0.5">
+                <div className="flex items-center justify-between text-xs font-semibold text-[#23262F]/85">
+                  <span className="flex items-center gap-1.5">
+                    <CheckSquare className="size-3.5 text-[#F5A623]" />
+                    <span>{completedItems}/{totalItems} {isVi ? "việc" : "done"}</span>
+                    <span className="font-mono text-xs opacity-60">({completionPercent}%)</span>
+                  </span>
+                  {isAllCompleted ? (
+                    <span className="flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-500/20 px-2 py-0.5 rounded-full animate-in zoom-in-95 shadow-xs">
+                      ✨ {isVi ? "Hoàn thành!" : "All done!"}
+                    </span>
+                  ) : (
+                    <span className="text-xs font-mono text-[#23262F]/55">
+                      {totalItems - completedItems} {isVi ? "còn lại" : "left"}
+                    </span>
+                  )}
+                </div>
+                {/* Ultra-sleek Progress Bar */}
+                <div className="h-1 w-full rounded-full bg-black/10 overflow-hidden">
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all duration-300 ease-out",
+                      isAllCompleted ? "bg-[#3FAE6C]" : "bg-[#F5A623]"
+                    )}
+                    style={{ width: `${completionPercent}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Scrollable Checklist Items */}
+              <div className="space-y-1 max-h-36 overflow-y-auto note-scrollbar">
+                {checkItems.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between gap-1 text-xs group/todo">
+                    <button
+                      type="button"
+                      onClick={() => toggleCheckItem(item.id)}
+                      className="flex items-center gap-2 text-left cursor-pointer flex-1 min-w-0 py-0.5"
+                    >
+                      {item.done ? (
+                        <CheckSquare className="size-3.5 text-[#3FAE6C] shrink-0" />
+                      ) : (
+                        <Square className="size-3.5 text-[#23262F]/50 shrink-0 hover:text-[#F5A623] transition-colors" />
+                      )}
+                      <span className={cn("leading-tight truncate text-xs text-[#23262F] transition-all", item.done && "line-through opacity-45")}>
+                        {item.text}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeCheckItem(item.id)}
+                      className="opacity-0 group-hover/todo:opacity-100 text-[#EF4444] px-1 cursor-pointer transition-opacity text-xs hover:scale-110"
+                      title={isVi ? "Xóa mục việc" : "Delete todo item"}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Add Checkbox Item Form / Quick Checklist Toggle */}
+        <div className="no-drag mt-2 flex items-center gap-1 shrink-0 mr-14">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              addCheckItem();
+            }}
+            className="flex-1 flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity"
+          >
+            <input
+              type="text"
+              value={newCheckText}
+              onChange={(e) => setNewCheckText(e.target.value)}
+              placeholder={isVi ? "+ Thêm mục việc..." : "+ Add todo item..."}
+              className="flex-1 bg-black/5 px-2.5 py-1 rounded-lg text-xs text-[#23262F] outline-none placeholder:text-[#23262F]/40 focus:bg-black/10 transition-colors select-text cursor-text touch-auto caret-[#000000]"
+            />
+            {newCheckText.trim() && (
+              <button
+                type="submit"
+                className="p-1 rounded-lg bg-black/10 hover:bg-black/20 text-[#23262F] cursor-pointer transition-colors shrink-0"
+              >
+                <Plus className="size-3" />
+              </button>
+            )}
+          </form>
+          {(!note.checkItems || note.checkItems.length === 0) && (
             <button
-              type="submit"
-              className="p-1 rounded-lg bg-black/10 hover:bg-black/20 text-[#23262F] cursor-pointer transition-colors shrink-0"
+              type="button"
+              onClick={convertBodyToChecklist}
+              title={isVi ? "Chuyển thành danh sách công việc (Checklist)" : "Convert to checklist"}
+              className="p-1 rounded-lg text-[#23262F]/50 hover:text-[#23262F] hover:bg-black/8 transition-colors cursor-pointer shrink-0"
             >
-              <Plus className="size-3" />
+              <CheckSquare className="size-3.5" />
             </button>
           )}
-        </form>
+        </div>
 
         {/* Ergonomic Bottom-Right Corner Controls: Smooth Rotation Handle + Corner Resize Handle */}
         {!stacked && (
@@ -1386,6 +1508,9 @@ export function StickyNote({ note, stacked }: Props) {
           </div>
         )}
       </div>
+
+      {/* Tactile Stationery: 3D Organic Paper Corner Curl */}
+      {!stacked && <div className="note-corner-curl" aria-hidden="true" />}
     </article>
   );
 }

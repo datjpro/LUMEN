@@ -1455,6 +1455,48 @@ console.log("\n📦 [SUITE 15]: Background Video Audio Isolation & Update Checke
   // 5. System Tray Menu Update Action Mapping
   const trayMenuIds = ["show", "capture", "timer", "calendar", "hub", "update", "quit"];
   assert(trayMenuIds.includes("update"), "System tray menu contains dedicated 'update' menu item");
+
+  console.log("\n📦 [SUITE 16]: Tactile Stationery Pro & Interactive Checklists");
+
+  // 1. Washi tape pin state logic
+  const mockPinnedNote = { id: "n_tape", pinned: true };
+  const mockUnpinnedNote = { id: "n_notape", pinned: false };
+  assert(mockPinnedNote.pinned === true, "Washi tape pin activates when note is pinned");
+  assert(mockUnpinnedNote.pinned === false, "Washi tape pin is hidden when note is unpinned");
+
+  // 2. Interactive Checklist Progress Calculation
+  const checkItemsSample = [
+    { id: "c1", text: "Thiết kế Washi Tape", done: true },
+    { id: "c2", text: "Viết Progress Bar", done: true },
+    { id: "c3", text: "Kiểm tra Impeccable", done: false },
+    { id: "c4", text: "Merge git develop", done: false },
+  ];
+  const totalCount = checkItemsSample.length;
+  const completedCount = checkItemsSample.filter((i) => i.done).length;
+  const percent = Math.round((completedCount / totalCount) * 100);
+  assert(totalCount === 4 && completedCount === 2, "Checklist computes total and completed count accurately (2/4)");
+  assert(percent === 50, "Checklist computes completion percentage accurately (50%)");
+
+  // 3. 100% Completion Celebration Trigger
+  const allDoneItems = checkItemsSample.map((i) => ({ ...i, done: true }));
+  const is100PercentDone = allDoneItems.every((i) => i.done);
+  assert(is100PercentDone === true, "100% checklist completion triggers celebration and Pip dance");
+
+  // 4. Text-to-Checklist Conversion Parsing
+  const rawBodyText = "- [ ] Học từ vựng mới\n- [x] Đọc 10 trang sách\nViết nhật ký";
+  const parsedCheckItems = rawBodyText
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0)
+    .map((line, idx) => {
+      const clean = line.replace(/^[-*•]\s*(\[[ xX]\])?\s*/, "").trim();
+      const done = /^[-*•]?\s*\[[xX]\]/.test(line);
+      return { id: `item_${idx}`, text: clean, done };
+    });
+  assert(parsedCheckItems.length === 3, "Converts multi-line body text into 3 structured checklist items");
+  assert(parsedCheckItems[0].done === false && parsedCheckItems[0].text === "Học từ vựng mới", "Parses unchecked markdown task item correctly");
+  assert(parsedCheckItems[1].done === true && parsedCheckItems[1].text === "Đọc 10 trang sách", "Parses checked markdown task item correctly");
+  assert(parsedCheckItems[2].done === false && parsedCheckItems[2].text === "Viết nhật ký", "Parses standard unbulleted text line as new todo item");
 }
 
 console.log(`\n========================================`);

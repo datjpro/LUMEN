@@ -222,6 +222,58 @@
   border-color: rgba(255, 255, 255, 0.35) !important;
 }
 
+/* Tactile Stationery: Washi Tape Pin (when note is pinned) */
+.note-washi-tape {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1deg);
+  width: 86px;
+  height: 22px;
+  background-color: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1);
+  border-left: 2px dashed rgba(0, 0, 0, 0.12);
+  border-right: 2px dashed rgba(0, 0, 0, 0.12);
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(245, 166, 35, 0.16),
+    rgba(245, 166, 35, 0.16) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  pointer-events: none;
+  z-index: 45;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+article:hover .note-washi-tape {
+  transform: translateX(-50%) rotate(-0.5deg) scale(1.02);
+}
+
+/* Tactile Stationery: Organic 3D Corner Curl on bottom-right hover */
+.note-corner-curl {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, transparent 50%, rgba(0, 0, 0, 0.08) 50%);
+  border-bottom-right-radius: 1rem;
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
+}
+
+article:hover .note-corner-curl {
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, transparent 50%, rgba(0, 0, 0, 0.16) 50%);
+  filter: drop-shadow(-1px -1px 3px rgba(0, 0, 0, 0.2));
+}
+
+
 /* ==========================================================================
    CASCADING SPATIAL THEME UTILITIES
    ========================================================================== */
