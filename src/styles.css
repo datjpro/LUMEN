@@ -19,7 +19,7 @@
     --lumen-accent-deep: #D6871A;      /* Hover / pressed của accent */
     --lumen-accent-glow: rgba(245, 166, 35, 0.20);
     --lumen-text: #F4F5F7;
-    --lumen-text-muted: #8B90A0;
+    --lumen-text-muted: #A2A8BC;       /* WCAG AA contrast compliant (4.6:1+) */
     --lumen-danger: #EF4444;           /* Chỉ dùng cho Thoát ứng dụng / Xoá */
 
     /* Bộ màu Note (Nền pastel + Accent riêng + Text chung) */
@@ -65,6 +65,74 @@
     --duration-fast: 150ms;
     --duration-base: 220ms;
     --duration-slow: 400ms;
+  }
+
+  /* ==========================================================================
+     SPATIAL THEME ENGINE TOKENS
+     ========================================================================== */
+  [data-theme="ink"] {
+    --lumen-bg: #14161D;
+    --lumen-surface: #1D2029;
+    --lumen-surface-elevated: #262A35;
+    --lumen-border: rgba(255, 255, 255, 0.08);
+    --lumen-border-hover: rgba(255, 255, 255, 0.16);
+    --lumen-accent: #F5A623;
+    --lumen-accent-deep: #D6871A;
+    --lumen-accent-glow: rgba(245, 166, 35, 0.22);
+    --lumen-text: #F4F5F7;
+    --lumen-text-muted: #A2A8BC;
+  }
+
+  [data-theme="glass"] {
+    --lumen-bg: #090E17;
+    --lumen-surface: rgba(18, 26, 44, 0.85);
+    --lumen-surface-elevated: rgba(30, 44, 72, 0.92);
+    --lumen-border: rgba(255, 255, 255, 0.15);
+    --lumen-border-hover: rgba(255, 255, 255, 0.30);
+    --lumen-accent: #38BDF8;
+    --lumen-accent-deep: #0284C7;
+    --lumen-accent-glow: rgba(56, 189, 248, 0.35);
+    --lumen-text: #F8FAFC;
+    --lumen-text-muted: #94A3B8;
+  }
+
+  [data-theme="pastel"] {
+    --lumen-bg: #201A16;
+    --lumen-surface: #2C231D;
+    --lumen-surface-elevated: #3E322A;
+    --lumen-border: rgba(245, 166, 35, 0.14);
+    --lumen-border-hover: rgba(245, 166, 35, 0.28);
+    --lumen-accent: #F5A623;
+    --lumen-accent-deep: #D6871A;
+    --lumen-accent-glow: rgba(245, 166, 35, 0.24);
+    --lumen-text: #FDFBF7;
+    --lumen-text-muted: #C2B3A7;
+  }
+
+  [data-theme="cyberpunk"] {
+    --lumen-bg: #0A0114;
+    --lumen-surface: #17042B;
+    --lumen-surface-elevated: #280749;
+    --lumen-border: rgba(0, 240, 255, 0.25);
+    --lumen-border-hover: rgba(255, 0, 128, 0.45);
+    --lumen-accent: #00F0FF;
+    --lumen-accent-deep: #00B4D8;
+    --lumen-accent-glow: rgba(0, 240, 255, 0.45);
+    --lumen-text: #FFFFFF;
+    --lumen-text-muted: #D3B5FF;
+  }
+
+  [data-theme="minimalist"] {
+    --lumen-bg: #121214;
+    --lumen-surface: #1C1C20;
+    --lumen-surface-elevated: #28282E;
+    --lumen-border: rgba(255, 255, 255, 0.12);
+    --lumen-border-hover: rgba(255, 255, 255, 0.25);
+    --lumen-accent: #E4E4E7;
+    --lumen-accent-deep: #A1A1AA;
+    --lumen-accent-glow: rgba(228, 228, 231, 0.20);
+    --lumen-text: #FAFAFA;
+    --lumen-text-muted: #A1A1AA;
   }
 
   * {
@@ -152,6 +220,131 @@
   color: var(--note-text) !important;
   backdrop-filter: blur(16px) !important;
   border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* ==========================================================================
+   CASCADING SPATIAL THEME UTILITIES
+   ========================================================================== */
+[data-theme="glass"] .bg-\[\#1D2029\]\/95,
+[data-theme="glass"] .bg-\[\#1D2029\]\/98,
+[data-theme="glass"] .bg-\[\#1D2029\],
+[data-theme="glass"] .bg-\[\#1D2029\]\/85 {
+  background-color: rgba(18, 26, 44, 0.85) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+[data-theme="glass"] .bg-\[\#14161D\] {
+  background-color: rgba(10, 15, 28, 0.90) !important;
+}
+
+[data-theme="glass"] .bg-\[\#262A35\] {
+  background-color: rgba(30, 44, 72, 0.90) !important;
+}
+
+[data-theme="glass"] .text-\[\#F5A623\] {
+  color: #38BDF8 !important;
+}
+
+[data-theme="glass"] .bg-\[\#F5A623\] {
+  background-color: #38BDF8 !important;
+  color: #0B132B !important;
+}
+
+[data-theme="glass"] .border-\[\#F5A623\] {
+  border-color: #38BDF8 !important;
+}
+
+[data-theme="pastel"] .bg-\[\#1D2029\]\/95,
+[data-theme="pastel"] .bg-\[\#1D2029\]\/98,
+[data-theme="pastel"] .bg-\[\#1D2029\],
+[data-theme="pastel"] .bg-\[\#1D2029\]\/85 {
+  background-color: #2C231D !important;
+  border-color: rgba(245, 166, 35, 0.14) !important;
+}
+
+[data-theme="pastel"] .bg-\[\#14161D\] {
+  background-color: #201A16 !important;
+}
+
+[data-theme="pastel"] .bg-\[\#262A35\] {
+  background-color: #3E322A !important;
+}
+
+[data-theme="cyberpunk"] .bg-\[\#1D2029\]\/95,
+[data-theme="cyberpunk"] .bg-\[\#1D2029\]\/98,
+[data-theme="cyberpunk"] .bg-\[\#1D2029\],
+[data-theme="cyberpunk"] .bg-\[\#1D2029\]\/85 {
+  background-color: #17042B !important;
+  border-color: rgba(0, 240, 255, 0.28) !important;
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.12) !important;
+}
+
+[data-theme="cyberpunk"] .bg-\[\#14161D\] {
+  background-color: #0A0114 !important;
+}
+
+[data-theme="cyberpunk"] .bg-\[\#262A35\] {
+  background-color: #280749 !important;
+}
+
+[data-theme="cyberpunk"] .text-\[\#F5A623\] {
+  color: #00F0FF !important;
+}
+
+[data-theme="cyberpunk"] .bg-\[\#F5A623\] {
+  background-color: #00F0FF !important;
+  color: #050010 !important;
+}
+
+[data-theme="cyberpunk"] .border-\[\#F5A623\] {
+  border-color: #00F0FF !important;
+}
+
+[data-theme="minimalist"] .bg-\[\#1D2029\]\/95,
+[data-theme="minimalist"] .bg-\[\#1D2029\]\/98,
+[data-theme="minimalist"] .bg-\[\#1D2029\],
+[data-theme="minimalist"] .bg-\[\#1D2029\]\/85 {
+  background-color: #1C1C20 !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+[data-theme="minimalist"] .bg-\[\#14161D\] {
+  background-color: #121214 !important;
+}
+
+[data-theme="minimalist"] .bg-\[\#262A35\] {
+  background-color: #28282E !important;
+}
+
+[data-theme="minimalist"] .text-\[\#F5A623\] {
+  color: #E4E4E7 !important;
+}
+
+[data-theme="minimalist"] .bg-\[\#F5A623\] {
+  background-color: #E4E4E7 !important;
+  color: #121214 !important;
+}
+
+[data-theme="minimalist"] .border-\[\#F5A623\] {
+  border-color: #E4E4E7 !important;
+}
+
+/* WCAG AA High Contrast tokens for text & secondary icons */
+.text-\[\#8B90A0\] {
+  color: #A2A8BC !important;
+}
+
+/* Clean Paper Sticky Note Header */
+.note-paper-header {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  color: #23262F !important;
+}
+
+.note-paper-header:hover {
+  background-color: rgba(0, 0, 0, 0.07) !important;
 }
 
 /* Fonts */
@@ -243,6 +436,27 @@
 
 .pip-timer-alarm {
   animation: petTimerBounce 0.4s ease-out infinite, petGlowPulse 1.2s ease-in-out infinite;
+}
+
+/* Micro-motion: Pip Procedural Dance Celebration (Squash and stretch 120 FPS) */
+@keyframes petDanceCelebration {
+  0%, 100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) scale(1.08, 0.94) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-12px) scale(0.96, 1.06) rotate(3deg);
+  }
+  75% {
+    transform: translateY(-4px) scale(1.04, 0.96) rotate(-1deg);
+  }
+}
+
+.pip-dance {
+  animation: petDanceCelebration 0.65s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  transform-origin: 50% 85%;
 }
 
 /* Micro-motion: Pip breathing (Scale Y ±1.5%, ~3s cycle) */

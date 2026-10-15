@@ -448,6 +448,7 @@ export function StickyNote({ note, stacked }: Props) {
   };
 
   const currentPalette = NOTE_PALETTE.find((p) => p.id === note.tint) || NOTE_PALETTE[0];
+  const isDarkNote = note.tint === "dark";
 
   const isTransformActive = isDragging || isRotating;
 
@@ -555,7 +556,10 @@ export function StickyNote({ note, stacked }: Props) {
           toggleNoteCollapse(note.id);
         }}
         className={cn(
-          "relative z-30 h-8.5 px-3 flex items-center justify-between bg-[#1D2029]/95 text-white backdrop-blur-md border-b border-white/5 shrink-0 select-none touch-none rounded-t-2xl",
+          "relative z-30 h-8.5 px-3 flex items-center justify-between border-b shrink-0 select-none touch-none rounded-t-2xl transition-colors duration-150",
+          isDarkNote
+            ? "bg-white/[0.06] border-white/10 text-white"
+            : "note-paper-header border-black/[0.06] text-[#23262F]",
           note.locked ? "cursor-default" : "cursor-grab active:cursor-grabbing",
         )}
       >
@@ -569,14 +573,20 @@ export function StickyNote({ note, stacked }: Props) {
               setColorPickerOpen(!colorPickerOpen);
               setMenuOpen(false);
             }}
-            title="Đổi màu ghi chú"
-            className="flex items-center gap-1.5 p-1 rounded-md hover:bg-white/10 cursor-pointer transition-colors"
+            title={isVi ? "Đổi màu ghi chú" : "Change note color"}
+            className={cn(
+              "flex items-center gap-1.5 p-1 rounded-lg transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[#F5A623] focus-visible:outline-none",
+              isDarkNote ? "hover:bg-white/10" : "hover:bg-black/8",
+            )}
           >
             <span
-              className="size-3 rounded-full shadow-xs border border-white/20 transition-transform hover:scale-110"
+              className={cn(
+                "size-3 rounded-full shadow-xs border transition-transform hover:scale-110",
+                isDarkNote ? "border-white/20" : "border-black/20",
+              )}
               style={{ backgroundColor: currentPalette.dot }}
             />
-            <ChevronDown className="size-2.5 text-[#8B90A0]" />
+            <ChevronDown className="size-2.5 opacity-60" />
           </button>
 
           {/* Color Picker Popover */}
@@ -594,7 +604,7 @@ export function StickyNote({ note, stacked }: Props) {
                   }}
                   title={isVi ? p.name : p.nameEn}
                   className={cn(
-                    "flex size-5 items-center justify-center rounded-full transition-transform hover:scale-110 cursor-pointer",
+                    "flex size-5 items-center justify-center rounded-full transition-transform hover:scale-110 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#F5A623] focus-visible:outline-none",
                     note.tint === p.id && "ring-1.5 ring-white shadow-xs",
                   )}
                   style={{ backgroundColor: p.dot }}
@@ -616,8 +626,13 @@ export function StickyNote({ note, stacked }: Props) {
                 bringNote(note.id);
                 setClusterPickerOpen(true);
               }}
-              className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 text-[#F5A623] text-[10px] font-semibold border border-white/10 transition-colors cursor-pointer truncate"
-              title="Nhóm / Cụm ghi chú (Click để đổi)"
+              className={cn(
+                "flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold transition-colors cursor-pointer truncate focus-visible:ring-2 focus-visible:ring-[#F5A623] focus-visible:outline-none",
+                isDarkNote
+                  ? "bg-white/10 hover:bg-white/20 text-[#F5A623] border border-white/10"
+                  : "bg-black/6 hover:bg-black/12 text-[#23262F] border border-black/10",
+              )}
+              title={isVi ? "Nhóm / Cụm ghi chú (Click để đổi)" : "Cluster group (Click to change)"}
             >
               <Folder className="size-2.5 shrink-0" />
               <span className="max-w-[75px] truncate">{note.cluster}</span>
@@ -632,8 +647,8 @@ export function StickyNote({ note, stacked }: Props) {
                 bringNote(note.id);
                 setSchedulePickerOpen(true);
               }}
-              className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[10px] font-semibold border border-emerald-500/30 transition-colors cursor-pointer shrink-0"
-              title={`Hạn chót: ${note.dueDate} ${note.dueTime || ""}`}
+              className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-[10px] font-semibold border border-emerald-500/30 transition-colors cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none"
+              title={`${isVi ? "Hạn chót" : "Due"}: ${note.dueDate} ${note.dueTime || ""}`}
             >
               <Calendar className="size-2.5" />
               <span>{note.dueDate.substring(5)}</span>
@@ -642,87 +657,104 @@ export function StickyNote({ note, stacked }: Props) {
 
           {note.locked && (
             <span
-              className="flex items-center gap-1 text-[10px] text-[#F5A623] bg-[#F5A623]/15 px-1.5 py-0.5 rounded-md border border-[#F5A623]/30 shrink-0 select-none"
-              title="Vị trí ghi chú đã được khóa cố định"
+              className={cn(
+                "flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md border shrink-0 select-none font-medium",
+                isDarkNote
+                  ? "text-[#F5A623] bg-[#F5A623]/15 border-[#F5A623]/30"
+                  : "text-[#23262F] bg-black/6 border-black/10",
+              )}
+              title={isVi ? "Vị trí ghi chú đã được khóa cố định" : "Note position is locked"}
             >
               <Lock className="size-2.5" />
-              <span>Khóa</span>
+              <span>{isVi ? "Khóa" : "Locked"}</span>
             </span>
           )}
         </div>
 
-        {/* Right Header Actions: Minimize + Lock + Pin + Direct Trash (Delete) + Kebab (…) */}
+        {/* Right Header Actions: Clean Paper style - utility icons revealed on hover / focus */}
         <div className="flex items-center gap-0.5 no-drag">
           {/* Direct Minimize / Collapse Quick Button */}
           <button
             type="button"
-            title="Thu nhỏ ghi chú (Nhấp đúp thanh tiêu đề cũng được)"
+            title={isVi ? "Thu nhỏ ghi chú (Nhấp đúp thanh tiêu đề cũng được)" : "Minimize note"}
             onClick={(e) => {
               e.stopPropagation();
               sounds.playPop(580);
               toggleNoteCollapse(note.id);
             }}
-            className="flex size-6 items-center justify-center rounded-md text-[#8B90A0] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className={cn(
+              "flex size-6.5 items-center justify-center rounded-lg transition-all cursor-pointer opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[#F5A623] focus-visible:outline-none",
+              isDarkNote ? "text-white/70 hover:text-white hover:bg-white/10" : "text-[#23262F]/70 hover:text-[#23262F] hover:bg-black/10",
+            )}
           >
-            <Minus className="size-3" />
+            <Minus className="size-3.5" />
           </button>
 
           {/* Lock / Unlock Quick Button */}
           <button
             type="button"
-            title={note.locked ? "Mở khóa vị trí" : "Khóa vị trí ghi chú"}
+            title={note.locked ? (isVi ? "Mở khóa vị trí" : "Unlock position") : (isVi ? "Khóa vị trí ghi chú" : "Lock position")}
             onClick={(e) => {
               e.stopPropagation();
               bringNote(note.id);
               toggleNoteLock(note.id);
             }}
             className={cn(
-              "flex size-6 items-center justify-center rounded-md transition-colors cursor-pointer",
+              "flex size-6.5 items-center justify-center rounded-lg transition-all cursor-pointer focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[#F5A623] focus-visible:outline-none",
               note.locked
-                ? "bg-[#F5A623]/20 text-[#F5A623]"
-                : "text-[#8B90A0] hover:text-white hover:bg-white/10",
+                ? "opacity-100 bg-[#F5A623]/20 text-[#F5A623]"
+                : cn(
+                    "opacity-0 group-hover:opacity-100",
+                    isDarkNote ? "text-white/70 hover:text-white hover:bg-white/10" : "text-[#23262F]/70 hover:text-[#23262F] hover:bg-black/10",
+                  ),
             )}
           >
-            {note.locked ? <Lock className="size-3" /> : <Unlock className="size-3" />}
+            {note.locked ? <Lock className="size-3.5" /> : <Unlock className="size-3.5" />}
           </button>
 
           {/* Pin Button */}
           <button
             type="button"
-            title={note.pinned ? "Bỏ ghim" : "Ghim lên trên"}
+            title={note.pinned ? (isVi ? "Bỏ ghim" : "Unpin note") : (isVi ? "Ghim lên trên" : "Pin to top")}
             onClick={(e) => {
               e.stopPropagation();
               bringNote(note.id);
               toggleNotePin(note.id);
             }}
             className={cn(
-              "flex size-6 items-center justify-center rounded-md transition-colors cursor-pointer",
+              "flex size-6.5 items-center justify-center rounded-lg transition-all cursor-pointer focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[#F5A623] focus-visible:outline-none",
               note.pinned
-                ? "bg-[#F5A623]/20 text-[#F5A623]"
-                : "text-[#8B90A0] hover:text-white hover:bg-white/10",
+                ? "opacity-100 bg-[#F5A623]/20 text-[#F5A623]"
+                : cn(
+                    "opacity-0 group-hover:opacity-100",
+                    isDarkNote ? "text-white/70 hover:text-white hover:bg-white/10" : "text-[#23262F]/70 hover:text-[#23262F] hover:bg-black/10",
+                  ),
             )}
           >
-            <Pin className={cn("size-3", note.pinned && "fill-current")} />
+            <Pin className={cn("size-3.5", note.pinned && "fill-current")} />
           </button>
 
           {/* Direct Delete Note Button */}
           <button
             type="button"
-            title="Xóa ghi chú này"
+            title={isVi ? "Xóa ghi chú này" : "Delete note"}
             onClick={(e) => {
               e.stopPropagation();
               handleDeleteClick();
             }}
-            className="flex size-6 items-center justify-center rounded-md text-[#8B90A0] hover:text-[#EF4444] hover:bg-red-500/15 transition-colors cursor-pointer"
+            className={cn(
+              "flex size-6.5 items-center justify-center rounded-lg transition-all cursor-pointer opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:text-[#EF4444] hover:bg-red-500/15 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none",
+              isDarkNote ? "text-white/70 hover:text-[#EF4444]" : "text-[#23262F]/70",
+            )}
           >
-            <Trash2 className="size-3" />
+            <Trash2 className="size-3.5" />
           </button>
 
           {/* Kebab Menu Button */}
           <div className="relative no-drag" ref={menuRef}>
             <button
               type="button"
-              title="Tùy chọn khác (Thu gọn, Khóa, Góc xoay, Sao chép, Xóa)"
+              title={isVi ? "Tùy chọn khác (Thu gọn, Khóa, Góc xoay, Sao chép, Xóa)" : "More options"}
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
@@ -732,11 +764,16 @@ export function StickyNote({ note, stacked }: Props) {
                 setClusterPickerOpen(false);
               }}
               className={cn(
-                "flex size-6 items-center justify-center rounded-md transition-colors cursor-pointer",
-                menuOpen ? "bg-white/15 text-white" : "text-[#8B90A0] hover:text-white hover:bg-white/10",
+                "flex size-6.5 items-center justify-center rounded-lg transition-all cursor-pointer focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[#F5A623] focus-visible:outline-none",
+                menuOpen
+                  ? (isDarkNote ? "bg-white/20 text-white opacity-100" : "bg-black/15 text-[#23262F] opacity-100")
+                  : cn(
+                      "opacity-0 group-hover:opacity-100",
+                      isDarkNote ? "text-white/70 hover:text-white hover:bg-white/10" : "text-[#23262F]/70 hover:text-[#23262F] hover:bg-black/10",
+                    ),
               )}
             >
-              <MoreHorizontal className="size-3.5" />
+              <MoreHorizontal className="size-4" />
             </button>
 
             {/* Kebab Popover Menu */}

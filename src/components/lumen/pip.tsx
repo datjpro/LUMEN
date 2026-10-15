@@ -65,7 +65,7 @@ export function PipFigure({
     <div
       className={cn(
         "relative h-20 w-20 sm:h-24 sm:w-24 select-none will-change-transform",
-        isDancing && "animate-bounce",
+        isDancing && "pip-dance",
         className,
       )}
       style={{

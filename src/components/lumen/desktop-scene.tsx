@@ -450,6 +450,8 @@ function FloatingTrayMenu() {
 
 export function DesktopScene() {
   const theme = useLumen((s) => s.theme);
+  const lang = useLumen((s) => s.lang);
+  const isVi = lang === "vi";
   const layout = useLumen((s) => s.layout);
   const setLayout = useLumen((s) => s.setLayout);
   const notes = useLumen((s) => s.notes);
@@ -822,14 +824,14 @@ export function DesktopScene() {
       {/* Drag-and-drop file drop target indicator */}
       {isDragOverFile && (
         <div className="fixed inset-4 z-[95] rounded-3xl border-2 border-dashed border-[#F5A623] bg-[#1D2029]/85 backdrop-blur-md flex flex-col items-center justify-center text-[#F4F5F7] animate-in fade-in zoom-in-95 pointer-events-none shadow-2xl">
-          <div className="size-16 rounded-2xl bg-[#F5A623]/20 flex items-center justify-center text-[#F5A623] mb-3 animate-bounce">
+          <div className="size-16 rounded-2xl bg-[#F5A623]/20 flex items-center justify-center text-[#F5A623] mb-3 transition-transform duration-500 animate-pulse">
             <Folder className="size-8" />
           </div>
           <p className="font-bold text-base text-[#F5A623]">
-            Thả file .txt / .md vào đây để tạo ghi chú dán tức thì
+            {isVi ? "Thả file .txt / .md vào đây để tạo ghi chú dán tức thì" : "Drop .txt / .md files here to create instant sticky notes"}
           </p>
-          <p className="text-xs text-[#8B90A0] mt-1">
-            Hỗ trợ tự động đọc văn bản từ các tệp .txt, .md, .csv, .log
+          <p className="text-xs text-[#A2A8BC] mt-1">
+            {isVi ? "Hỗ trợ tự động đọc văn bản từ các tệp .txt, .md, .csv, .log" : "Automatically imports text from .txt, .md, .csv, and .log files"}
           </p>
         </div>
       )}
