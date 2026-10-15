@@ -1520,6 +1520,33 @@ console.log("\n📦 [SUITE 15]: Background Video Audio Isolation & Update Checke
   assert(formatWrap("Ghi chú", "*") === "*Ghi chú*", "Markdown italic wrapper applies single asterisks");
   assert(formatWrap("npm test", "`") === "`npm test`", "Markdown code wrapper applies backticks");
   assert(formatWrap("Lưu ý", "==", "==") === "==Lưu ý==", "Markdown highlight wrapper applies double equal signs");
+  assert(formatWrap("Gạch chân", "<u>", "</u>") === "<u>Gạch chân</u>", "Markdown underline wrapper applies u tags");
+  assert(formatWrap("Đã hủy", "~~") === "~~Đã hủy~~", "Markdown strikethrough wrapper applies double tildes");
+
+  // Markdown Smart Toggle (Unwrapping existing formatting)
+  function toggleMarkdown(selected, prefix, suffix = prefix) {
+    if (selected.length >= prefix.length + suffix.length && selected.startsWith(prefix) && selected.endsWith(suffix)) {
+      return selected.slice(prefix.length, selected.length - suffix.length);
+    }
+    return `${prefix}${selected}${suffix}`;
+  }
+  assert(toggleMarkdown("**Đậm**", "**") === "Đậm", "Markdown bold unwraps when already bold");
+  assert(toggleMarkdown("*Nghiêng*", "*") === "Nghiêng", "Markdown italic unwraps when already italic");
+  assert(toggleMarkdown("~~Xóa~~", "~~") === "Xóa", "Markdown strikethrough unwraps when already strikethrough");
+  assert(toggleMarkdown("Bình thường", "**") === "**Bình thường**", "Markdown bold wraps when unformatted");
+
+  // Top Note bringNote Optimization Guard
+  let storeZ = 10;
+  const testNotes = [{ id: "n1", z: 5 }, { id: "n2", z: 10 }];
+  function testBringNote(id) {
+    const target = testNotes.find((n) => n.id === id);
+    if (target && target.z === storeZ) return false; // Early exit without re-render
+    storeZ += 1;
+    target.z = storeZ;
+    return true;
+  }
+  assert(testBringNote("n2") === false, "bringNote skips redundant store mutation when note is already on top");
+  assert(testBringNote("n1") === true && testNotes[0].z === 11, "bringNote elevates background note to new maxZ");
 }
 
 console.log(`\n========================================`);

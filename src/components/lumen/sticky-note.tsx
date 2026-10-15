@@ -23,8 +23,10 @@ import {
   RotateCw,
   Scaling,
   Square,
+  Strikethrough,
   Trash2,
   Type,
+  Underline,
   Undo2,
   Unlock,
   X,
@@ -110,11 +112,12 @@ export function StickyNote({ note, stacked }: Props) {
   const resizeDrag = useRef<{ startX: number; startY: number; startW: number; startH: number } | null>(null);
 
   const handleTextareaSelect = () => {
-    if (!textareaRef.current) return;
-    const start = textareaRef.current.selectionStart;
-    const end = textareaRef.current.selectionEnd;
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
     if (start !== end && end > start) {
-      const selected = textareaRef.current.value.substring(start, end).trim();
+      const selected = el.value.substring(start, end).trim();
       if (selected.length > 0) {
         setSelectionRange({ start, end, text: selected });
         return;
@@ -124,17 +127,51 @@ export function StickyNote({ note, stacked }: Props) {
   };
 
   const applyMarkdownFormat = (prefix: string, suffix: string = prefix) => {
-    if (!textareaRef.current || !selectionRange) return;
-    const { start, end } = selectionRange;
-    const fullText = note.body;
-    const selected = fullText.substring(start, end);
+    const el = textareaRef.current;
+    if (!el) return;
 
-    // If already wrapped, unwrap it (toggle behavior)
+    let start = el.selectionStart;
+    let end = el.selectionEnd;
+
+    if (start === end && selectionRange) {
+      start = selectionRange.start;
+      end = selectionRange.end;
+    }
+
+    const fullText = el.value;
+
+    // Zero-length selection: insert wrapper and place cursor inside: e.g. **|**
+    if (start === end) {
+      const newText = fullText.substring(0, start) + prefix + suffix + fullText.substring(end);
+      const newPos = start + prefix.length;
+      el.value = newText;
+      el.focus();
+      el.setSelectionRange(newPos, newPos);
+      updateNote(note.id, { body: newText });
+      sounds.playPop(620);
+      return;
+    }
+
+    const selected = fullText.substring(start, end);
     let newText = "";
     let newStart = start;
     let newEnd = end;
 
+    // Smart Toggle:
+    // Case 1: selection itself starts and ends with prefix/suffix (e.g. user selected `**text**`)
     if (
+      selected.length >= prefix.length + suffix.length &&
+      selected.startsWith(prefix) &&
+      selected.endsWith(suffix)
+    ) {
+      const unwrapped = selected.slice(prefix.length, selected.length - suffix.length);
+      newText = fullText.substring(0, start) + unwrapped + fullText.substring(end);
+      newStart = start;
+      newEnd = start + unwrapped.length;
+    }
+    // Case 2: surrounding text has prefix/suffix (e.g. user selected `text` inside `**text**`)
+    else if (
+      start >= prefix.length &&
       fullText.substring(start - prefix.length, start) === prefix &&
       fullText.substring(end, end + suffix.length) === suffix
     ) {
@@ -144,7 +181,9 @@ export function StickyNote({ note, stacked }: Props) {
         fullText.substring(end + suffix.length);
       newStart = start - prefix.length;
       newEnd = end - prefix.length;
-    } else {
+    }
+    // Case 3: Wrap text with formatting
+    else {
       newText =
         fullText.substring(0, start) +
         prefix +
@@ -155,17 +194,70 @@ export function StickyNote({ note, stacked }: Props) {
       newEnd = end + prefix.length;
     }
 
+    // Direct synchronous DOM update for zero flicker/caret jump
+    el.value = newText;
+    el.focus();
+    el.setSelectionRange(newStart, newEnd);
+
     updateNote(note.id, { body: newText });
     sounds.playPop(620);
-    setSelectionRange(null);
 
-    // Re-focus and preserve selection
-    requestAnimationFrame(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(newStart, newEnd);
-      }
+    setSelectionRange({
+      start: newStart,
+      end: newEnd,
+      text: selected,
     });
+  };
+
+  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Keyboard Shortcuts for Instant Formatting
+    if (e.ctrlKey || e.metaKey) {
+      const key = e.key.toLowerCase();
+      if (key === "b") {
+        e.preventDefault();
+        applyMarkdownFormat("**");
+        return;
+      }
+      if (key === "i") {
+        e.preventDefault();
+        applyMarkdownFormat("*");
+        return;
+      }
+      if (key === "u") {
+        e.preventDefault();
+        applyMarkdownFormat("<u>", "</u>");
+        return;
+      }
+      if (key === "h") {
+        e.preventDefault();
+        applyMarkdownFormat("==", "==");
+        return;
+      }
+      if (key === "`") {
+        e.preventDefault();
+        applyMarkdownFormat("`");
+        return;
+      }
+      if (e.shiftKey && key === "x") {
+        e.preventDefault();
+        applyMarkdownFormat("~~");
+        return;
+      }
+    }
+
+    // Tab key indents with 2 spaces instead of losing focus
+    if (e.key === "Tab" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      e.preventDefault();
+      const el = textareaRef.current;
+      if (!el) return;
+      const start = el.selectionStart;
+      const end = el.selectionEnd;
+      const val = el.value;
+      const next = val.substring(0, start) + "  " + val.substring(end);
+      el.value = next;
+      el.setSelectionRange(start + 2, start + 2);
+      updateNote(note.id, { body: next });
+    }
   };
 
   // Resize Handlers with smooth rubber-band clamping (220px–600px)
@@ -676,7 +768,13 @@ export function StickyNote({ note, stacked }: Props) {
         highlightNoteId === note.id && "ring-4 ring-[#F5A623] shadow-[0_0_35px_rgba(245,166,35,0.75)] animate-pulse",
       )}
       style={style}
-      onMouseDown={() => bringNote(note.id)}
+      onMouseDown={(e) => {
+        const target = e.target as HTMLElement | null;
+        if (target && (target.tagName === "TEXTAREA" || target.tagName === "INPUT" || target.closest("button,input,textarea,form,.no-drag"))) {
+          return;
+        }
+        bringNote(note.id);
+      }}
     >
       {/* Tactile Stationery: Washi Tape Pin (Top Center when pinned) */}
       {note.pinned && (
@@ -1306,7 +1404,7 @@ export function StickyNote({ note, stacked }: Props) {
 
       {/* Note Body Area (Pastel Background + #23262F Text) - relative z-0 keeps content below header popovers */}
       <div
-        className="no-drag relative z-0 p-3.5 pb-6 flex flex-1 flex-col text-[#23262F] rounded-b-2xl cursor-text select-text min-h-0 pointer-events-auto"
+        className="no-drag note-body-area relative z-0 p-3.5 pb-6 flex flex-1 flex-col text-[#23262F] rounded-b-2xl cursor-text select-text min-h-0 pointer-events-auto"
         onClick={(e) => {
           const tag = (e.target as HTMLElement).tagName;
           if (tag !== "TEXTAREA" && tag !== "INPUT" && tag !== "BUTTON" && !(e.target as HTMLElement).closest("button,input,form")) {
@@ -1423,43 +1521,91 @@ export function StickyNote({ note, stacked }: Props) {
         {selectionRange && (
           <div
             onPointerDown={(e) => e.stopPropagation()}
-            className="no-drag absolute left-1/2 -top-3 -translate-x-1/2 z-40 flex items-center gap-1 px-2 py-1 rounded-full bg-[#1D2029]/95 text-white border border-white/15 shadow-[0_8px_20px_rgba(0,0,0,0.5)] backdrop-blur-md animate-in fade-in zoom-in-95 duration-120 select-none"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            className="no-drag absolute left-1/2 -top-4 -translate-x-1/2 z-40 flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#1D2029]/95 text-white border border-white/15 shadow-[0_8px_25px_rgba(0,0,0,0.6)] backdrop-blur-md animate-in fade-in zoom-in-95 duration-120 select-none pointer-events-auto"
           >
             <button
               type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
               onClick={() => applyMarkdownFormat("**")}
               className="p-1 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
-              title="In đậm (Bold: **chữ**)"
+              title={isVi ? "In đậm (Ctrl+B)" : "Bold (Ctrl+B)"}
             >
               <Bold className="size-3.5" />
             </button>
             <button
               type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
               onClick={() => applyMarkdownFormat("*")}
               className="p-1 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
-              title="In nghiêng (Italic: *chữ*)"
+              title={isVi ? "In nghiêng (Ctrl+I)" : "Italic (Ctrl+I)"}
             >
               <Italic className="size-3.5" />
             </button>
             <button
               type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onClick={() => applyMarkdownFormat("<u>", "</u>")}
+              className="p-1 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
+              title={isVi ? "Gạch chân (Ctrl+U)" : "Underline (Ctrl+U)"}
+            >
+              <Underline className="size-3.5" />
+            </button>
+            <button
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onClick={() => applyMarkdownFormat("~~")}
+              className="p-1 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
+              title={isVi ? "Gạch ngang (Ctrl+Shift+X)" : "Strikethrough (Ctrl+Shift+X)"}
+            >
+              <Strikethrough className="size-3.5" />
+            </button>
+            <button
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
               onClick={() => applyMarkdownFormat("`")}
               className="p-1 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
-              title="Đoạn mã (Code: `code`)"
+              title={isVi ? "Đoạn mã (Code: `code`)" : "Inline Code (`code`)"}
             >
               <Code className="size-3.5" />
             </button>
             <button
               type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
               onClick={() => applyMarkdownFormat("==", "==")}
               className="p-1 rounded-full hover:bg-white/15 text-[#F5A623] hover:text-[#D6871A] transition-colors cursor-pointer"
-              title="Tô sáng (Highlight: ==chữ==)"
+              title={isVi ? "Tô sáng (Ctrl+H: ==chữ==)" : "Highlight (Ctrl+H)"}
             >
               <Highlighter className="size-3.5" />
             </button>
             <div className="w-px h-3 bg-white/20 mx-0.5" />
             <button
               type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
               onClick={() => {
                 if (selectionRange) {
                   const selected = selectionRange.text;
@@ -1476,7 +1622,7 @@ export function StickyNote({ note, stacked }: Props) {
                 }
               }}
               className="flex items-center gap-1 px-1.5 py-0.5 rounded-full hover:bg-white/15 text-xs font-medium text-emerald-400 cursor-pointer transition-colors"
-              title="Chuyển đoạn chọn thành mục việc checklist"
+              title={isVi ? "Chuyển đoạn chọn thành mục việc checklist" : "Convert selection to checklist item"}
             >
               <CheckSquare className="size-3" />
               <span>+Checklist</span>
@@ -1489,6 +1635,7 @@ export function StickyNote({ note, stacked }: Props) {
           ref={textareaRef}
           value={note.body}
           onChange={(e) => updateNote(note.id, { body: e.target.value })}
+          onKeyDown={handleTextareaKeyDown}
           onSelect={handleTextareaSelect}
           onKeyUp={handleTextareaSelect}
           onMouseUp={handleTextareaSelect}
@@ -1499,10 +1646,10 @@ export function StickyNote({ note, stacked }: Props) {
           suppressHydrationWarning
           style={{
             fontSize: typeof note.fontSize === "number" ? `${note.fontSize}px` : note.fontSize === "sm" ? "11px" : note.fontSize === "lg" ? "16px" : "13.5px",
-            caretColor: note.tint === "dark" ? "#F5A623" : "#000000",
+            caretColor: isDarkNote ? "#F5A623" : "#14161D",
           }}
           className={cn(
-            "no-drag w-full flex-1 min-h-[64px] resize-none bg-transparent font-normal leading-relaxed text-[#23262F] outline-none placeholder:text-[#23262F]/40 select-text cursor-text touch-auto sticky-note-textarea pointer-events-auto !caret-[#000000] focus:!caret-[#000000] selection:bg-[#F5A623]/30 selection:text-[#000000] note-scrollbar",
+            "no-drag w-full flex-1 min-h-[64px] resize-none bg-transparent font-normal leading-relaxed text-[#23262F] outline-none placeholder:text-[#23262F]/40 select-text cursor-text touch-auto sticky-note-textarea pointer-events-auto selection:bg-[#1D2029] selection:text-white note-scrollbar",
             note.fontFamily === "handwriting" && "font-handwriting leading-snug",
             note.fontFamily === "mono" && "font-mono leading-normal",
           )}
@@ -1622,7 +1769,7 @@ export function StickyNote({ note, stacked }: Props) {
               value={newCheckText}
               onChange={(e) => setNewCheckText(e.target.value)}
               placeholder={isVi ? "+ Thêm mục việc..." : "+ Add todo item..."}
-              className="flex-1 bg-black/5 px-2.5 py-1 rounded-lg text-xs text-[#23262F] outline-none placeholder:text-[#23262F]/40 focus:bg-black/10 transition-colors select-text cursor-text touch-auto caret-[#000000]"
+              className="flex-1 bg-black/5 px-2.5 py-1 rounded-lg text-xs text-[#23262F] outline-none placeholder:text-[#23262F]/40 focus:bg-black/10 transition-colors select-text cursor-text touch-auto caret-[#14161D] dark:caret-[#F5A623]"
             />
             {newCheckText.trim() && (
               <button

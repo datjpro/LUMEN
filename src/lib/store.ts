@@ -986,6 +986,8 @@ export const useLumen = create<LumenState>()(
         );
       },
       bringNote: (id) => {
+        const target = get().notes.find((n) => n.id === id);
+        if (target && target.z === get().maxZ) return;
         const z = get().maxZ + 1;
         set({
           notes: get().notes.map((n) => (n.id === id ? { ...n, z } : n)),

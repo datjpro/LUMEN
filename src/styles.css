@@ -751,7 +751,7 @@ section[role="dialog"],
 }
 
 /* ==========================================================================
-   CARET & INPUT CURSOR ENHANCEMENT (Khắc phục rõ con trỏ văn bản)
+   CARET & INPUT CURSOR ENHANCEMENT (Khắc phục rõ con trỏ văn bản & bôi đen)
    ========================================================================== */
 textarea,
 input[type="text"],
@@ -769,11 +769,12 @@ section[role="dialog"] input,
   caret-color: #F5A623 !important;
 }
 
-/* Sticky notes on pastel backgrounds ALWAYS have pitch black high-contrast caret */
+/* Sticky notes on pastel backgrounds: Rich Charcoal Caret with distinct presence */
 .sticky-note-textarea,
 article textarea,
-article input[type="text"] {
-  caret-color: #000000 !important;
+article input[type="text"],
+.note-body-area {
+  caret-color: #14161D !important;
   cursor: text !important;
   user-select: text !important;
   -webkit-user-select: text !important;
@@ -782,19 +783,32 @@ article input[type="text"] {
 .sticky-note-textarea:focus,
 article textarea:focus,
 article input[type="text"]:focus {
-  caret-color: #000000 !important;
+  caret-color: #14161D !important;
   cursor: text !important;
 }
 
+/* Dark sticky notes: Luminous Amber Caret */
 .note-charcoal textarea,
 .note-charcoal input,
 .note-dark textarea,
-.note-dark input {
+.note-dark input,
+.note-dark .sticky-note-textarea {
   caret-color: #F5A623 !important;
 }
 
+/* High-Contrast Crisp Text Selection (Bôi đen sắc nét chuẩn mực trên giấy) */
 .sticky-note-textarea::selection,
-article textarea::selection {
-  background-color: rgba(245, 166, 35, 0.35);
-  color: #000000;
+article textarea::selection,
+article input[type="text"]::selection {
+  background-color: #1D2029 !important;
+  color: #FFFFFF !important;
 }
+
+/* Dark note selection */
+.note-dark .sticky-note-textarea::selection,
+.note-dark textarea::selection,
+.note-dark input[type="text"]::selection {
+  background-color: #F5A623 !important;
+  color: #14161D !important;
+}
+
