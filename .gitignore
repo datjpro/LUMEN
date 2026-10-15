@@ -86,3 +86,14 @@ electron-builder-out/
 .project_id
 .github_repo
 .grok/app-env.json
+
+# Internal Confidential Ideas, Strategic Roadmaps & Local Scratchpads (DO NOT COMMIT)
+*.local.md
+.ideas/
+.internal/
+PROPOSALS.local.md
+ROADMAP.local.md
+IDEAS.local.md
+SECRET_*
+*.secret.*
+
