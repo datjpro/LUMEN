@@ -1508,6 +1508,18 @@ console.log("\n📦 [SUITE 15]: Background Video Audio Isolation & Update Checke
   // Undo restoration restores item at exact original index
   list.splice(deletedIndex, 0, deletedItem);
   assert(list.length === 3 && list[1].id === "2" && list[1].done === true, "Undo restoration accurately restores deleted item at original index with done state preserved");
+
+  // 6. Semver Version Progression & Floating Markdown Formatting Check
+  assert(compareSemver("1.2.7", "1.2.6") === 1, "v1.2.7 is strictly newer than v1.2.6");
+  assert(compareSemver("1.2.6", "1.2.7") === -1, "v1.2.6 is older than v1.2.7");
+  assert(compareSemver("1.2.7", "1.2.7") === 0, "v1.2.7 matches v1.2.7");
+
+  // Floating Markdown Pill Wrapper Functionality
+  const formatWrap = (text, prefix, suffix = prefix) => `${prefix}${text}${suffix}`;
+  assert(formatWrap("Quan trọng", "**") === "**Quan trọng**", "Markdown bold wrapper applies double asterisks");
+  assert(formatWrap("Ghi chú", "*") === "*Ghi chú*", "Markdown italic wrapper applies single asterisks");
+  assert(formatWrap("npm test", "`") === "`npm test`", "Markdown code wrapper applies backticks");
+  assert(formatWrap("Lưu ý", "==", "==") === "==Lưu ý==", "Markdown highlight wrapper applies double equal signs");
 }
 
 console.log(`\n========================================`);

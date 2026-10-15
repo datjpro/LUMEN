@@ -2,6 +2,32 @@
 
 > **Version Control & Release Tracker:** All notable changes, spatial features, performance optimizations, and bug fixes across Lumen releases.
 
+## 🚀 [v1.2.7] — 2026-10-15 — Tactile Stationery Pro, Interactive Checklists & Smooth Undo Engine
+
+### 🎨 Tactile Stationery Pro (Nâng Cấp Ghi Chú Xúc Giác Thủ Công):
+- **🎗️ Băng Dính Washi Thủ Công Khi Ghim Note (`.note-washi-tape`):**
+  - Khi ghim note (`pinned: true`), mép trên của tờ note xuất hiện một dải băng dính giấy washi mờ bán trong suốt với hoa văn sọc chéo hổ phách tinh tế, viền răng cưa thủ công và góc nghiêng `-1deg`, tạo cảm giác như tờ giấy đang được dán trực tiếp lên mặt bàn gỗ/obsidian.
+- **📄 Góc Giấy Uốn Cong 3D Tự Nhiên (`.note-corner-curl`):**
+  - Tích hợp góc uốn cong 3D ở góc dưới bên phải note. Khi rê chuột (hover), góc giấy cong nhẹ lên kèm hiệu ứng đổ bóng tiếp xúc chân thực (`filter: drop-shadow`).
+- **✨ Thanh Công Cụ Markdown Nổi Dạng Viên Thuốc (Floating Markdown Pill):**
+  - Khi bôi đen văn bản trong note, tự động kích hoạt mini-toolbar nổi bo tròn bóng mờ (Glassmorphism) với các nút định dạng 1-chạm: In đậm (`**`), In nghiêng (`*`), Đoạn mã (`` ` ``), Tô sáng (`==`) và nút `+Checklist` chuyển ngay đoạn chọn thành mục việc.
+
+### ✅ Interactive Checklists & Micro Progress Tracker:
+- **📊 Thanh Tiến Độ Tí Hon (Progress Tracker Pill & Ultra-Sleek Bar):**
+  - Hiển thị tỷ lệ hoàn thành dạng pill: `2/4 việc (50%)` kèm thanh tiến độ đổi màu (`#F5A623` khi làm, xanh ngọc `#3FAE6C` khi xong).
+- **🦊 Màn Nhảy Múa Ăn Mừng 100% Của Pip (Procedural 120 FPS Celebration):**
+  - Khi tích xong mục việc cuối cùng đạt 100%, chuông ngân `playChime()` vang lên và linh thú Pip tự động thực hiện vũ điệu ăn mừng squash-and-stretch procedural 120 FPS.
+- **⚡ Chuyển Đổi Nhanh Văn Bản Thành Checklist:**
+  - Hỗ trợ nút 1-chạm trong menu 3 chấm hoặc cạnh form thêm việc để tự động phân tích từng dòng văn bản (hoặc cú pháp `- [ ]`, `- [x]`) thành các mục checklist tương tác.
+
+### 🛠️ Glitch-Free Deletion & Instant Undo Engine:
+- **🎛️ Khắc Phục Triệt Để Hiện Tượng Co Giật Khung Note Khi Xóa:**
+  - Triển khai `@keyframes checklistItemExit` (thời gian `0.22s` với đường cong `cubic-bezier(0.16, 1, 0.3, 1)`). Mục việc trượt ngang và co chiều cao mượt mà về 0 trước khi cập nhật state.
+- **↩️ Thanh Thông Báo Hoàn Tác Tức Thì (Instant Undo Restoration):**
+  - Xuất hiện thanh thông báo viền mờ tinh xảo hiển thị tên mục vừa xóa cùng nút **[Hoàn tác]** giúp người dùng khôi phục ngay lập tức mục xóa nhầm về đúng vị trí chỉ mục ban đầu.
+
+---
+
 ## 🚀 [v1.2.6] — 2026-09-21 — Background Video Playback Fix, Extreme RAM Optimization & Update Checker UI Prominence
 
 ### ⚡ Extreme RAM & Resource Optimization (Ép RAM Xuống Mức Siêu Nhẹ):

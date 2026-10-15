@@ -17,10 +17,58 @@ export interface VersionRelease {
 
 export const APP_RELEASES: VersionRelease[] = [
   {
+    version: "1.2.7",
+    releaseName: "Lumen v1.2.7 — Tactile Stationery Pro, Interactive Checklists & Smooth Undo Engine",
+    releaseDate: "2026-10-15",
+    isLatest: true,
+    highlights: [
+      {
+        icon: "🎨",
+        badge: "ui",
+        titleVi: "Ghi Chú Xúc Giác Thủ Công (Washi Tape Pin & 3D Corner Curl)",
+        titleEn: "Handcrafted Tactile Stationery (Washi Tape Pin & 3D Corner Curl)",
+        descriptionVi:
+          "Tích hợp dải băng dính washi thủ công mờ bán trong suốt khi ghim note và hiệu ứng uốn cong góc giấy 3D tự nhiên khi rê chuột, mang lại cảm giác thị giác chân thực như dán note lên bàn gỗ.",
+        descriptionEn:
+          "Handcrafted translucent washi tape pin strip and organic 3D paper corner curl upon hover, evoking an artisanal physical desk stationery feel.",
+      },
+      {
+        icon: "✅",
+        badge: "feat",
+        titleVi: "Danh Sách Việc Tương Tác & Thanh Tiến Độ Tí Hon (Checklist Progress Bar)",
+        titleEn: "Interactive Checklists, Micro Progress Tracker & Pip Celebration",
+        descriptionVi:
+          "Hỗ trợ checklist tương tác với phản hồi âm thanh pop theo cao độ, thanh tiến độ % siêu mảnh và kích hoạt màn nhảy múa ăn mừng của Pip khi hoàn thành 100%.",
+        descriptionEn:
+          "Interactive checklist mode with pitch-shifted audio feedback, ultra-sleek progress bar pill, and procedural celebration dance by Pip upon reaching 100% completion.",
+      },
+      {
+        icon: "↩️",
+        badge: "fix",
+        titleVi: "Xóa Mục Việc Mượt Mà & Nút Hoàn Tác Tức Thì (Smooth Delete & Instant Undo)",
+        titleEn: "Glitch-Free Smooth Removal & Instant Undo Restoration",
+        descriptionVi:
+          "Loại bỏ hoàn toàn hiện tượng co giật khung note khi xóa nhờ animation trượt co ngang 0.22s, kèm thanh thông báo hoàn tác khôi phục mục vừa xóa về đúng vị trí cũ.",
+        descriptionEn:
+          "Eliminated layout jitter during checklist item deletion with a 0.22s slide-and-collapse animation, and added instant one-tap undo restoration at original index.",
+      },
+      {
+        icon: "✨",
+        badge: "ui",
+        titleVi: "Thanh Công Cụ Markdown Nổi Thông Minh (Floating Markdown Pill)",
+        titleEn: "Floating Markdown Formatting Pill Menu",
+        descriptionVi:
+          "Tự động xuất hiện thanh công cụ dạng viên thuốc nổi khi bôi đen văn bản trong note: In đậm (**), In nghiêng (*), Đoạn mã (`), Tô sáng (==) và +Checklist nhanh.",
+        descriptionEn:
+          "Automatic floating pill toolbar on text selection for quick Markdown formatting (Bold, Italic, Code, Highlight) and 1-tap conversion to checklist items.",
+      },
+    ],
+  },
+  {
     version: "1.2.6",
     releaseName: "Lumen v1.2.6 — Background Video Playback Fix & Update Checker UI Prominence",
     releaseDate: "2026-09-21",
-    isLatest: true,
+    isLatest: false,
     highlights: [
       {
         icon: "⚡",

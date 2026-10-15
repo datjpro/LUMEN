@@ -9,8 +9,8 @@
 [![Electron](https://img.shields.io/badge/Electron-34+-47848F.svg?style=flat-square&logo=electron)](https://www.electronjs.org/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC.svg?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
 [![Zustand](https://img.shields.io/badge/Zustand-v5.0-orange.svg?style=flat-square)](https://zustand-demo.pmnd.rs/)
-[![Version](https://img.shields.io/badge/Version-v1.2.6-blue.svg?style=flat-square)](CHANGELOG.md)
-[![Tests](https://img.shields.io/badge/Tests-251%2F251_PASS-brightgreen.svg?style=flat-square)](scripts/test-suite.mjs)
+[![Version](https://img.shields.io/badge/Version-v1.2.7-blue.svg?style=flat-square)](CHANGELOG.md)
+[![Tests](https://img.shields.io/badge/Tests-265%2F265_PASS-brightgreen.svg?style=flat-square)](scripts/test-suite.mjs)
 [![Performance](https://img.shields.io/badge/Performance-60%2F120_FPS_%7C_<30MB_RAM-purple.svg?style=flat-square)](#-performance-benchmarks--systems-metrics)
 
 <p align="center">

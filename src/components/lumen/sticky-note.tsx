@@ -1,15 +1,19 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import {
   ALargeSmall,
+  Bold,
   Calendar,
   Check,
   CheckSquare,
   ChevronDown,
   ChevronUp,
+  Code,
   Copy,
   Download,
   Folder,
   FolderPlus,
+  Highlighter,
+  Italic,
   Lock,
   Minus,
   MoreHorizontal,
@@ -96,6 +100,7 @@ export function StickyNote({ note, stacked }: Props) {
   const [newCheckText, setNewCheckText] = useState("");
   const [exitingItemId, setExitingItemId] = useState<string | null>(null);
   const [lastDeletedItem, setLastDeletedItem] = useState<{ id: string; text: string; done: boolean; index: number } | null>(null);
+  const [selectionRange, setSelectionRange] = useState<{ start: number; end: number; text: string } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -103,6 +108,65 @@ export function StickyNote({ note, stacked }: Props) {
   const [copied, setCopied] = useState(false);
   const cardRef = useRef<HTMLElement | null>(null);
   const resizeDrag = useRef<{ startX: number; startY: number; startW: number; startH: number } | null>(null);
+
+  const handleTextareaSelect = () => {
+    if (!textareaRef.current) return;
+    const start = textareaRef.current.selectionStart;
+    const end = textareaRef.current.selectionEnd;
+    if (start !== end && end > start) {
+      const selected = textareaRef.current.value.substring(start, end).trim();
+      if (selected.length > 0) {
+        setSelectionRange({ start, end, text: selected });
+        return;
+      }
+    }
+    setSelectionRange(null);
+  };
+
+  const applyMarkdownFormat = (prefix: string, suffix: string = prefix) => {
+    if (!textareaRef.current || !selectionRange) return;
+    const { start, end } = selectionRange;
+    const fullText = note.body;
+    const selected = fullText.substring(start, end);
+
+    // If already wrapped, unwrap it (toggle behavior)
+    let newText = "";
+    let newStart = start;
+    let newEnd = end;
+
+    if (
+      fullText.substring(start - prefix.length, start) === prefix &&
+      fullText.substring(end, end + suffix.length) === suffix
+    ) {
+      newText =
+        fullText.substring(0, start - prefix.length) +
+        selected +
+        fullText.substring(end + suffix.length);
+      newStart = start - prefix.length;
+      newEnd = end - prefix.length;
+    } else {
+      newText =
+        fullText.substring(0, start) +
+        prefix +
+        selected +
+        suffix +
+        fullText.substring(end);
+      newStart = start + prefix.length;
+      newEnd = end + prefix.length;
+    }
+
+    updateNote(note.id, { body: newText });
+    sounds.playPop(620);
+    setSelectionRange(null);
+
+    // Re-focus and preserve selection
+    requestAnimationFrame(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newStart, newEnd);
+      }
+    });
+  };
 
   // Resize Handlers with smooth rubber-band clamping (220px–600px)
   const onResizePointerDown = (e: PointerEvent<HTMLDivElement>) => {
@@ -1355,11 +1419,79 @@ export function StickyNote({ note, stacked }: Props) {
           </div>
         )}
 
+        {/* Floating Markdown Pill Menu (Reveals when text is selected) */}
+        {selectionRange && (
+          <div
+            onPointerDown={(e) => e.stopPropagation()}
+            className="no-drag absolute left-1/2 -top-3 -translate-x-1/2 z-40 flex items-center gap-1 px-2 py-1 rounded-full bg-[#1D2029]/95 text-white border border-white/15 shadow-[0_8px_20px_rgba(0,0,0,0.5)] backdrop-blur-md animate-in fade-in zoom-in-95 duration-120 select-none"
+          >
+            <button
+              type="button"
+              onClick={() => applyMarkdownFormat("**")}
+              className="p-1 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
+              title="In đậm (Bold: **chữ**)"
+            >
+              <Bold className="size-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => applyMarkdownFormat("*")}
+              className="p-1 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
+              title="In nghiêng (Italic: *chữ*)"
+            >
+              <Italic className="size-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => applyMarkdownFormat("`")}
+              className="p-1 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
+              title="Đoạn mã (Code: `code`)"
+            >
+              <Code className="size-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => applyMarkdownFormat("==", "==")}
+              className="p-1 rounded-full hover:bg-white/15 text-[#F5A623] hover:text-[#D6871A] transition-colors cursor-pointer"
+              title="Tô sáng (Highlight: ==chữ==)"
+            >
+              <Highlighter className="size-3.5" />
+            </button>
+            <div className="w-px h-3 bg-white/20 mx-0.5" />
+            <button
+              type="button"
+              onClick={() => {
+                if (selectionRange) {
+                  const selected = selectionRange.text;
+                  const newItems = [{ id: uid(), text: selected, done: false }];
+                  const updatedBody =
+                    note.body.substring(0, selectionRange.start) +
+                    note.body.substring(selectionRange.end);
+                  updateNote(note.id, {
+                    body: updatedBody.trim(),
+                    checkItems: [...(note.checkItems || []), ...newItems],
+                  });
+                  setSelectionRange(null);
+                  sounds.playPop(620);
+                }
+              }}
+              className="flex items-center gap-1 px-1.5 py-0.5 rounded-full hover:bg-white/15 text-xs font-medium text-emerald-400 cursor-pointer transition-colors"
+              title="Chuyển đoạn chọn thành mục việc checklist"
+            >
+              <CheckSquare className="size-3" />
+              <span>+Checklist</span>
+            </button>
+          </div>
+        )}
+
         {/* Main Textarea: Expands flex-1 to fill the note when resized */}
         <textarea
           ref={textareaRef}
           value={note.body}
           onChange={(e) => updateNote(note.id, { body: e.target.value })}
+          onSelect={handleTextareaSelect}
+          onKeyUp={handleTextareaSelect}
+          onMouseUp={handleTextareaSelect}
           onFocus={() => {
             bringNote(note.id);
           }}
