@@ -21,6 +21,7 @@ import {
   Square,
   Trash2,
   Type,
+  Undo2,
   Unlock,
   X,
 } from "lucide-react";
@@ -93,6 +94,8 @@ export function StickyNote({ note, stacked }: Props) {
   const [clusterPickerOpen, setClusterPickerOpen] = useState(false);
   const [customClusterInput, setCustomClusterInput] = useState("");
   const [newCheckText, setNewCheckText] = useState("");
+  const [exitingItemId, setExitingItemId] = useState<string | null>(null);
+  const [lastDeletedItem, setLastDeletedItem] = useState<{ id: string; text: string; done: boolean; index: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -422,9 +425,32 @@ export function StickyNote({ note, stacked }: Props) {
   };
 
   const removeCheckItem = (itemId: string) => {
-    const items = (note.checkItems || []).filter((item) => item.id !== itemId);
-    updateNote(note.id, { checkItems: items });
+    const currentItems = note.checkItems || [];
+    const itemIndex = currentItems.findIndex((item) => item.id === itemId);
+    const targetItem = currentItems[itemIndex];
+    if (!targetItem) return;
+
+    // Trigger smooth exit animation first to prevent UI jitter
+    setExitingItemId(itemId);
     sounds.playPop(420);
+
+    setTimeout(() => {
+      const updated = (note.checkItems || []).filter((item) => item.id !== itemId);
+      updateNote(note.id, { checkItems: updated });
+      setLastDeletedItem({ ...targetItem, index: itemIndex >= 0 ? itemIndex : updated.length });
+      setExitingItemId(null);
+    }, 200);
+  };
+
+  const undoRemoveCheckItem = () => {
+    if (!lastDeletedItem) return;
+    const currentItems = [...(note.checkItems || [])];
+    const restoredItem = { id: lastDeletedItem.id, text: lastDeletedItem.text, done: lastDeletedItem.done };
+    const insertIdx = Math.min(Math.max(0, lastDeletedItem.index), currentItems.length);
+    currentItems.splice(insertIdx, 0, restoredItem);
+    updateNote(note.id, { checkItems: currentItems });
+    setLastDeletedItem(null);
+    sounds.playPop(650);
   };
 
   const convertBodyToChecklist = () => {
@@ -1392,33 +1418,60 @@ export function StickyNote({ note, stacked }: Props) {
 
               {/* Scrollable Checklist Items */}
               <div className="space-y-1 max-h-36 overflow-y-auto note-scrollbar">
-                {checkItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between gap-1 text-xs group/todo">
-                    <button
-                      type="button"
-                      onClick={() => toggleCheckItem(item.id)}
-                      className="flex items-center gap-2 text-left cursor-pointer flex-1 min-w-0 py-0.5"
-                    >
-                      {item.done ? (
-                        <CheckSquare className="size-3.5 text-[#3FAE6C] shrink-0" />
-                      ) : (
-                        <Square className="size-3.5 text-[#23262F]/50 shrink-0 hover:text-[#F5A623] transition-colors" />
+                {checkItems.map((item) => {
+                  const isExiting = exitingItemId === item.id;
+                  return (
+                    <div
+                      key={item.id}
+                      className={cn(
+                        "flex items-center justify-between gap-1 text-xs group/todo transition-all duration-200",
+                        isExiting && "checklist-item-exiting",
                       )}
-                      <span className={cn("leading-tight truncate text-xs text-[#23262F] transition-all", item.done && "line-through opacity-45")}>
-                        {item.text}
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => removeCheckItem(item.id)}
-                      className="opacity-0 group-hover/todo:opacity-100 text-[#EF4444] px-1 cursor-pointer transition-opacity text-xs hover:scale-110"
-                      title={isVi ? "Xóa mục việc" : "Delete todo item"}
                     >
-                      ×
-                    </button>
-                  </div>
-                ))}
+                      <button
+                        type="button"
+                        onClick={() => toggleCheckItem(item.id)}
+                        className="flex items-center gap-2 text-left cursor-pointer flex-1 min-w-0 py-0.5"
+                      >
+                        {item.done ? (
+                          <CheckSquare className="size-3.5 text-[#3FAE6C] shrink-0" />
+                        ) : (
+                          <Square className="size-3.5 text-[#23262F]/50 shrink-0 hover:text-[#F5A623] transition-colors" />
+                        )}
+                        <span className={cn("leading-tight truncate text-xs text-[#23262F] transition-all", item.done && "line-through opacity-45")}>
+                          {item.text}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeCheckItem(item.id)}
+                        className="opacity-0 group-hover/todo:opacity-100 text-[#EF4444] px-1 cursor-pointer transition-opacity text-xs hover:scale-110"
+                        title={isVi ? "Xóa mục việc" : "Delete todo item"}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
+
+              {/* Undo Delete Quick Notification Bar */}
+              {lastDeletedItem && (
+                <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-black/8 border border-black/10 text-xs animate-in fade-in zoom-in-95 duration-150">
+                  <span className="truncate max-w-[150px] opacity-75">
+                    {isVi ? `Đã xóa: "${lastDeletedItem.text}"` : `Deleted: "${lastDeletedItem.text}"`}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={undoRemoveCheckItem}
+                    className="flex items-center gap-1 font-semibold text-[#F5A623] hover:text-[#D6871A] hover:underline cursor-pointer ml-1 shrink-0"
+                    title={isVi ? "Khôi phục mục vừa xóa" : "Undo deletion"}
+                  >
+                    <Undo2 className="size-3" />
+                    <span>{isVi ? "Hoàn tác" : "Undo"}</span>
+                  </button>
+                </div>
+              )}
             </div>
           );
         })()}

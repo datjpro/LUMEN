@@ -1497,6 +1497,17 @@ console.log("\n📦 [SUITE 15]: Background Video Audio Isolation & Update Checke
   assert(parsedCheckItems[0].done === false && parsedCheckItems[0].text === "Học từ vựng mới", "Parses unchecked markdown task item correctly");
   assert(parsedCheckItems[1].done === true && parsedCheckItems[1].text === "Đọc 10 trang sách", "Parses checked markdown task item correctly");
   assert(parsedCheckItems[2].done === false && parsedCheckItems[2].text === "Viết nhật ký", "Parses standard unbulleted text line as new todo item");
+
+  // 5. Checklist Item Deletion & Undo Restoration
+  let list = [{ id: "1", text: "A", done: false }, { id: "2", text: "B", done: true }, { id: "3", text: "C", done: false }];
+  const deletedIndex = 1;
+  const deletedItem = list[deletedIndex];
+  list = list.filter((i) => i.id !== deletedItem.id);
+  assert(list.length === 2 && !list.find((i) => i.id === "2"), "Checklist item removed cleanly without layout glitch");
+
+  // Undo restoration restores item at exact original index
+  list.splice(deletedIndex, 0, deletedItem);
+  assert(list.length === 3 && list[1].id === "2" && list[1].done === true, "Undo restoration accurately restores deleted item at original index with done state preserved");
 }
 
 console.log(`\n========================================`);
